@@ -1,0 +1,199 @@
+<div class="animate-fade-in space-y-8">
+  
+  <!-- Create User Section -->
+  <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+      <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Cadastrar Novo Agente
+      </h2>
+      <p class="text-sm text-slate-500 mt-1">O usuário receberá um e-mail para confirmar a conta antes de acessar.</p>
+    </div>
+    
+    <div class="p-6">
+      @if (feedbackMessage()) {
+        <div 
+          class="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+          [ngClass]="feedbackMessage()?.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'"
+        >
+          @if (feedbackMessage()?.type === 'success') {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          }
+          {{ feedbackMessage()?.text }}
+        </div>
+      }
+
+      <form [formGroup]="createForm" (ngSubmit)="onCreateUser()" class="flex flex-col md:flex-row gap-4 items-start">
+        <div class="flex-1 w-full">
+          <input 
+            type="text" 
+            formControlName="name"
+            placeholder="Nome Completo" 
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+          >
+        </div>
+        <div class="flex-1 w-full">
+          <input 
+            type="email" 
+            formControlName="email"
+            placeholder="E-mail do colaborador" 
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+          >
+        </div>
+        <div class="flex-1 w-full">
+          <input 
+            type="password" 
+            formControlName="password"
+            placeholder="Senha (mín 6 dígitos)" 
+            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+          >
+        </div>
+        <button 
+          type="submit"
+          [disabled]="createForm.invalid || isCreating()" 
+          class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+        >
+          {{ isCreating() ? 'Criando...' : 'Criar' }}
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- User List -->
+  <section>
+    <div class="flex items-center justify-between mb-4 px-1">
+      <h2 class="text-lg font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-slate-500 rounded-full inline-block"></span>
+        Colaboradores Ativos
+      </h2>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100">
+          <thead class="bg-slate-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Nome</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">E-mail</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Função</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data Criação</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-slate-100">
+            @for (user of users(); track user.id) {
+              <tr class="hover:bg-slate-50/50 transition-colors group">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{{ user.name || 'Sem nome' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">{{ user.email }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                  <span 
+                    class="px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide border"
+                    [ngClass]="user.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                  >
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">{{ user.created_at | date:'dd/MM/yyyy' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <!-- Edit Button -->
+                    <button 
+                      (click)="startEdit(user)"
+                      class="p-1.5 text-brand-600 hover:text-brand-800 hover:bg-brand-50 rounded-lg transition-colors"
+                      title="Editar"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                    
+                    <!-- Delete Button -->
+                    <button 
+                      (click)="onDeleteUser(user)"
+                      [disabled]="user.id === authService.user()?.id"
+                      class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      title="Excluir"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (users().length === 0 && !isLoading()) {
+        <div class="p-8 text-center text-slate-500 text-sm">Nenhum usuário encontrado.</div>
+      }
+    </div>
+  </section>
+
+  <!-- Edit User Modal -->
+  @if (editingUser()) {
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div 
+          class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+          aria-hidden="true"
+          (click)="cancelEdit()"
+        ></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-slate-100">
+          <div class="bg-white px-6 pt-6 pb-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl leading-6 font-bold text-slate-900" id="modal-title">
+                Editar Usuário
+              </h3>
+              <button (click)="cancelEdit()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form [formGroup]="editForm" (ngSubmit)="onUpdateUser()" class="space-y-4">
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Nome</label>
+                <input 
+                  type="text" 
+                  formControlName="name"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                >
+              </div>
+              
+              <div>
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Função</label>
+                <select 
+                  formControlName="role"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all appearance-none"
+                >
+                  <option value="agent">Agente</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+
+              <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
+                <button 
+                  type="button" 
+                  (click)="cancelEdit()"
+                  class="px-5 py-2.5 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 font-semibold transition-all"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  [disabled]="editForm.invalid"
+                  class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md transition-all disabled:opacity-50"
+                >
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
