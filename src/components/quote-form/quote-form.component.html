@@ -1,0 +1,176 @@
+<form 
+  [formGroup]="quoteForm" 
+  (ngSubmit)="onSubmit()" 
+  class="bg-white p-6 rounded-2xl shadow-lg shadow-purple-200/50 border border-purple-100 mb-6 transition-all hover:shadow-xl hover:shadow-purple-200/60"
+>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    
+    <!-- Supplier -->
+    <div class="flex flex-col group lg:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Fornecedor</label>
+      <input 
+        type="text" 
+        formControlName="supplier"
+        placeholder="Ex: CVC, Decolar, Hotel..."
+        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+      >
+      @if (quoteForm.get('supplier')?.touched && quoteForm.get('supplier')?.invalid) {
+        <span class="text-xs text-red-500 mt-1">Obrigatório.</span>
+      }
+    </div>
+
+    <!-- Hotel Name -->
+    <div class="flex flex-col group lg:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome do Hotel</label>
+      <input 
+        type="text" 
+        formControlName="hotel_name"
+        placeholder="Ex: Resort Paradise"
+        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+      >
+      @if (quoteForm.get('hotel_name')?.touched && quoteForm.get('hotel_name')?.invalid) {
+        <span class="text-xs text-red-500 mt-1">Obrigatório.</span>
+      }
+    </div>
+
+    <!-- City -->
+    <div class="flex flex-col group lg:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cidade</label>
+      <input 
+        type="text" 
+        formControlName="city"
+        placeholder="Ex: Gramado, RS"
+        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+      >
+    </div>
+
+    <!-- Accommodation Type -->
+    <div class="flex flex-col group lg:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Regime</label>
+      <input 
+        type="text" 
+        formControlName="accommodation_type"
+        placeholder="Ex: Café da manhã, All Inclusive..."
+        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+      >
+    </div>
+
+    <!-- Check-in -->
+    <div class="flex flex-col group">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Check-in</label>
+      <div class="relative">
+        <input 
+          type="text" 
+          formControlName="check_in"
+          (input)="onDateInput($event, 'check_in')"
+          placeholder="dd/mm/aaaa"
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+        >
+      </div>
+      @if (quoteForm.get('check_in')?.touched && quoteForm.get('check_in')?.invalid) {
+        <span class="text-xs text-red-500 mt-1">Data inválida.</span>
+      }
+    </div>
+
+    <!-- Check-out -->
+    <div class="flex flex-col group">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Check-out</label>
+      <div class="relative">
+        <input 
+          type="text" 
+          formControlName="check_out"
+          (input)="onDateInput($event, 'check_out')"
+          placeholder="dd/mm/aaaa"
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+        >
+      </div>
+      @if (quoteForm.get('check_out')?.touched && quoteForm.get('check_out')?.invalid) {
+        <span class="text-xs text-red-500 mt-1">Data inválida.</span>
+      }
+    </div>
+
+    <!-- Pax (Adults/Children) -->
+    <div class="flex gap-4 lg:col-span-2">
+      <div class="flex flex-col group flex-1">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Adultos</label>
+        <input 
+          type="number" 
+          formControlName="adults"
+          min="1"
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+        >
+      </div>
+      <div class="flex flex-col group flex-1">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Crianças</label>
+        <input 
+          type="number" 
+          formControlName="children"
+          min="0"
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+        >
+      </div>
+    </div>
+
+    <!-- Lead Name (Optional) -->
+    <div class="flex flex-col group lg:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Titular (Opcional)</label>
+      <input 
+        type="text" 
+        formControlName="lead_name"
+        placeholder="Nome do cliente principal"
+        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+      >
+    </div>
+
+    <!-- Currency & Value -->
+    <div class="flex flex-col sm:flex-row gap-4 lg:col-span-2 items-end">
+        <div class="flex flex-col group w-32">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Moeda</label>
+            <select formControlName="currency" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer">
+                <option value="BRL">BRL (R$)</option>
+                <option value="USD">USD ($)</option>
+            </select>
+        </div>
+        <div class="flex flex-col group flex-grow">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Valor da Cotação</label>
+            <input 
+                type="text"
+                [value]="displayValue()"
+                (input)="onAmountInput($event)"
+                placeholder="0,00"
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold text-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+            >
+             @if (quoteForm.get('amount')?.touched && quoteForm.get('amount')?.value <= 0) {
+                <span class="text-xs text-red-500 mt-1">Valor inválido.</span>
+             }
+        </div>
+    </div>
+
+  </div>
+
+  <div class="flex justify-end gap-4 pt-4 border-t border-slate-100">
+    @if (isEditMode()) {
+      <button 
+        type="button" 
+        (click)="onCancel()"
+        class="px-6 py-3 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-semibold transition-all shadow-sm"
+      >
+        Cancelar
+      </button>
+    }
+
+    <button 
+      type="submit" 
+      [disabled]="quoteForm.invalid"
+      class="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-bold shadow-lg shadow-purple-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-2"
+    >
+      @if (isEditMode()) {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Salvar Alterações</span>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Salvar Cotação</span>
+      }
+    </button>
+  </div>
+</form>

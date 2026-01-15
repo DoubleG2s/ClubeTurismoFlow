@@ -17,11 +17,7 @@
               "browser": "."
             },
             "browser": "index.tsx",
-            "tsConfig": "tsconfig.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ]
+            "tsConfig": "tsconfig.json"
           },
           "configurations": {
             "production": {

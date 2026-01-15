@@ -3,17 +3,21 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from './services/flight.service';
 import { ReservationService } from './services/reservation.service';
+import { QuoteService } from './services/quote.service'; // Added
 import { AuthService } from './services/auth.service';
 
 import { FlightFormComponent } from './components/flight-form/flight-form.component';
 import { FlightCardComponent } from './components/flight-card/flight-card.component';
 import { ReservationFormComponent } from './components/reservation-form/reservation-form.component';
 import { ReservationCardComponent } from './components/reservation-card/reservation-card.component';
+import { QuoteFormComponent } from './components/quote-form/quote-form.component'; // Added
+import { QuoteCardComponent } from './components/quote-card/quote-card.component'; // Added
 import { LoginComponent } from './components/login/login.component';
 import { UserListComponent } from './components/user-management/user-list.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
+import { Quote } from './models/quote'; // Added
 
 @Component({
   selector: 'app-root',
@@ -25,6 +29,8 @@ import { Reservation } from './models/reservation';
     FlightCardComponent,
     ReservationFormComponent,
     ReservationCardComponent,
+    QuoteFormComponent, // Added
+    QuoteCardComponent, // Added
     LoginComponent,
     UserListComponent
   ],
@@ -33,10 +39,11 @@ import { Reservation } from './models/reservation';
 export class AppComponent implements OnInit {
   private flightService = inject(FlightService);
   private reservationService = inject(ReservationService);
-  public authService = inject(AuthService); // Public for HTML access
+  private quoteService = inject(QuoteService); // Added
+  public authService = inject(AuthService); 
   
   // State
-  activeTab = signal<'voos' | 'reservas' | 'hotel' | 'usuarios'>('voos');
+  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos'); // Added 'cotacoes'
   
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
@@ -47,17 +54,22 @@ export class AppComponent implements OnInit {
   editingReservation = signal<Reservation | null>(null);
   showReservationEditModal = signal(false);
 
+  // Quote State
+  editingQuote = signal<Quote | null>(null);
+  showQuoteEditModal = signal(false);
+  usdExchangeRate = signal<number>(6.00); // Default Exchange Rate
+
   // --- FILTERS & SORTING STATE ---
   searchTerm = signal('');
   showAdvancedFilters = signal(false);
 
-  // 1. DRAFT STATE (User is typing, but not applied yet)
+  // 1. DRAFT STATE 
   draftDateStart = signal(''); 
   draftDateEnd = signal('');   
   draftReturnStart = signal(''); 
   draftReturnEnd = signal('');   
 
-  // 2. ACTIVE STATE (Filters actually applied to the list)
+  // 2. ACTIVE STATE 
   activeDateStart = signal(''); 
   activeDateEnd = signal('');   
   activeReturnStart = signal(''); 
@@ -65,11 +77,12 @@ export class AppComponent implements OnInit {
 
   // Sorting
   sortField = signal<'date' | 'return_date'>('date');
-  sortDirection = signal<'asc' | 'desc'>('desc'); // Default: Mais recente primeiro
+  sortDirection = signal<'asc' | 'desc'>('desc'); 
 
   // Derived state
   flights = this.flightService.flights;
   reservations = this.reservationService.reservations;
+  quotes = this.quoteService.quotes; // Added
   
   // Computed filtered reservations
   filteredReservations = computed(() => {
@@ -145,7 +158,11 @@ export class AppComponent implements OnInit {
     );
   });
 
-  isLoading = this.flightService.isLoading; 
+  isLoading = computed(() => 
+    this.flightService.isLoading() || 
+    this.reservationService.isLoading() ||
+    this.quoteService.isLoading()
+  ); 
 
   ngOnInit() {
     // Data loaded in services
@@ -169,7 +186,6 @@ export class AppComponent implements OnInit {
     }
   }
 
-  // Action: Apply the typed dates to the active filter logic
   applyAdvancedFilters() {
     this.activeDateStart.set(this.draftDateStart());
     this.activeDateEnd.set(this.draftDateEnd());
@@ -177,24 +193,16 @@ export class AppComponent implements OnInit {
     this.activeReturnEnd.set(this.draftReturnEnd());
   }
 
-  // Action: Clear everything
   clearFilters() {
-    // Clear Text
     this.searchTerm.set('');
-    
-    // Clear Drafts
     this.draftDateStart.set('');
     this.draftDateEnd.set('');
     this.draftReturnStart.set('');
     this.draftReturnEnd.set('');
-
-    // Clear Actives
     this.activeDateStart.set('');
     this.activeDateEnd.set('');
     this.activeReturnStart.set('');
     this.activeReturnEnd.set('');
-    
-    // Reset Sort to Default
     this.sortField.set('date');
     this.sortDirection.set('desc');
   }
@@ -210,6 +218,14 @@ export class AppComponent implements OnInit {
     }
     input.value = value;
     signalSetter.set(value);
+  }
+
+  onExchangeRateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = parseFloat(input.value);
+    if (!isNaN(value) && value > 0) {
+      this.usdExchangeRate.set(value);
+    }
   }
 
   // --- Auth Actions ---
@@ -308,7 +324,34 @@ export class AppComponent implements OnInit {
     }
   }
 
-  switchTab(tab: 'voos' | 'reservas' | 'hotel' | 'usuarios') {
+  // --- Quote Actions ---
+  async onAddQuote(data: Omit<Quote, 'id' | 'created_at'>) {
+    await this.quoteService.addQuote(data);
+  }
+
+  async onUpdateQuote(event: {id: string, data: Partial<Quote>}) {
+    await this.quoteService.updateQuote(event.id, event.data);
+    this.closeQuoteEditModal();
+  }
+
+  onRemoveQuote(id: string) {
+    this.quoteService.removeQuote(id);
+  }
+
+  startEditQuote(id: string) {
+    const quote = this.quotes().find(q => q.id === id);
+    if (quote) {
+      this.editingQuote.set(quote);
+      this.showQuoteEditModal.set(true);
+    }
+  }
+
+  closeQuoteEditModal() {
+    this.showQuoteEditModal.set(false);
+    this.editingQuote.set(null);
+  }
+
+  switchTab(tab: 'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios') {
     this.activeTab.set(tab);
   }
 }
