@@ -11,6 +11,7 @@ export interface Quote {
   lead_name?: string; // Titular (opcional)
   amount: number; // Valor numérico
   currency: 'BRL' | 'USD';
+  notes?: string; // Observações (Novo)
   created_by?: string;
   created_at?: string;
   author_name?: string;

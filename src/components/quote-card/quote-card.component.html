@@ -67,6 +67,14 @@
         }
     </div>
 
+    <!-- Notes (if any) -->
+    @if (quote.notes) {
+      <div class="mt-3 pt-3 border-t border-slate-50">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Observações</p>
+        <p class="text-xs text-slate-600 line-clamp-3">{{ quote.notes }}</p>
+      </div>
+    }
+
   </div>
 
   <!-- Footer Actions -->

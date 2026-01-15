@@ -33,7 +33,8 @@ export class QuoteFormComponent implements OnInit {
       children: [0, [Validators.required, Validators.min(0)]],
       lead_name: [''],
       currency: ['BRL', Validators.required],
-      amount: [0, [Validators.required, Validators.min(0.01)]]
+      amount: [0, [Validators.required, Validators.min(0.01)]],
+      notes: [''] // Added notes field
     });
   }
 
@@ -115,7 +116,8 @@ export class QuoteFormComponent implements OnInit {
           adults: 2, 
           children: 0, 
           currency: 'BRL',
-          amount: 0
+          amount: 0,
+          notes: ''
         });
         this.displayValue.set('');
       }
