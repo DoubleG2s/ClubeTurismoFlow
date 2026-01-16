@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "start": "ng serve",
-    "build": "ng build",
+    "build": "node inject-env.js && ng build",
     "preview": "ng serve --configuration=production"
   },
   "dependencies": {
