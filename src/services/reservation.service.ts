@@ -30,12 +30,12 @@ export class ReservationService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
+
       if (data) {
         // Ensure checklist defaults exist if null in DB or structure changed
         const processedData = data.map((item: any) => {
           const rawChecklist = item.checklist || {};
-          
+
           return {
             ...item,
             passengers: item.passengers || [],
@@ -44,15 +44,16 @@ export class ReservationService {
               payment: rawChecklist.payment || false,
               flight_registered: rawChecklist.flight_registered || false,
               hotel_confirmed: rawChecklist.hotel_confirmed || false,
-              
+
               // Migration Logic for new fields:
               // 1. checkin_outbound (Ida): Inherit from old 'checkin_info' if it exists, otherwise false
               checkin_outbound: rawChecklist.checkin_outbound ?? rawChecklist.checkin_info ?? false,
-              
+
               // 2. New fields default to false if not present
               checkin_inbound: rawChecklist.checkin_inbound || false,
               hotel_email: rawChecklist.hotel_email || false,
-              seats_assigned: rawChecklist.seats_assigned || false
+              seats_assigned: rawChecklist.seats_assigned || false,
+              seats_assigned_inbound: rawChecklist.seats_assigned_inbound || false
             }
           };
         });
@@ -84,6 +85,7 @@ export class ReservationService {
           checkin_inbound: false,
           hotel_email: false,
           seats_assigned: false,
+          seats_assigned_inbound: false,
           ...reservation.checklist // Overrides if any provided
         }
       };
@@ -97,12 +99,12 @@ export class ReservationService {
       if (error) throw error;
 
       if (data) {
-         // Apply defaults for local state consistency
-         const newRes = {
-            ...data,
-            passengers: data.passengers || [],
-            checklist: payload.checklist // Use the payload checklist which is guaranteed correct
-         };
+        // Apply defaults for local state consistency
+        const newRes = {
+          ...data,
+          passengers: data.passengers || [],
+          checklist: payload.checklist // Use the payload checklist which is guaranteed correct
+        };
         this.reservationsSignal.update(current => [newRes as Reservation, ...current]);
       }
     } catch (error) {
@@ -113,7 +115,7 @@ export class ReservationService {
 
   async updateReservation(id: string, updates: Partial<Reservation>) {
     // Optimistic Update
-    this.reservationsSignal.update(current => 
+    this.reservationsSignal.update(current =>
       current.map(r => r.id === id ? { ...r, ...updates } as Reservation : r)
     );
 

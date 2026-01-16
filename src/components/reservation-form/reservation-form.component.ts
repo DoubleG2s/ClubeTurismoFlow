@@ -12,12 +12,12 @@ import { Reservation } from '../../models/reservation';
 export class ReservationFormComponent implements OnInit {
   @Input() reservationToEdit: Reservation | null = null;
   @Output() save = new EventEmitter<Omit<Reservation, 'id' | 'created_at'>>();
-  @Output() update = new EventEmitter<{id: string, data: Partial<Reservation>}>();
+  @Output() update = new EventEmitter<{ id: string, data: Partial<Reservation> }>();
   @Output() cancel = new EventEmitter<void>();
 
   reservationForm!: FormGroup; // Definite assignment assertion
   isEditMode = signal(false);
-  
+
   // Inject ChangeDetectorRef for Zoneless updates
   private cdr = inject(ChangeDetectorRef);
 
@@ -31,8 +31,8 @@ export class ReservationFormComponent implements OnInit {
       reservation_number: ['', Validators.required],
       date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
       // return_date e flight_voucher agora são OBRIGATÓRIOS
-      return_date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]], 
-      flight_voucher: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]], 
+      return_date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
+      flight_voucher: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
       passengers: this.fb.array([this.createPassengerControl()]),
       notes: ['']
     });
@@ -41,7 +41,7 @@ export class ReservationFormComponent implements OnInit {
   ngOnInit() {
     if (this.reservationToEdit) {
       this.isEditMode.set(true);
-      
+
       this.reservationForm.patchValue({
         reservation_number: this.reservationToEdit.reservation_number,
         date: this.reservationToEdit.date,
@@ -82,7 +82,7 @@ export class ReservationFormComponent implements OnInit {
 
   onDateInput(event: Event, controlName: string) {
     const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, ''); 
+    let value = input.value.replace(/\D/g, '');
     if (value.length > 8) value = value.slice(0, 8);
     if (value.length >= 5) {
       value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4);
@@ -90,7 +90,7 @@ export class ReservationFormComponent implements OnInit {
       value = value.slice(0, 2) + '/' + value.slice(2);
     }
     input.value = value;
-    
+
     // Ensure value propagation
     this.reservationForm.get(controlName)?.setValue(value);
   }
@@ -99,7 +99,7 @@ export class ReservationFormComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     let value = input.value.toUpperCase();
     if (value.length > 6) value = value.slice(0, 6);
-    
+
     input.value = value;
     this.reservationForm.get('flight_voucher')?.setValue(value);
   }
@@ -107,7 +107,7 @@ export class ReservationFormComponent implements OnInit {
   onSubmit() {
     if (this.reservationForm.valid) {
       const formValue = this.reservationForm.value;
-      
+
       // Validação extra
       if (formValue.flight_voucher && formValue.flight_voucher.length !== 6) {
         alert('O voucher deve ter exatamente 6 caracteres.');
@@ -139,12 +139,13 @@ export class ReservationFormComponent implements OnInit {
             checkin_outbound: false,
             checkin_inbound: false,
             hotel_email: false,
-            seats_assigned: false
+            seats_assigned: false,
+            seats_assigned_inbound: false
           }
         };
-        
+
         this.save.emit(newReservation);
-        
+
         // CRITICAL FIX: Destroy and Re-create the form instance.
         this.initForm();
         this.cdr.markForCheck();

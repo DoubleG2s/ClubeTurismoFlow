@@ -8,7 +8,8 @@ export interface ReservationChecklist {
   checkin_outbound: boolean; // Orientação check-in IDA
   checkin_inbound: boolean;  // Orientação check-in VOLTA
   hotel_email: boolean;      // E-mail enviado para o hotel
-  seats_assigned: boolean;   // Assentos marcados
+  seats_assigned: boolean;   // Assentos marcados - IDA
+  seats_assigned_inbound: boolean; // Assentos marcados
 }
 
 export interface Reservation {
