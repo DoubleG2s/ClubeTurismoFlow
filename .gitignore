@@ -44,7 +44,8 @@ testem.log
 Thumbs.db
 
 # Environments (Security)
+# não ignore os environments
+# ignore apenas arquivos sensíveis se existirem
 .env
 .env.*
-src/environments/environment.ts
-src/environments/environment.prod.ts
+
