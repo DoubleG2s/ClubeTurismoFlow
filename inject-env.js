@@ -1,11 +1,11 @@
-import fs from 'fs';
-import dotenv from 'dotenv';
+const fs = require('fs');
+const dotenv = require('dotenv');
 
 console.log('🟢 inject-env.js iniciado');
 
 /**
- * 1️⃣ Carrega variáveis locais se existirem (.env.local)
- *    Na Vercel isso não existe, então não muda nada
+ * Carrega .env.local se existir (local dev)
+ * Na Vercel não existe, então é ignorado
  */
 dotenv.config({ path: '.env.local' });
 
@@ -15,9 +15,6 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 console.log('SUPABASE_URL:', SUPABASE_URL ? 'OK' : 'MISSING');
 console.log('SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? 'OK' : 'MISSING');
 
-/**
- * 2️⃣ Arquivos que receberão as variáveis
- */
 const files = [
     'src/environments/environment.ts',
     'src/environments/environment.prod.ts'
