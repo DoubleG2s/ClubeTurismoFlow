@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve",
+    "dev": "node inject-env.js && ng serve",
     "build": "node inject-env.js && ng build",
     "preview": "ng serve --configuration=production"
   },
