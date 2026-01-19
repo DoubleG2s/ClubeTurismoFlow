@@ -130,7 +130,7 @@
         'bg-white/60 border-yellow-200/50': !isComplete && alertStatus === 'warning',
         'bg-indigo-50/50 border-indigo-100/50': !isComplete && alertStatus !== 'critical' && alertStatus !== 'warning'
       }">
-      <div class="flex items-center gap-2 mb-3">
+      <div class="flex items-center gap-2 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-colors duration-300"
           [ngClass]="isComplete ? 'text-emerald-500' : 'text-indigo-500'" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -143,89 +143,114 @@
         </h4>
       </div>
 
-      <div class="space-y-2">
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.contract"
-            (change)="onChecklistChange('contract', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.contract"
-            [class.opacity-60]="reservation.checklist.contract">Contrato feito?</span>
-        </label>
+      <!-- Group 1: Pré-venda -->
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Pré-venda</h5>
+          <div class="h-px flex-grow bg-slate-300/30"></div>
+        </div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.contract"
+              (change)="onChecklistChange('contract', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.contract"
+              [class.opacity-60]="reservation.checklist.contract">Contrato feito?</span>
+          </label>
 
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.payment"
-            (change)="onChecklistChange('payment', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.payment"
-            [class.opacity-60]="reservation.checklist.payment">Pagamento realizado?</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.hotel_email"
-            (change)="onChecklistChange('hotel_email', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.hotel_email"
-            [class.opacity-60]="reservation.checklist.hotel_email">E-mail enviado para o hotel?</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.hotel_confirmed"
-            (change)="onChecklistChange('hotel_confirmed', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.hotel_confirmed"
-            [class.opacity-60]="reservation.checklist.hotel_confirmed">Reserva hotel confirmada?</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.flight_registered"
-            (change)="onChecklistChange('flight_registered', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.flight_registered"
-            [class.opacity-60]="reservation.checklist.flight_registered">Voo cadastrado na aba Voos?</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.seats_assigned"
-            (change)="onChecklistChange('seats_assigned', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.seats_assigned"
-            [class.opacity-60]="reservation.checklist.seats_assigned">Assentos marcados - IDA?</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.seats_assigned_inbound"
-            (change)="onChecklistChange('seats_assigned_inbound', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.seats_assigned_inbound"
-            [class.opacity-60]="reservation.checklist.seats_assigned_inbound">Assentos marcados - VOLTA?</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.checkin_outbound"
-            (change)="onChecklistChange('checkin_outbound', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.checkin_outbound"
-            [class.opacity-60]="reservation.checklist.checkin_outbound">Orientação check-in IDA</span>
-        </label>
-
-        <label class="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" [checked]="reservation.checklist.checkin_inbound"
-            (change)="onChecklistChange('checkin_inbound', $event)"
-            class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-          <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-            [class.line-through]="reservation.checklist.checkin_inbound"
-            [class.opacity-60]="reservation.checklist.checkin_inbound">Orientação check-in VOLTA</span>
-        </label>
-
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.payment"
+              (change)="onChecklistChange('payment', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.payment"
+              [class.opacity-60]="reservation.checklist.payment">Pagamento realizado?</span>
+          </label>
+        </div>
       </div>
+
+      <!-- Group 2: Hotel -->
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Hotel</h5>
+          <div class="h-px flex-grow bg-slate-300/30"></div>
+        </div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.hotel_email"
+              (change)="onChecklistChange('hotel_email', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.hotel_email"
+              [class.opacity-60]="reservation.checklist.hotel_email">E-mail enviado para o hotel?</span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.hotel_confirmed"
+              (change)="onChecklistChange('hotel_confirmed', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.hotel_confirmed"
+              [class.opacity-60]="reservation.checklist.hotel_confirmed">Reserva hotel confirmada?</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Group 3: Voo -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Voo</h5>
+          <div class="h-px flex-grow bg-slate-300/30"></div>
+        </div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.flight_registered"
+              (change)="onChecklistChange('flight_registered', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.flight_registered"
+              [class.opacity-60]="reservation.checklist.flight_registered">Voo cadastrado na aba Voos?</span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.seats_assigned"
+              (change)="onChecklistChange('seats_assigned', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.seats_assigned"
+              [class.opacity-60]="reservation.checklist.seats_assigned">Assentos marcados - IDA?</span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.seats_assigned_inbound"
+              (change)="onChecklistChange('seats_assigned_inbound', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.seats_assigned_inbound"
+              [class.opacity-60]="reservation.checklist.seats_assigned_inbound">Assentos marcados - VOLTA?</span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.checkin_outbound"
+              (change)="onChecklistChange('checkin_outbound', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.checkin_outbound"
+              [class.opacity-60]="reservation.checklist.checkin_outbound">Orientação check-in IDA</span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.checkin_inbound"
+              (change)="onChecklistChange('checkin_inbound', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.checkin_inbound"
+              [class.opacity-60]="reservation.checklist.checkin_inbound">Orientação check-in VOLTA</span>
+          </label>
+        </div>
+      </div>
+
     </div>
 
     <!-- Notes -->
