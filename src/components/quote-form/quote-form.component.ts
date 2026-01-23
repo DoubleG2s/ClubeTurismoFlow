@@ -11,7 +11,7 @@ import { Quote } from '../../models/quote';
 })
 export class QuoteFormComponent implements OnInit {
   @Input() quoteToEdit: Quote | null = null;
-  @Input() isLoading = false; // Novo input para controlar estado do botão
+  @Input() isLoading = false;
 
   @Output() save = new EventEmitter<Omit<Quote, 'id' | 'created_at'>>();
   @Output() update = new EventEmitter<{ id: string, data: Partial<Quote> }>();
@@ -81,13 +81,15 @@ export class QuoteFormComponent implements OnInit {
       // Handle Hotel Options Array
       if (this.quoteToEdit.hotel_options && this.quoteToEdit.hotel_options.length > 0) {
         this.quoteToEdit.hotel_options.forEach(hotel => {
-          this.addHotelOption(hotel);
+          // Converte o valor numérico do banco para string formatada
+          const formattedAmount = this.formatNumberToString(hotel.amount);
+          this.addHotelOption({ ...hotel, amount: formattedAmount });
         });
       } else {
-        this.addHotelOption(); // Ensure at least one
+        this.addHotelOption();
       }
     } else {
-      this.addHotelOption(); // Start with one option for new quotes
+      this.addHotelOption();
     }
   }
 
@@ -96,7 +98,8 @@ export class QuoteFormComponent implements OnInit {
       hotel_name: [data?.hotel_name || '', Validators.required],
       regime: [data?.regime || '', Validators.required],
       accommodation: [data?.accommodation || '', Validators.required],
-      amount: [data?.amount || 0, [Validators.required, Validators.min(0.01)]],
+      // Amount inicia como string para suportar mascara
+      amount: [data?.amount || '', Validators.required],
       currency: [data?.currency || 'BRL', Validators.required],
       link: [data?.link || '']
     });
@@ -112,7 +115,47 @@ export class QuoteFormComponent implements OnInit {
     }
   }
 
-  // Método público para ser chamado pelo pai após sucesso
+  // --- MÁSCARA MONETÁRIA ---
+
+  // Converte número 1234.56 -> "1.234,56"
+  private formatNumberToString(value: number): string {
+    if (value === undefined || value === null) return '';
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // Evento de input para aplicar máscara em tempo real
+  onCurrencyInput(event: Event, index: number) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+
+    if (!value) {
+      this.hotelOptions.at(index).get('amount')?.setValue('');
+      return;
+    }
+
+    // Divide por 100 para considerar os centavos
+    const floatValue = parseFloat(value) / 100;
+
+    // Formata para pt-BR
+    const formatted = floatValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    input.value = formatted;
+    this.hotelOptions.at(index).get('amount')?.setValue(formatted);
+  }
+
+  // Converte string "1.234,56" -> number 1234.56 para salvar
+  private parseCurrencyString(value: string): number {
+    if (!value) return 0;
+    // Remove pontos de milhar e substitui vírgula por ponto
+    const cleanValue = value.toString().replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleanValue);
+  }
+
+  // -------------------------
+
   resetForm() {
     this.quoteForm.reset({
       adults: 2,
@@ -148,28 +191,36 @@ export class QuoteFormComponent implements OnInit {
     }
     input.value = value;
 
-    // Access nested control safely
     this.quoteForm.get('flight_details')?.get(groupName)?.get(controlName)?.setValue(value);
   }
 
   onSubmit() {
     if (this.quoteForm.valid) {
-      const formData = this.quoteForm.value;
+      const formValue = this.quoteForm.value;
+
+      // PREPARAÇÃO DOS DADOS: Converter amounts de string para number
+      const processedHotels = formValue.hotel_options.map((hotel: any) => ({
+        ...hotel,
+        amount: typeof hotel.amount === 'string' ? this.parseCurrencyString(hotel.amount) : hotel.amount
+      }));
+
+      const finalPayload = {
+        ...formValue,
+        hotel_options: processedHotels
+      };
 
       if (this.isEditMode() && this.quoteToEdit) {
         this.update.emit({
           id: this.quoteToEdit.id,
-          data: formData
+          data: finalPayload
         });
       } else {
-        // Emitimos o evento, mas NÃO resetamos aqui.
-        // O pai chama resetForm() apenas se o backend confirmar o sucesso.
-        this.save.emit(formData);
+        this.save.emit(finalPayload);
       }
     } else {
       console.log('Formulário Inválido', this.quoteForm.errors);
       this.quoteForm.markAllAsTouched();
-      alert('Por favor, preencha todos os campos obrigatórios (incluindo voos e hotéis).');
+      alert('Por favor, preencha todos os campos obrigatórios.');
     }
   }
 

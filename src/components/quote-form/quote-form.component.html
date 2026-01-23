@@ -221,7 +221,8 @@
             </div>
             <div class="flex flex-col group flex-grow">
               <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Total</label>
-              <input type="number" formControlName="amount" placeholder="0.00"
+              <!-- INPUT MUDADO PARA TEXT PARA SUPORTAR MÁSCARA -->
+              <input type="text" formControlName="amount" (input)="onCurrencyInput($event, $index)" placeholder="0,00"
                 class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold focus:outline-none focus:border-purple-500 placeholder-slate-400">
             </div>
           </div>

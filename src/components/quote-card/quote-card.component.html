@@ -16,11 +16,7 @@
       <!-- Main Amount (Display first option or range) -->
       @if (mainHotel(); as hotel) {
       <div class="font-bold text-xl text-purple-700 font-mono tracking-tight">
-        @if (hotel.currency === 'BRL') {
-        {{ hotel.amount | currency:'BRL':'symbol':'1.0-0' }}
-        } @else {
-        {{ hotel.amount | currency:'USD':'symbol':'1.0-0' }}
-        }
+        {{ formatCurrencyValue(hotel.amount, hotel.currency) }}
       </div>
       @if (totalOptions() > 1) {
       <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wide mt-0.5">+ {{ totalOptions() - 1 }}

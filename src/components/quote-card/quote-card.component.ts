@@ -22,12 +22,16 @@ export class QuoteCardComponent {
   mainHotel = computed(() => this.quote.hotel_options?.[0]);
   totalOptions = computed(() => this.quote.hotel_options?.length || 0);
 
-  // Cálculo aproximado em BRL para o card (apenas visualização rápida)
-  approxValueBrl = computed(() => {
-    const hotel = this.mainHotel();
-    if (!hotel) return 0;
-    return hotel.currency === 'USD' ? hotel.amount * this.exchangeRate : hotel.amount;
-  });
+  // Helpers de formatação segura para garantir 9.999,99 independente do locale global
+  formatCurrencyValue(value: number, currency: string): string {
+    if (value === undefined || value === null) return '';
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
 
   onDelete(event: Event) {
     event.stopPropagation();
@@ -78,9 +82,7 @@ export class QuoteCardComponent {
 
     // Opções de Hospedagem (Dinâmico)
     const hotelsBlock = q.hotel_options.map(h => {
-      const valor = h.currency === 'BRL'
-        ? h.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-        : h.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      const valor = h.amount.toLocaleString('pt-BR', { style: 'currency', currency: h.currency });
 
       return `🏨 **${h.hotel_name} + ${h.regime}** - (${h.accommodation})
 Total = **${valor}** – ${paxText}
