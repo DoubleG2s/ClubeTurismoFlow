@@ -110,3 +110,49 @@
     </button>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="cancelDelete()"></div>
+
+  <!-- Modal Panel -->
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-100 animate-fade-in">
+    <div class="flex flex-col items-center text-center">
+      <!-- Warning Icon -->
+      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-900 mb-2">Excluir Cotação?</h3>
+      <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+        Tem certeza que deseja excluir esta cotação permanentemente? <br>
+        <span class="text-xs text-red-500 font-medium">Esta ação não pode ser desfeita.</span>
+      </p>
+
+      <div class="flex gap-3 w-full">
+        <button type="button" (click)="cancelDelete()"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+          Cancelar
+        </button>
+        <button type="button" (click)="confirmDelete()"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-0.5">
+          Excluir
+        </button>
+      </div>
+
+      <p class="text-[10px] text-slate-400 mt-4 font-medium">
+        Pressione <span
+          class="bg-slate-100 border border-slate-200 rounded px-1 py-0.5 text-slate-500 font-bold font-mono">Enter</span>
+        para confirmar
+      </p>
+    </div>
+  </div>
+</div>
+}

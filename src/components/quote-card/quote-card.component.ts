@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Quote } from '../../models/quote';
 
@@ -14,6 +14,8 @@ export class QuoteCardComponent {
   @Output() edit = new EventEmitter<string>();
   @Output() remove = new EventEmitter<string>();
 
+  showDeleteModal = signal(false);
+
   // Computed value for converted BRL
   convertedBrl = computed(() => {
     if (this.quote.currency === 'USD') {
@@ -24,8 +26,29 @@ export class QuoteCardComponent {
 
   onDelete(event: Event) {
     event.stopPropagation();
-    if (confirm('Tem certeza que deseja excluir esta cotação permanentemente?')) {
-      this.remove.emit(this.quote.id);
+    this.showDeleteModal.set(true);
+  }
+
+  confirmDelete() {
+    this.remove.emit(this.quote.id);
+    this.showDeleteModal.set(false);
+  }
+
+  cancelDelete() {
+    this.showDeleteModal.set(false);
+  }
+
+  // Handle global keyboard events only when this specific card's modal is open
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.showDeleteModal()) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        this.confirmDelete();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        this.cancelDelete();
+      }
     }
   }
 }
