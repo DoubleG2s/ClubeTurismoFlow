@@ -1,36 +1,36 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from './services/flight.service';
 import { ReservationService } from './services/reservation.service';
-import { QuoteService } from './services/quote.service'; // Added
+import { QuoteService } from './services/quote.service';
 import { AuthService } from './services/auth.service';
 
 import { FlightFormComponent } from './components/flight-form/flight-form.component';
 import { FlightCardComponent } from './components/flight-card/flight-card.component';
 import { ReservationFormComponent } from './components/reservation-form/reservation-form.component';
 import { ReservationCardComponent } from './components/reservation-card/reservation-card.component';
-import { QuoteFormComponent } from './components/quote-form/quote-form.component'; // Added
-import { QuoteCardComponent } from './components/quote-card/quote-card.component'; // Added
+import { QuoteFormComponent } from './components/quote-form/quote-form.component';
+import { QuoteCardComponent } from './components/quote-card/quote-card.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserListComponent } from './components/user-management/user-list.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
-import { Quote } from './models/quote'; // Added
+import { Quote } from './models/quote';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule, 
-    FlightFormComponent, 
+    FormsModule,
+    FlightFormComponent,
     FlightCardComponent,
     ReservationFormComponent,
     ReservationCardComponent,
-    QuoteFormComponent, // Added
-    QuoteCardComponent, // Added
+    QuoteFormComponent,
+    QuoteCardComponent,
     LoginComponent,
     UserListComponent
   ],
@@ -39,12 +39,15 @@ import { Quote } from './models/quote'; // Added
 export class AppComponent implements OnInit {
   private flightService = inject(FlightService);
   private reservationService = inject(ReservationService);
-  private quoteService = inject(QuoteService); // Added
-  public authService = inject(AuthService); 
-  
+  private quoteService = inject(QuoteService);
+  public authService = inject(AuthService);
+
+  // ViewChild para controlar o formulário de cotação
+  @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
+
   // State
-  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos'); // Added 'cotacoes'
-  
+  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos');
+
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
   prefilledFlightData = signal<Partial<Flight> | null>(null);
@@ -57,48 +60,43 @@ export class AppComponent implements OnInit {
   // Quote State
   editingQuote = signal<Quote | null>(null);
   showQuoteEditModal = signal(false);
-  usdExchangeRate = signal<number>(6.00); // Default Exchange Rate
+  usdExchangeRate = signal<number>(6.00);
+  isSavingQuote = signal(false); // Novo estado
 
   // --- FILTERS & SORTING STATE ---
   searchTerm = signal('');
   showAdvancedFilters = signal(false);
 
-  // 1. DRAFT STATE 
-  draftDateStart = signal(''); 
-  draftDateEnd = signal('');   
-  draftReturnStart = signal(''); 
-  draftReturnEnd = signal('');   
-
-  // 2. ACTIVE STATE 
-  activeDateStart = signal(''); 
-  activeDateEnd = signal('');   
-  activeReturnStart = signal(''); 
-  activeReturnEnd = signal(''); 
-
-  // Sorting
+  // ... (Sinais de filtro mantidos iguais) ...
+  draftDateStart = signal('');
+  draftDateEnd = signal('');
+  draftReturnStart = signal('');
+  draftReturnEnd = signal('');
+  activeDateStart = signal('');
+  activeDateEnd = signal('');
+  activeReturnStart = signal('');
+  activeReturnEnd = signal('');
   sortField = signal<'date' | 'return_date'>('date');
-  sortDirection = signal<'asc' | 'desc'>('desc'); 
+  sortDirection = signal<'asc' | 'desc'>('desc');
 
   // Derived state
   flights = this.flightService.flights;
   reservations = this.reservationService.reservations;
-  quotes = this.quoteService.quotes; // Added
-  
-  // Computed filtered reservations
+  quotes = this.quoteService.quotes;
+
+  // Computed filtered reservations (mantido igual)
   filteredReservations = computed(() => {
     let result = this.reservations();
     const term = this.searchTerm().toLowerCase().trim();
 
-    // 1. Text Search (Immediate)
     if (term) {
-      result = result.filter(res => 
+      result = result.filter(res =>
         res.passengers.some(p => p.toLowerCase().includes(term)) ||
         res.reservation_number.toLowerCase().includes(term) ||
         (res.flight_voucher && res.flight_voucher.toLowerCase().includes(term))
       );
     }
 
-    // 2. Date Range Filters (Uses ACTIVE signals, not drafts)
     const dStart = this.parseDate(this.activeDateStart());
     const dEnd = this.parseDate(this.activeDateEnd());
     const rStart = this.parseDate(this.activeReturnStart());
@@ -110,66 +108,62 @@ export class AppComponent implements OnInit {
         const resReturn = res.return_date ? this.parseDate(res.return_date) : 0;
 
         const matchIda = (!dStart || resDate >= dStart) && (!dEnd || resDate <= dEnd);
-        
+
         const hasReturnFilter = rStart || rEnd;
         let matchVolta = true;
-        
+
         if (hasReturnFilter) {
-           if (!resReturn) matchVolta = false;
-           else matchVolta = (!rStart || resReturn >= rStart) && (!rEnd || resReturn <= rEnd);
+          if (!resReturn) matchVolta = false;
+          else matchVolta = (!rStart || resReturn >= rStart) && (!rEnd || resReturn <= rEnd);
         }
 
         return matchIda && matchVolta;
       });
     }
 
-    // 3. Sorting
     const field = this.sortField();
     const direction = this.sortDirection() === 'asc' ? 1 : -1;
 
     result = [...result].sort((a, b) => {
       const dateA = field === 'date' ? this.parseDate(a.date) : (a.return_date ? this.parseDate(a.return_date) : 0);
       const dateB = field === 'date' ? this.parseDate(b.date) : (b.return_date ? this.parseDate(b.return_date) : 0);
-      
+
       return (dateA - dateB) * direction;
     });
 
     return result;
   });
 
-  // Check if any filter (Text OR Date) is active
   hasActiveFilters = computed(() => {
     return !!(
-      this.searchTerm() || 
-      this.activeDateStart() || 
-      this.activeDateEnd() || 
-      this.activeReturnStart() || 
+      this.searchTerm() ||
+      this.activeDateStart() ||
+      this.activeDateEnd() ||
+      this.activeReturnStart() ||
       this.activeReturnEnd()
     );
   });
 
-  // Check if user typed anything in the draft fields (to enable the "Filter" button)
   hasDraftFilters = computed(() => {
     return !!(
-      this.draftDateStart() || 
-      this.draftDateEnd() || 
-      this.draftReturnStart() || 
+      this.draftDateStart() ||
+      this.draftDateEnd() ||
+      this.draftReturnStart() ||
       this.draftReturnEnd()
     );
   });
 
-  isLoading = computed(() => 
-    this.flightService.isLoading() || 
+  isLoading = computed(() =>
+    this.flightService.isLoading() ||
     this.reservationService.isLoading() ||
     this.quoteService.isLoading()
-  ); 
+  );
 
   ngOnInit() {
     // Data loaded in services
   }
 
   // --- Helper Methods ---
-
   private parseDate(dateStr: string): number {
     if (!dateStr || dateStr.length < 10) return 0;
     const parts = dateStr.split('/');
@@ -209,7 +203,7 @@ export class AppComponent implements OnInit {
 
   onDateInput(event: Event, signalSetter: any) {
     const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, ''); 
+    let value = input.value.replace(/\D/g, '');
     if (value.length > 8) value = value.slice(0, 8);
     if (value.length >= 5) {
       value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4);
@@ -242,7 +236,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  async onUpdateFlight(event: {id: string, data: Partial<Flight>}) {
+  async onUpdateFlight(event: { id: string, data: Partial<Flight> }) {
     await this.flightService.updateFlight(event.id, event.data);
     this.closeEditModal();
   }
@@ -251,7 +245,7 @@ export class AppComponent implements OnInit {
     this.flightService.removeFlight(id);
   }
 
-  onToggleConfirm(event: {id: string, checked: boolean}) {
+  onToggleConfirm(event: { id: string, checked: boolean }) {
     this.flightService.toggleConfirmation(event.id, event.checked);
   }
 
@@ -274,11 +268,11 @@ export class AppComponent implements OnInit {
     await this.reservationService.addReservation(data);
   }
 
-  async onUpdateReservation(event: {id: string, data: Partial<Reservation>}) {
+  async onUpdateReservation(event: { id: string, data: Partial<Reservation> }) {
     await this.reservationService.updateReservation(event.id, event.data);
   }
 
-  async onUpdateReservationForm(event: {id: string, data: Partial<Reservation>}) {
+  async onUpdateReservationForm(event: { id: string, data: Partial<Reservation> }) {
     await this.reservationService.updateReservation(event.id, event.data);
     this.closeReservationEditModal();
   }
@@ -310,26 +304,36 @@ export class AppComponent implements OnInit {
       locator: reservation.flight_voucher,
       date: reservation.date,
       return_date: reservation.return_date,
-      origin: '' 
+      origin: ''
     };
 
     this.prefilledFlightData.set(prefillData);
     this.showEditModal.set(true);
-    this.activeTab.set('voos'); 
-    
+    this.activeTab.set('voos');
+
     if (!reservation.checklist.flight_registered) {
-       this.reservationService.updateReservation(reservation.id, {
-         checklist: { ...reservation.checklist, flight_registered: true }
-       });
+      this.reservationService.updateReservation(reservation.id, {
+        checklist: { ...reservation.checklist, flight_registered: true }
+      });
     }
   }
 
   // --- Quote Actions ---
   async onAddQuote(data: Omit<Quote, 'id' | 'created_at'>) {
-    await this.quoteService.addQuote(data);
+    this.isSavingQuote.set(true);
+    try {
+      const success = await this.quoteService.addQuote(data);
+      if (success && this.quoteFormComp) {
+        this.quoteFormComp.resetForm(); // Reset apenas se sucesso
+      }
+    } catch (e) {
+      console.error('Falha inesperada no app.component ao salvar cotação', e);
+    } finally {
+      this.isSavingQuote.set(false);
+    }
   }
 
-  async onUpdateQuote(event: {id: string, data: Partial<Quote>}) {
+  async onUpdateQuote(event: { id: string, data: Partial<Quote> }) {
     await this.quoteService.updateQuote(event.id, event.data);
     this.closeQuoteEditModal();
   }

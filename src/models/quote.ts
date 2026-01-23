@@ -1,18 +1,51 @@
+export interface HotelOption {
+  hotel_name: string;
+  regime: string; // Ex: Café da manhã
+  accommodation: string; // Ex: Apto Luxo
+  amount: number;
+  currency: 'BRL' | 'USD';
+  link?: string;
+}
+
+export interface FlightSegment {
+  origin_city: string;
+  destination_city: string;
+  departure_time: string; // HH:mm
+  arrival_time: string; // HH:mm
+}
+
+export interface QuoteFlightDetails {
+  outbound: FlightSegment;
+  inbound: FlightSegment;
+}
+
 export interface Quote {
   id: string;
-  supplier: string; // Fornecedor
+  created_at?: string;
+  created_by?: string;
+  author_name?: string;
+
+  // Campos Obrigatórios Principais
+  title: string;
+  subtitle?: string; // Opcional
+  supplier: string;
+
+  // Datas e Pax
   check_in: string; // dd/mm/aaaa
   check_out: string; // dd/mm/aaaa
-  hotel_name: string;
-  city: string;
-  accommodation_type: string;
   adults: number;
   children: number;
-  lead_name?: string; // Titular (opcional)
-  amount: number; // Valor numérico
-  currency: 'BRL' | 'USD';
-  notes?: string; // Observações (Novo)
-  created_by?: string;
-  created_at?: string;
-  author_name?: string;
+
+  // Detalhes do Voo
+  flight_details: QuoteFlightDetails;
+
+  // Detalhes Gerais
+  tour_details?: string; // Opcional {passeio}
+
+  // Lista de Hotéis (Dinâmica)
+  hotel_options: HotelOption[];
+
+  // Campos Legados (Mantidos para compatibilidade, mas podem ser ignorados na UI nova se vazios)
+  city?: string;
+  notes?: string;
 }

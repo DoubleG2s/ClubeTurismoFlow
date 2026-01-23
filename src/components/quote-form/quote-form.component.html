@@ -1,186 +1,259 @@
-<form 
-  [formGroup]="quoteForm" 
-  (ngSubmit)="onSubmit()" 
-  class="bg-white p-6 rounded-2xl shadow-lg shadow-purple-200/50 border border-purple-100 mb-6 transition-all hover:shadow-xl hover:shadow-purple-200/60"
->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-    
-    <!-- Supplier -->
-    <div class="flex flex-col group lg:col-span-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Fornecedor</label>
-      <input 
-        type="text" 
-        formControlName="supplier"
-        placeholder="Ex: CVC, Decolar, Hotel..."
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-      >
-      @if (quoteForm.get('supplier')?.touched && quoteForm.get('supplier')?.invalid) {
-        <span class="text-xs text-red-500 mt-1">Obrigatório.</span>
-      }
-    </div>
+<form [formGroup]="quoteForm" (ngSubmit)="onSubmit()"
+  class="bg-white p-6 rounded-2xl shadow-lg shadow-purple-200/50 border border-purple-100 mb-6 transition-all hover:shadow-xl hover:shadow-purple-200/60">
 
-    <!-- Hotel Name -->
-    <div class="flex flex-col group lg:col-span-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome do Hotel</label>
-      <input 
-        type="text" 
-        formControlName="hotel_name"
-        placeholder="Ex: Resort Paradise"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-      >
-      @if (quoteForm.get('hotel_name')?.touched && quoteForm.get('hotel_name')?.invalid) {
-        <span class="text-xs text-red-500 mt-1">Obrigatório.</span>
-      }
-    </div>
-
-    <!-- City -->
-    <div class="flex flex-col group lg:col-span-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cidade</label>
-      <input 
-        type="text" 
-        formControlName="city"
-        placeholder="Ex: Gramado, RS"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-      >
-    </div>
-
-    <!-- Accommodation Type -->
-    <div class="flex flex-col group lg:col-span-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Regime</label>
-      <input 
-        type="text" 
-        formControlName="accommodation_type"
-        placeholder="Ex: Café da manhã, All Inclusive..."
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-      >
-    </div>
-
-    <!-- Check-in -->
-    <div class="flex flex-col group">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Check-in</label>
-      <div class="relative">
-        <input 
-          type="text" 
-          formControlName="check_in"
-          (input)="onDateInput($event, 'check_in')"
-          placeholder="dd/mm/aaaa"
-          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-        >
+  <!-- CABEÇALHO DA COTAÇÃO -->
+  <div class="mb-6 border-b border-purple-100 pb-4">
+    <h3 class="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Dados Principais</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col group">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Título do Orçamento *</label>
+        <input type="text" formControlName="title" placeholder="Ex: Férias em Cancún"
+          class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+        @if (quoteForm.get('title')?.touched && quoteForm.get('title')?.invalid) {
+        <span class="text-[10px] text-red-500 mt-1 font-bold">Obrigatório</span>
+        }
       </div>
-      @if (quoteForm.get('check_in')?.touched && quoteForm.get('check_in')?.invalid) {
-        <span class="text-xs text-red-500 mt-1">Data inválida.</span>
-      }
-    </div>
-
-    <!-- Check-out -->
-    <div class="flex flex-col group">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Check-out</label>
-      <div class="relative">
-        <input 
-          type="text" 
-          formControlName="check_out"
-          (input)="onDateInput($event, 'check_out')"
-          placeholder="dd/mm/aaaa"
-          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-        >
-      </div>
-      @if (quoteForm.get('check_out')?.touched && quoteForm.get('check_out')?.invalid) {
-        <span class="text-xs text-red-500 mt-1">Data inválida.</span>
-      }
-    </div>
-
-    <!-- Pax (Adults/Children) -->
-    <div class="flex gap-4 lg:col-span-2">
-      <div class="flex flex-col group flex-1">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Adultos</label>
-        <input 
-          type="number" 
-          formControlName="adults"
-          min="1"
-          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-        >
-      </div>
-      <div class="flex flex-col group flex-1">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Crianças</label>
-        <input 
-          type="number" 
-          formControlName="children"
-          min="0"
-          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-        >
+      <div class="flex flex-col group">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Subtítulo (Opcional)</label>
+        <input type="text" formControlName="subtitle" placeholder="Ex: Família Silva"
+          class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
       </div>
     </div>
-
-    <!-- Lead Name (Optional) -->
-    <div class="flex flex-col group lg:col-span-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Titular (Opcional)</label>
-      <input 
-        type="text" 
-        formControlName="lead_name"
-        placeholder="Nome do cliente principal"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-      >
-    </div>
-
-    <!-- Currency & Value -->
-    <div class="flex flex-col sm:flex-row gap-4 lg:col-span-2 items-end">
-        <div class="flex flex-col group w-32">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Moeda</label>
-            <select formControlName="currency" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer">
-                <option value="BRL">BRL (R$)</option>
-                <option value="USD">USD ($)</option>
-            </select>
-        </div>
-        <div class="flex flex-col group flex-grow">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Valor da Cotação</label>
-            <input 
-                type="text"
-                [value]="displayValue()"
-                (input)="onAmountInput($event)"
-                placeholder="0,00"
-                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold text-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-            >
-             @if (quoteForm.get('amount')?.touched && quoteForm.get('amount')?.value <= 0) {
-                <span class="text-xs text-red-500 mt-1">Valor inválido.</span>
-             }
-        </div>
-    </div>
-
-    <!-- Notes (New Field) -->
-    <div class="flex flex-col group lg:col-span-4">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Observações</label>
-      <textarea 
-        formControlName="notes"
-        rows="2" 
-        placeholder="Detalhes adicionais sobre a cotação..."
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all resize-none"
-      ></textarea>
-    </div>
-
   </div>
 
+  <!-- DATAS E FORNECEDOR -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="flex flex-col group md:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Fornecedor *</label>
+      <input type="text" formControlName="supplier" placeholder="Ex: CVC, Decolar"
+        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+      @if (quoteForm.get('supplier')?.touched && quoteForm.get('supplier')?.invalid) {
+      <span class="text-[10px] text-red-500 mt-1 font-bold">Obrigatório</span>
+      }
+    </div>
+    <div class="flex flex-col group">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Data Ida *</label>
+      <input type="text" formControlName="check_in" (input)="onDateInput($event, 'check_in')" placeholder="dd/mm/aaaa"
+        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+      @if (quoteForm.get('check_in')?.touched && quoteForm.get('check_in')?.invalid) {
+      <span class="text-[10px] text-red-500 mt-1 font-bold">Inválido</span>
+      }
+    </div>
+    <div class="flex flex-col group">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Data Volta *</label>
+      <input type="text" formControlName="check_out" (input)="onDateInput($event, 'check_out')" placeholder="dd/mm/aaaa"
+        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+      @if (quoteForm.get('check_out')?.touched && quoteForm.get('check_out')?.invalid) {
+      <span class="text-[10px] text-red-500 mt-1 font-bold">Inválido</span>
+      }
+    </div>
+  </div>
+
+  <!-- PAX E PASSEIO -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 pb-6 border-b border-purple-100">
+    <div class="flex flex-col group">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Adultos *</label>
+      <input type="number" formControlName="adults" min="1"
+        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+    </div>
+    <div class="flex flex-col group">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Crianças</label>
+      <input type="number" formControlName="children" min="0"
+        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+    </div>
+    <div class="flex flex-col group md:col-span-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Passeio (Opcional)</label>
+      <input type="text" formControlName="tour_details" placeholder="Ex: City Tour Panorâmico"
+        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+    </div>
+  </div>
+
+  <!-- DETALHES DO VOO -->
+  <div class="mb-6 pb-6 border-b border-purple-100" formGroupName="flight_details">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xs font-bold text-purple-600 uppercase tracking-wider flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z" />
+        </svg>
+        Logística Aérea
+      </h3>
+      @if (quoteForm.get('flight_details')?.invalid && quoteForm.get('flight_details')?.touched) {
+      <span class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded font-bold">Preencha todos os dados dos
+        voos</span>
+      }
+    </div>
+
+    <!-- IDA -->
+    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-4" formGroupName="outbound">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-md">Ida</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Origem *</label>
+          <input type="text" formControlName="origin_city" placeholder="Cidade"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Horário Saída *</label>
+          <input type="text" formControlName="departure_time"
+            (input)="onTimeInput($event, 'outbound', 'departure_time')" placeholder="HH:mm"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Destino *</label>
+          <input type="text" formControlName="destination_city" placeholder="Cidade"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Horário Chegada *</label>
+          <input type="text" formControlName="arrival_time" (input)="onTimeInput($event, 'outbound', 'arrival_time')"
+            placeholder="HH:mm"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
+        </div>
+      </div>
+    </div>
+
+    <!-- VOLTA -->
+    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl" formGroupName="inbound">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold uppercase rounded-md">Volta</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Origem *</label>
+          <input type="text" formControlName="origin_city" placeholder="Cidade"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Horário Saída *</label>
+          <input type="text" formControlName="departure_time" (input)="onTimeInput($event, 'inbound', 'departure_time')"
+            placeholder="HH:mm"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Destino *</label>
+          <input type="text" formControlName="destination_city" placeholder="Cidade"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Horário Chegada *</label>
+          <input type="text" formControlName="arrival_time" (input)="onTimeInput($event, 'inbound', 'arrival_time')"
+            placeholder="HH:mm"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPÇÕES DE HOSPEDAGEM (ARRAY) -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xs font-bold text-purple-600 uppercase tracking-wider flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
+          <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
+          <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
+          <path d="M10 6h4" />
+          <path d="M10 10h4" />
+          <path d="M10 14h4" />
+          <path d="M10 18h4" />
+        </svg>
+        Opções de Hospedagem
+      </h3>
+      <button type="button" (click)="addHotelOption()"
+        class="text-xs font-bold text-purple-600 hover:bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200 transition-all">
+        + Adicionar Hotel
+      </button>
+    </div>
+
+    <div formArrayName="hotel_options" class="space-y-4">
+      @for (hotel of hotelOptions.controls; track $index) {
+      <div [formGroupName]="$index"
+        class="p-4 border border-slate-200 rounded-xl relative hover:shadow-sm transition-shadow bg-white">
+
+        <!-- Remover Botão -->
+        @if (hotelOptions.length > 1) {
+        <button type="button" (click)="removeHotelOption($index)"
+          class="absolute top-2 right-2 text-slate-300 hover:text-red-500 transition-colors p-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18" />
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          </svg>
+        </button>
+        }
+
+        <div class="mb-3">
+          <span
+            class="text-[10px] font-bold uppercase tracking-wide text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Opção
+            {{ $index + 1 }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col group">
+            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Hotel</label>
+            <input type="text" formControlName="hotel_name" placeholder="Nome do Hotel"
+              class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400">
+          </div>
+          <div class="flex flex-col group">
+            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Regime</label>
+            <input type="text" formControlName="regime" placeholder="Ex: Café da Manhã"
+              class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400">
+          </div>
+          <div class="flex flex-col group">
+            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Acomodação</label>
+            <input type="text" formControlName="accommodation" placeholder="Ex: Apto Standard"
+              class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400">
+          </div>
+          <div class="flex gap-2">
+            <div class="flex flex-col group w-24">
+              <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Moeda</label>
+              <select formControlName="currency"
+                class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold">
+                <option value="BRL">R$</option>
+                <option value="USD">US$</option>
+              </select>
+            </div>
+            <div class="flex flex-col group flex-grow">
+              <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Total</label>
+              <input type="number" formControlName="amount" placeholder="0.00"
+                class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold focus:outline-none focus:border-purple-500 placeholder-slate-400">
+            </div>
+          </div>
+          <div class="flex flex-col group md:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Link Fotos (URL)</label>
+            <input type="text" formControlName="link" placeholder="https://..."
+              class="w-full p-2 bg-white text-blue-600 text-sm border border-slate-200 rounded-lg underline-offset-2 focus:outline-none focus:border-purple-500 placeholder-slate-400">
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- AÇÕES -->
   <div class="flex justify-end gap-4 pt-4 border-t border-slate-100">
     @if (isEditMode()) {
-      <button 
-        type="button" 
-        (click)="onCancel()"
-        class="px-6 py-3 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-semibold transition-all shadow-sm"
-      >
-        Cancelar
-      </button>
+    <button type="button" (click)="onCancel()"
+      class="px-6 py-3 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 font-semibold transition-all shadow-sm">Cancelar</button>
     }
-
-    <button 
-      type="submit" 
-      [disabled]="quoteForm.invalid"
-      class="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-bold shadow-lg shadow-purple-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-2"
-    >
-      @if (isEditMode()) {
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Salvar Alterações</span>
+    <button type="submit" [disabled]="quoteForm.invalid || isLoading"
+      class="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-bold shadow-lg shadow-purple-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+      @if (isLoading) {
+      <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+      Salvando...
       } @else {
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span>Salvar Cotação</span>
+      {{ isEditMode() ? 'Salvar Alterações' : 'Criar Cotação' }}
       }
     </button>
   </div>

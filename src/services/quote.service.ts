@@ -32,16 +32,26 @@ export class QuoteService {
       if (error) throw error;
 
       if (data) {
-        this.quotesSignal.set(data as Quote[]);
+        // Map data to ensure types match, especially JSONB fields
+        const mappedData = data.map((q: any) => ({
+          ...q,
+          hotel_options: q.hotel_options || [],
+          flight_details: q.flight_details || {
+            outbound: { origin_city: '', destination_city: '', departure_time: '', arrival_time: '' },
+            inbound: { origin_city: '', destination_city: '', departure_time: '', arrival_time: '' }
+          }
+        }));
+        this.quotesSignal.set(mappedData as Quote[]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar cotações:', error);
     } finally {
       this.loadingSignal.set(false);
     }
   }
 
-  async addQuote(quote: Omit<Quote, 'id' | 'created_at'>) {
+  // Returns TRUE if successful, FALSE otherwise
+  async addQuote(quote: Omit<Quote, 'id' | 'created_at'>): Promise<boolean> {
     const user = this.authService.user();
     const profile = this.authService.profile();
 
@@ -58,14 +68,30 @@ export class QuoteService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Insert Error:', error);
+        throw error;
+      }
 
       if (data) {
-        this.quotesSignal.update(current => [data as Quote, ...current]);
+        const newQuote = {
+          ...data,
+          hotel_options: data.hotel_options || [],
+          flight_details: data.flight_details || {}
+        } as Quote;
+        this.quotesSignal.update(current => [newQuote, ...current]);
+        alert('Cotação criada com sucesso!');
+        return true;
       }
-    } catch (error) {
-      console.error('Erro ao adicionar cotação:', error);
-      alert('Erro ao salvar cotação.');
+      return false;
+    } catch (error: any) {
+      console.error('Erro detalhado ao adicionar cotação:', error);
+      if (error.code === '42703') { // Undefined column
+        alert('Erro de sistema: O banco de dados precisa ser atualizado com as novas colunas (flight_details, hotel_options).');
+      } else {
+        alert(`Erro ao salvar cotação: ${error.message || 'Erro desconhecido'}`);
+      }
+      return false;
     }
   }
 
