@@ -30,7 +30,7 @@ export class QuoteService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
+
       if (data) {
         this.quotesSignal.set(data as Quote[]);
       }
@@ -70,7 +70,7 @@ export class QuoteService {
   }
 
   async updateQuote(id: string, updates: Partial<Quote>) {
-    this.quotesSignal.update(current => 
+    this.quotesSignal.update(current =>
       current.map(q => q.id === id ? { ...q, ...updates } : q)
     );
 
@@ -88,20 +88,31 @@ export class QuoteService {
   }
 
   async removeQuote(id: string) {
+    // 1. Snapshot previous state for rollback
     const previousState = this.quotesSignal();
+
+    // 2. Optimistic Update (remove from UI immediately)
     this.quotesSignal.update(current => current.filter(q => q.id !== id));
 
     try {
-      const { error } = await supabase
+      // 3. Database Request with Count check
+      const { error, count } = await supabase
         .from('quotes')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', id);
 
       if (error) throw error;
+
+      // 4. Verification: If count is 0, it means nothing was deleted (e.g. ID not found or RLS blocked it)
+      if (count === 0) {
+        throw new Error('Nenhum registro foi excluído pelo banco de dados.');
+      }
+
     } catch (error) {
       console.error('Erro ao remover cotação:', error);
+      // 5. Rollback on error
       this.quotesSignal.set(previousState);
-      alert('Não foi possível excluir a cotação.');
+      alert('Não foi possível excluir a cotação. Verifique se você tem permissão.');
     }
   }
 }

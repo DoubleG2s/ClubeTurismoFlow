@@ -21,4 +21,11 @@ export class QuoteCardComponent {
     }
     return null;
   });
+
+  onDelete(event: Event) {
+    event.stopPropagation();
+    if (confirm('Tem certeza que deseja excluir esta cotação permanentemente?')) {
+      this.remove.emit(this.quote.id);
+    }
+  }
 }
