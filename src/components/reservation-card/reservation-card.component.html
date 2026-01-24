@@ -63,16 +63,17 @@
       <!-- Voucher Display with Click Action -->
       @if (reservation.flight_voucher) {
       <button type="button" (click)="onVoucherClick($event)"
-        class="relative z-50 mt-1 flex items-center gap-1.5 text-xs font-mono text-slate-600 cursor-pointer hover:bg-black/5 hover:text-brand-700 rounded px-2 py-1 transition-all border border-transparent hover:border-black/10 w-fit"
+        class="relative z-50 mt-1 flex items-center gap-1.5 text-sm font-mono text-slate-700 cursor-pointer hover:bg-black/5 hover:text-brand-700 rounded px-2 py-1 transition-all border border-transparent hover:border-black/10 w-fit group/voucher"
         title="Clique para adicionar aos Voos">
         <!-- Replaced Icon with Airplane -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 pointer-events-none -rotate-45" viewBox="0 0 24 24"
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 pointer-events-none -rotate-45" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path
             d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z" />
         </svg>
-        <span class="font-bold tracking-wide pointer-events-none">{{ reservation.flight_voucher }}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 ml-0.5 text-brand-500 pointer-events-none"
+        <span class="font-bold tracking-wide pointer-events-none text-base">{{ reservation.flight_voucher }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+          class="w-3.5 h-3.5 ml-0.5 text-brand-500 pointer-events-none opacity-50 group-hover/voucher:opacity-100 transition-opacity"
           viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round">
           <path d="M5 12h14" />
@@ -143,20 +144,31 @@
         </h4>
       </div>
 
-      <!-- Group 1: Pré-venda -->
+      <!-- Group 1: Pré-venda (Atualizado) -->
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2">
           <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Pré-venda</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
         </div>
         <div class="space-y-2">
+          <!-- Renomeado de "Contrato feito?" para "Contrato enviado?" -->
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.contract"
               (change)="onChecklistChange('contract', $event)"
               class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
             <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
               [class.line-through]="reservation.checklist.contract"
-              [class.opacity-60]="reservation.checklist.contract">Contrato feito?</span>
+              [class.opacity-60]="reservation.checklist.contract">Contrato enviado?</span>
+          </label>
+
+          <!-- Novo: Contrato assinado? -->
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.contract_signed"
+              (change)="onChecklistChange('contract_signed', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.contract_signed"
+              [class.opacity-60]="reservation.checklist.contract_signed">Contrato assinado?</span>
           </label>
 
           <label class="flex items-center gap-3 cursor-pointer group">
@@ -166,6 +178,16 @@
             <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
               [class.line-through]="reservation.checklist.payment"
               [class.opacity-60]="reservation.checklist.payment">Pagamento realizado?</span>
+          </label>
+
+          <!-- Novo: Voucher enviado? -->
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.voucher_sent"
+              (change)="onChecklistChange('voucher_sent', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.voucher_sent"
+              [class.opacity-60]="reservation.checklist.voucher_sent">Voucher enviado?</span>
           </label>
         </div>
       </div>

@@ -11,10 +11,10 @@ import { Reservation, ReservationChecklist } from '../../models/reservation';
 })
 export class ReservationCardComponent {
   @Input({ required: true }) reservation!: Reservation;
-  @Output() update = new EventEmitter<{id: string, data: Partial<Reservation>}>();
+  @Output() update = new EventEmitter<{ id: string, data: Partial<Reservation> }>();
   @Output() remove = new EventEmitter<string>();
   @Output() edit = new EventEmitter<string>();
-  @Output() addToFlights = new EventEmitter<Reservation>(); 
+  @Output() addToFlights = new EventEmitter<Reservation>();
 
   get isComplete(): boolean {
     return Object.values(this.reservation.checklist).every(status => status === true);
@@ -22,20 +22,20 @@ export class ReservationCardComponent {
 
   // New Alert Logic with Priorities: Today > Critical (1 day) > Warning (2 days)
   get alertStatus(): 'today' | 'critical' | 'warning' | null {
-    if (this.isComplete) return null; 
+    if (this.isComplete) return null;
 
     const checkDateDiff = (dateStr?: string): number | null => {
       if (!dateStr) return null;
-      
+
       const parts = dateStr.split('/');
       if (parts.length !== 3) return null;
 
       const targetDate = new Date(+parts[2], +parts[1] - 1, +parts[0]);
       const today = new Date();
-      
+
       // Normalize to midnight to compare dates only
-      targetDate.setHours(0,0,0,0);
-      today.setHours(0,0,0,0);
+      targetDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
 
       // Return difference in days
       return Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -57,7 +57,7 @@ export class ReservationCardComponent {
 
   onChecklistChange(key: keyof ReservationChecklist, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-    
+
     const updatedChecklist = {
       ...this.reservation.checklist,
       [key]: checked

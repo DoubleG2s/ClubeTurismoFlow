@@ -53,7 +53,11 @@ export class ReservationService {
               checkin_inbound: rawChecklist.checkin_inbound || false,
               hotel_email: rawChecklist.hotel_email || false,
               seats_assigned: rawChecklist.seats_assigned || false,
-              seats_assigned_inbound: rawChecklist.seats_assigned_inbound || false
+              seats_assigned_inbound: rawChecklist.seats_assigned_inbound || false,
+
+              // 3. New Pre-sales fields
+              contract_signed: rawChecklist.contract_signed || false,
+              voucher_sent: rawChecklist.voucher_sent || false
             }
           };
         });
@@ -86,6 +90,8 @@ export class ReservationService {
           hotel_email: false,
           seats_assigned: false,
           seats_assigned_inbound: false,
+          contract_signed: false,
+          voucher_sent: false,
           ...reservation.checklist // Overrides if any provided
         }
       };
