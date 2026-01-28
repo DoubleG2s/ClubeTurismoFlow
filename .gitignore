@@ -48,4 +48,4 @@ Thumbs.db
 # ignore apenas arquivos sensíveis se existirem
 .env
 .env.*
-
+.agent
