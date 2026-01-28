@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Quote } from '../../models/quote';
@@ -17,10 +17,18 @@ export class QuoteFormComponent implements OnInit {
   @Output() update = new EventEmitter<{ id: string, data: Partial<Quote> }>();
   @Output() cancel = new EventEmitter<void>();
 
-  quoteForm: FormGroup;
+  quoteForm!: FormGroup; // Definite assignment
   isEditMode = signal(false);
 
+  // Injeção do ChangeDetectorRef para garantir atualização da UI após recriar o form
+  private cdr = inject(ChangeDetectorRef);
+
   constructor(private fb: FormBuilder) {
+    this.initForm();
+  }
+
+  // Método para criar/recriar a estrutura limpa do formulário
+  private initForm() {
     this.quoteForm = this.fb.group({
       // Campos principais
       title: ['', Validators.required],
@@ -55,6 +63,9 @@ export class QuoteFormComponent implements OnInit {
       // Hotéis (Form Array)
       hotel_options: this.fb.array([])
     });
+
+    // Adiciona uma opção de hotel vazia por padrão
+    this.addHotelOption();
   }
 
   get hotelOptions() {
@@ -78,7 +89,9 @@ export class QuoteFormComponent implements OnInit {
         flight_details: this.quoteToEdit.flight_details
       });
 
-      // Handle Hotel Options Array
+      // Handle Hotel Options Array - Limpa o default criado pelo initForm
+      this.hotelOptions.clear();
+
       if (this.quoteToEdit.hotel_options && this.quoteToEdit.hotel_options.length > 0) {
         this.quoteToEdit.hotel_options.forEach(hotel => {
           // Converte o valor numérico do banco para string formatada
@@ -88,9 +101,8 @@ export class QuoteFormComponent implements OnInit {
       } else {
         this.addHotelOption();
       }
-    } else {
-      this.addHotelOption();
     }
+    // Se não for edição, o initForm já configurou o estado inicial corretamente
   }
 
   createHotelOptionGroup(data?: any): FormGroup {
@@ -157,16 +169,9 @@ export class QuoteFormComponent implements OnInit {
   // -------------------------
 
   resetForm() {
-    this.quoteForm.reset({
-      adults: 2,
-      children: 0,
-      flight_details: {
-        outbound: { origin_city: '', destination_city: '', departure_time: '', arrival_time: '' },
-        inbound: { origin_city: '', destination_city: '', departure_time: '', arrival_time: '' }
-      }
-    });
-    this.hotelOptions.clear();
-    this.addHotelOption();
+    this.isEditMode.set(false);
+    this.initForm(); // Destrói e recria os controles para limpar flags de validação
+    this.cdr.markForCheck(); // Garante que a UI atualize o estado disabled do botão
   }
 
   onDateInput(event: Event, controlName: string) {
@@ -216,6 +221,7 @@ export class QuoteFormComponent implements OnInit {
         });
       } else {
         this.save.emit(finalPayload);
+        // O reset é chamado pelo componente pai (AppComponent) após sucesso
       }
     } else {
       console.log('Formulário Inválido', this.quoteForm.errors);
