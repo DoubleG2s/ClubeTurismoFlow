@@ -57,7 +57,10 @@ export class ReservationService {
 
               // 3. New Pre-sales fields
               contract_signed: rawChecklist.contract_signed || false,
-              voucher_sent: rawChecklist.voucher_sent || false
+              voucher_sent: rawChecklist.voucher_sent || false,
+
+              // 4. Post-trip field
+              post_trip: rawChecklist.post_trip || false
             }
           };
         });
@@ -92,6 +95,7 @@ export class ReservationService {
           seats_assigned_inbound: false,
           contract_signed: false,
           voucher_sent: false,
+          post_trip: false,
           ...reservation.checklist // Overrides if any provided
         }
       };

@@ -141,8 +141,9 @@ export class ReservationFormComponent implements OnInit {
             hotel_email: false,
             seats_assigned: false,
             seats_assigned_inbound: false,
-            contract_signed: false, // Added
-            voucher_sent: false     // Added
+            contract_signed: false,
+            voucher_sent: false,
+            post_trip: false // Added
           }
         };
 

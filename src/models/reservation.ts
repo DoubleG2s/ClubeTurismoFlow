@@ -11,9 +11,12 @@ export interface ReservationChecklist {
   seats_assigned: boolean;   // Assentos marcados - IDA
   seats_assigned_inbound: boolean; // Assentos marcados - VOLTA
 
-  // Novos campos da atualização
+  // Novos campos da atualização anterior
   contract_signed: boolean; // Contrato assinado?
   voucher_sent: boolean;    // Voucher enviado?
+
+  // Novo campo solicitado agora
+  post_trip: boolean;       // Pós-viagem
 }
 
 export interface Reservation {
