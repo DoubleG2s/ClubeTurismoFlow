@@ -144,14 +144,13 @@
         </h4>
       </div>
 
-      <!-- Group 1: Pré-venda (Atualizado) -->
+      <!-- Group 1: Pré-venda -->
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2">
           <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Pré-venda</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
         </div>
         <div class="space-y-2">
-          <!-- Renomeado de "Contrato feito?" para "Contrato enviado?" -->
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.contract"
               (change)="onChecklistChange('contract', $event)"
@@ -161,7 +160,6 @@
               [class.opacity-60]="reservation.checklist.contract">Contrato enviado?</span>
           </label>
 
-          <!-- Novo: Contrato assinado? -->
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.contract_signed"
               (change)="onChecklistChange('contract_signed', $event)"
@@ -180,7 +178,6 @@
               [class.opacity-60]="reservation.checklist.payment">Pagamento realizado?</span>
           </label>
 
-          <!-- Novo: Voucher enviado? -->
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.voucher_sent"
               (change)="onChecklistChange('voucher_sent', $event)"
@@ -220,7 +217,7 @@
       </div>
 
       <!-- Group 3: Voo -->
-      <div>
+      <div class="mb-4">
         <div class="flex items-center gap-2 mb-2">
           <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Voo</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
@@ -269,6 +266,24 @@
             <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
               [class.line-through]="reservation.checklist.checkin_inbound"
               [class.opacity-60]="reservation.checklist.checkin_inbound">Check-in VOLTA?</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Group 4: Pós-viagem (New) -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Pós-viagem</h5>
+          <div class="h-px flex-grow bg-slate-300/30"></div>
+        </div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" [checked]="reservation.checklist.post_trip"
+              (change)="onChecklistChange('post_trip', $event)"
+              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
+              [class.line-through]="reservation.checklist.post_trip"
+              [class.opacity-60]="reservation.checklist.post_trip">Pós-viagem</span>
           </label>
         </div>
       </div>
