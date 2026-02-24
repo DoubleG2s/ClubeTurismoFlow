@@ -1,4 +1,5 @@
-<div class="group relative bg-white border border-slate-200 transition-all duration-300 hover:border-slate-400 overflow-hidden flex flex-col h-full"
+<div (click)="view.emit(hotel.id)"
+    class="group cursor-pointer relative bg-white border border-slate-200 transition-all duration-300 hover:border-slate-400 overflow-hidden flex flex-col h-full hover:shadow-lg hover:-translate-y-1"
     style="border-radius: 4px;">
 
     <!-- Image Header area -->
@@ -30,7 +31,7 @@
         <!-- Actions overlay (Edit/Delete) -->
         <div
             class="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button (click)="edit.emit(hotel.id)"
+            <button (click)="$event.stopPropagation(); edit.emit(hotel.id)"
                 class="w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm text-slate-700 hover:text-brand-600 transition-colors shadow-sm"
                 style="border-radius: 2px;" title="Editar">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
@@ -39,7 +40,7 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                 </svg>
             </button>
-            <button (click)="remove.emit(hotel.id)"
+            <button (click)="$event.stopPropagation(); remove.emit(hotel.id)"
                 class="w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors shadow-sm"
                 style="border-radius: 2px;" title="Excluir">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"

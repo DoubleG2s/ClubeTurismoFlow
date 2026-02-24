@@ -13,6 +13,7 @@ export class HotelCardComponent {
 
     @Output() edit = new EventEmitter<string>();
     @Output() remove = new EventEmitter<string>();
+    @Output() view = new EventEmitter<string>();
 
     getStarsArray(count: number | undefined): number[] {
         if (!count) return [];

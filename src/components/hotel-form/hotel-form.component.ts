@@ -175,5 +175,28 @@ export class HotelFormComponent implements OnInit {
             deletedPhoneIds: this.deletedPhoneIds(),
             deletedImageIds: this.deletedImageIds()
         });
+
+        if (!this.hotelToEdit) {
+            this.resetForm();
+        }
+    }
+
+    resetForm() {
+        this.id.set('');
+        this.name.set('');
+        this.brand.set('');
+        this.category.set(3);
+        this.type.set('hotel');
+        this.city.set('');
+        this.state.set('');
+        this.country.set('Brasil');
+        this.checkin.set('14:00');
+        this.checkout.set('12:00');
+        this.emails.set([]);
+        this.phones.set([]);
+        this.images.set([]);
+        this.deletedEmailIds.set([]);
+        this.deletedPhoneIds.set([]);
+        this.deletedImageIds.set([]);
     }
 }

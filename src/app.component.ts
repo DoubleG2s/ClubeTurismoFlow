@@ -15,6 +15,7 @@ import { QuoteFormComponent } from './components/quote-form/quote-form.component
 import { QuoteCardComponent } from './components/quote-card/quote-card.component';
 import { HotelFormComponent } from './components/hotel-form/hotel-form.component';
 import { HotelCardComponent } from './components/hotel-card/hotel-card.component';
+import { HotelDetailsComponent } from './components/hotel-details/hotel-details.component';
 import { ConfirmModalComponent } from './components/shared/confirm-modal/confirm-modal.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserListComponent } from './components/user-management/user-list.component';
@@ -38,6 +39,7 @@ import { Hotel } from './models/hotel';
     QuoteCardComponent,
     HotelFormComponent,
     HotelCardComponent,
+    HotelDetailsComponent,
     ConfirmModalComponent,
     LoginComponent,
     UserListComponent
@@ -75,6 +77,10 @@ export class AppComponent implements OnInit {
   // Hotel State
   editingHotel = signal<Hotel | null>(null);
   showHotelEditModal = signal(false);
+
+  // Hotel Details View State
+  selectedHotelDetails = signal<Hotel | null>(null);
+  showHotelDetailsModal = signal(false);
 
   // Shared Modal State
   showConfirmDeleteModal = signal(false);
@@ -180,6 +186,20 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     // Data loaded in services
+  }
+
+  // --- Hotel Methods ---
+  openHotelDetails(hotelId: string) {
+    const hotel = this.hotels().find(h => h.id === hotelId);
+    if (hotel) {
+      this.selectedHotelDetails.set(hotel);
+      this.showHotelDetailsModal.set(true);
+    }
+  }
+
+  closeHotelDetailsModal() {
+    this.showHotelDetailsModal.set(false);
+    setTimeout(() => this.selectedHotelDetails.set(null), 300); // delay clear to let transition finish
   }
 
   // --- Helper Methods ---

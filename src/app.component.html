@@ -490,7 +490,7 @@
         @if (hotels().length > 0) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           @for (hotel of hotels(); track hotel.id) {
-          <app-hotel-card [hotel]="hotel" (edit)="startEditHotel($event)"
+          <app-hotel-card [hotel]="hotel" (view)="openHotelDetails($event)" (edit)="startEditHotel($event)"
             (remove)="promptDeleteHotel($event)"></app-hotel-card>
           }
         </div>
@@ -659,6 +659,11 @@
       </div>
     </div>
   </div>
+  }
+
+  <!-- View Details Modal Overlay (Hotel - NEW) -->
+  @if (showHotelDetailsModal() && selectedHotelDetails()) {
+  <app-hotel-details [hotel]="selectedHotelDetails()!" (close)="closeHotelDetailsModal()"></app-hotel-details>
   }
 
   <!-- Global Confirm Delete Modal -->
