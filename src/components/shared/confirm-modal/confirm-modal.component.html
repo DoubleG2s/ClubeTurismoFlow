@@ -1,0 +1,29 @@
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in" (click)="cancel.emit()"></div>
+  <div class="relative bg-white border border-slate-200 shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up" style="border-radius: 2px;">
+    <!-- Sharp edges, no extreme rounds -->
+    <div class="p-6">
+      <div class="w-12 h-12 bg-red-50 text-red-600 flex items-center justify-center mb-4" style="border-radius: 2px;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-2">{{ title }}</h3>
+      <p class="text-sm text-slate-500">{{ message }}</p>
+    </div>
+    <div class="bg-slate-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-slate-100">
+      <button 
+        (click)="cancel.emit()" 
+        class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+        {{ cancelText }}
+      </button>
+      <button 
+        (click)="confirm.emit()" 
+        class="px-5 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm" style="border-radius: 2px;">
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<div class="group relative bg-white border border-slate-200 transition-all duration-300 hover:border-slate-400 overflow-hidden flex flex-col h-full"
+    style="border-radius: 4px;">
+
+    <!-- Image Header area -->
+    <div class="relative h-48 bg-slate-100 overflow-hidden">
+        @if(hotel.hotel_images && hotel.hotel_images.length > 0) {
+        <img [src]="hotel.hotel_images[0].image_url" alt="{{ hotel.name }}"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+        } @else {
+        <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mb-2 opacity-50" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span class="text-xs font-medium tracking-widest uppercase">Sem Imagem</span>
+        </div>
+        }
+
+        <!-- Badges overlay -->
+        <div class="absolute top-3 left-3 flex flex-col gap-2">
+            <span
+                class="px-2 py-1 bg-black/80 backdrop-blur-md text-white text-[10px] uppercase tracking-wider font-bold"
+                style="border-radius: 2px;">
+                {{ hotel.type || 'Hotel' }}
+            </span>
+        </div>
+
+        <!-- Actions overlay (Edit/Delete) -->
+        <div
+            class="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button (click)="edit.emit(hotel.id)"
+                class="w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm text-slate-700 hover:text-brand-600 transition-colors shadow-sm"
+                style="border-radius: 2px;" title="Editar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+            </button>
+            <button (click)="remove.emit(hotel.id)"
+                class="w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors shadow-sm"
+                style="border-radius: 2px;" title="Excluir">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="p-5 flex-grow flex flex-col">
+        <!-- Category Stars -->
+        <div class="flex items-center gap-0.5 mb-2 text-yellow-500">
+            @for(star of getStarsArray(hotel.category); track $index) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            }
+            @for(star of getEmptyStarsArray(hotel.category); track $index) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-200 fill-current" viewBox="0 0 24 24">
+                <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            }
+        </div>
+
+        <!-- Title and Brand -->
+        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-1">{{ hotel.name }}</h3>
+        @if(hotel.brand) {
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">{{ hotel.brand }}</p>
+        }
+
+        <!-- Location -->
+        <div class="flex items-start gap-2 mt-auto text-sm text-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 shrink-0 text-slate-400" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span class="line-clamp-2">{{ hotel.location_city }}{{ hotel.location_state ? ', ' + hotel.location_state :
+                '' }}{{ hotel.location_country ? ' - ' + hotel.location_country : '' }}</span>
+        </div>
+
+        <!-- Check In/Out Info -->
+        @if(hotel.default_checkin || hotel.default_checkout) {
+        <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+            <div class="flex flex-col">
+                <span class="text-slate-400 font-medium uppercase tracking-wider mb-0.5 text-[10px]">In</span>
+                <span class="text-slate-800 font-bold">{{ hotel.default_checkin || '--' }}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-slate-400 font-medium uppercase tracking-wider mb-0.5 text-[10px]">Out</span>
+                <span class="text-slate-800 font-bold">{{ hotel.default_checkout || '--' }}</span>
+            </div>
+        </div>
+        }
+    </div>
+</div>

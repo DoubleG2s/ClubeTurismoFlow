@@ -5,6 +5,7 @@ import { FlightService } from './services/flight.service';
 import { ReservationService } from './services/reservation.service';
 import { QuoteService } from './services/quote.service';
 import { AuthService } from './services/auth.service';
+import { HotelService } from './services/hotel.service';
 
 import { FlightFormComponent } from './components/flight-form/flight-form.component';
 import { FlightCardComponent } from './components/flight-card/flight-card.component';
@@ -12,12 +13,16 @@ import { ReservationFormComponent } from './components/reservation-form/reservat
 import { ReservationCardComponent } from './components/reservation-card/reservation-card.component';
 import { QuoteFormComponent } from './components/quote-form/quote-form.component';
 import { QuoteCardComponent } from './components/quote-card/quote-card.component';
+import { HotelFormComponent } from './components/hotel-form/hotel-form.component';
+import { HotelCardComponent } from './components/hotel-card/hotel-card.component';
+import { ConfirmModalComponent } from './components/shared/confirm-modal/confirm-modal.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserListComponent } from './components/user-management/user-list.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
 import { Quote } from './models/quote';
+import { Hotel } from './models/hotel';
 
 @Component({
   selector: 'app-root',
@@ -31,6 +36,9 @@ import { Quote } from './models/quote';
     ReservationCardComponent,
     QuoteFormComponent,
     QuoteCardComponent,
+    HotelFormComponent,
+    HotelCardComponent,
+    ConfirmModalComponent,
     LoginComponent,
     UserListComponent
   ],
@@ -40,6 +48,7 @@ export class AppComponent implements OnInit {
   private flightService = inject(FlightService);
   private reservationService = inject(ReservationService);
   private quoteService = inject(QuoteService);
+  private hotelService = inject(HotelService);
   public authService = inject(AuthService);
 
   // ViewChild para controlar o formulário de cotação
@@ -63,6 +72,14 @@ export class AppComponent implements OnInit {
   usdExchangeRate = signal<number>(6.00);
   isSavingQuote = signal(false); // Novo estado
 
+  // Hotel State
+  editingHotel = signal<Hotel | null>(null);
+  showHotelEditModal = signal(false);
+
+  // Shared Modal State
+  showConfirmDeleteModal = signal(false);
+  itemToDelete = signal<{ type: 'hotel', id: string } | null>(null);
+
   // --- FILTERS & SORTING STATE ---
   searchTerm = signal('');
   showAdvancedFilters = signal(false);
@@ -83,6 +100,7 @@ export class AppComponent implements OnInit {
   flights = this.flightService.flights;
   reservations = this.reservationService.reservations;
   quotes = this.quoteService.quotes;
+  hotels = this.hotelService.hotels;
 
   // Computed filtered reservations (mantido igual)
   filteredReservations = computed(() => {
@@ -156,7 +174,8 @@ export class AppComponent implements OnInit {
   isLoading = computed(() =>
     this.flightService.isLoading() ||
     this.reservationService.isLoading() ||
-    this.quoteService.isLoading()
+    this.quoteService.isLoading() ||
+    this.hotelService.isLoading()
   );
 
   ngOnInit() {
@@ -353,6 +372,62 @@ export class AppComponent implements OnInit {
   closeQuoteEditModal() {
     this.showQuoteEditModal.set(false);
     this.editingQuote.set(null);
+  }
+
+  // --- Hotel Actions ---
+  async onSaveHotel(event: any) {
+    if (this.editingHotel()) {
+      const newEmails = event.emails.filter((e: any) => !e.id).map((e: any) => ({ email: e.email, type: e.type }));
+      const newPhones = event.phones.filter((p: any) => !p.id).map((p: any) => ({ phone: p.phone, is_whatsapp: p.is_whatsapp }));
+
+      await this.hotelService.updateHotel(
+        this.editingHotel()!.id,
+        event.hotelData,
+        newEmails,
+        newPhones,
+        event.newImages,
+        event.deletedEmailIds,
+        event.deletedPhoneIds,
+        event.deletedImageIds
+      );
+    } else {
+      await this.hotelService.addHotel(event.hotelData, event.emails, event.phones, event.images);
+    }
+
+    if (this.showHotelEditModal()) {
+      this.closeHotelEditModal();
+    }
+  }
+
+  startEditHotel(id: string) {
+    const hotel = this.hotels().find(h => h.id === id);
+    if (hotel) {
+      this.editingHotel.set(hotel);
+      this.showHotelEditModal.set(true);
+    }
+  }
+
+  closeHotelEditModal() {
+    this.showHotelEditModal.set(false);
+    this.editingHotel.set(null);
+  }
+
+  promptDeleteHotel(id: string) {
+    this.itemToDelete.set({ type: 'hotel', id });
+    this.showConfirmDeleteModal.set(true);
+  }
+
+  confirmDelete() {
+    const item = this.itemToDelete();
+    if (item && item.type === 'hotel') {
+      this.hotelService.deleteHotel(item.id);
+    }
+    this.closeConfirmModal();
+  }
+
+  closeConfirmModal() {
+    this.showConfirmDeleteModal.set(false);
+    this.itemToDelete.set(null);
   }
 
   switchTab(tab: 'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios') {

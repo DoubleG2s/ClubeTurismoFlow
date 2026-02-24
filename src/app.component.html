@@ -460,27 +460,57 @@
     }
 
     @if (activeTab() === 'hotel') {
-    <div
-      class="flex flex-col items-center justify-center py-32 animate-fade-in bg-white rounded-3xl shadow-sm border border-slate-100">
-      <div class="relative w-24 h-24 bg-brand-50 rounded-full flex items-center justify-center mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-brand-300" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
-          <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
-          <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
-          <path d="M10 6h4" />
-          <path d="M10 10h4" />
-          <path d="M10 14h4" />
-          <path d="M10 18h4" />
-        </svg>
-        <div
-          class="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-          WIP
+    <div class="animate-fade-in space-y-8">
+
+      <!-- Add Hotel Form Section -->
+      <section>
+        <div class="flex items-center justify-between mb-5 pl-1">
+          <div class="flex items-center gap-3">
+            <h2 class="text-lg font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <span class="w-1.5 h-6 bg-brand-500 rounded-full inline-block"></span>
+              Novo Hotel
+            </h2>
+          </div>
         </div>
-      </div>
-      <h3 class="text-2xl font-bold text-slate-900">Gestão de Hotéis</h3>
-      <p class="text-slate-500 mt-2 text-center max-w-md">Estamos construindo uma experiência incrível para reservas de
-        hotéis. Volte em breve!</p>
+
+        <app-hotel-form (save)="onSaveHotel($event)" [isLoading]="hotelService.isLoading()"></app-hotel-form>
+      </section>
+
+      <!-- Hotel Grid -->
+      <section>
+        <div class="flex items-center justify-between mb-6 pl-1">
+          <h2 class="text-lg font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-6 bg-brand-700 rounded-full inline-block"></span>
+            Estabelecimentos Cadastrados
+            <span
+              class="text-sm font-medium normal-case bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full ml-2">{{hotels().length}}</span>
+          </h2>
+        </div>
+
+        @if (hotels().length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          @for (hotel of hotels(); track hotel.id) {
+          <app-hotel-card [hotel]="hotel" (edit)="startEditHotel($event)"
+            (remove)="promptDeleteHotel($event)"></app-hotel-card>
+          }
+        </div>
+        } @else {
+        <div
+          class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 text-center shadow-sm">
+          <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-slate-900">Nenhum hotel cadastrado</h3>
+          <p class="mt-1 text-sm text-slate-500 max-w-xs">Adicione hotéis para centralizar os contatos e opções de
+            hospedagem.</p>
+        </div>
+        }
+      </section>
+
     </div>
     }
 
@@ -586,6 +616,57 @@
       </div>
     </div>
   </div>
+  }
+
+  <!-- Edit Modal Overlay (Hotel - NEW) -->
+  @if (showHotelEditModal()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-hotel" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"
+        (click)="closeHotelEditModal()"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div
+        class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-4xl sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-brand-50 rounded-lg text-brand-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
+                  <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
+                  <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl leading-6 font-bold text-slate-900" id="modal-hotel">Editar Hotel</h3>
+              </div>
+            </div>
+            <button (click)="closeHotelEditModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          @if (editingHotel()) {
+          <app-hotel-form [hotelToEdit]="editingHotel()" [isLoading]="hotelService.isLoading()"
+            (save)="onSaveHotel($event)" (cancel)="closeHotelEditModal()"></app-hotel-form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Global Confirm Delete Modal -->
+  @if (showConfirmDeleteModal()) {
+  <app-confirm-modal title="Excluir Hotel"
+    message="Tem certeza que deseja excluir esse hotel? Todos os dados vinculados (e-mails, imagens e telefones) também serão removidos permanentemente. Esta ação é irreversível."
+    confirmText="Sim, excluir" (confirm)="confirmDelete()" (cancel)="closeConfirmModal()">
+  </app-confirm-modal>
   }
   }
 </div>
