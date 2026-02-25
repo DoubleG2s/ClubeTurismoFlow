@@ -36,7 +36,7 @@
                     <div class="flex p-2 gap-2 overflow-x-auto bg-white border-t border-slate-200">
                         @for(img of hotel.hotel_images; track img.id) {
                         <button (click)="selectImage(img.image_url)" [class.ring-2]="mainImage() === img.image_url"
-                            [class.ring-brand-500]="mainImage() === img.image_url"
+                            [class.ring-red-500]="mainImage() === img.image_url"
                             [class.opacity-50]="mainImage() !== img.image_url"
                             class="w-20 h-20 shrink-0 border border-slate-200 overflow-hidden cursor-pointer hover:opacity-100 transition-opacity"
                             style="border-radius: 2px;">
@@ -209,7 +209,7 @@
                                     <li class="flex flex-col">
                                         <span class="text-sm text-slate-800 font-medium">{{ email.email }}</span>
                                         <span
-                                            class="text-[10px] uppercase font-bold tracking-widest text-brand-600 mt-0.5">{{
+                                            class="text-[10px] uppercase font-bold tracking-widest text-red-600 mt-0.5">{{
                                             email.type }}</span>
                                     </li>
                                     }
@@ -225,7 +225,7 @@
                     <!-- Footer / Close Action -->
                     <div class="mt-8 pt-6 border-t border-slate-200">
                         <button (click)="close.emit()"
-                            class="w-full flex justify-center py-2.5 px-4 border border-slate-300 shadow-sm text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 transition-colors uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+                            class="w-full flex justify-center py-2.5 px-4 border border-slate-300 shadow-sm text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 transition-colors uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                             style="border-radius: 2px;">
                             Fechar Detalhes
                         </button>

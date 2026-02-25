@@ -1,301 +1,336 @@
-<div class="bg-white border border-slate-200 shadow-sm" style="border-radius: 4px;">
-    <form (ngSubmit)="onSubmit()" #hotelForm="ngForm">
+<form (ngSubmit)="onSubmit()" #hotelForm="ngForm"
+    class="bg-white p-6 rounded-2xl shadow-lg shadow-red-200/50 border border-red-100 mb-6 transition-all hover:shadow-xl hover:shadow-red-200/60">
 
-        <div class="p-6 md:p-8 space-y-10">
+    <!-- Seção Principal -->
+    <div class="mb-6 border-b border-red-100 pb-4">
+        <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Estrutura do Prédio -->
+                <path d="M3 21h18" />
+                <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+                <!-- Janelas -->
+                <path d="M9 7h1" />
+                <path d="M9 11h1" />
+                <path d="M9 15h1" />
+                <path d="M14 7h1" />
+                <path d="M14 11h1" />
+                <path d="M14 15h1" />
+            </svg>
+            Informações Principais
+        </h3>
 
-            <!-- Seção Principal -->
-            <section>
-                <div class="mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-500" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
-                        <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
-                        <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
-                    </svg>
-                    <h3 class="text-xs tracking-widest font-bold text-slate-800 uppercase">Informações Principais</h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome Comercial
-                            *</label>
-                        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" required
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;" placeholder="Ex: Grand Plaza">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Marca/Rede</label>
-                        <input type="text" [ngModel]="brand()" (ngModelChange)="brand.set($event)" name="brand"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;" placeholder="Ex: Accor, Wyndham">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tipo</label>
-                        <select [ngModel]="type()" (ngModelChange)="type.set($event)" name="type"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;">
-                            <option value="hotel">Hotel</option>
-                            <option value="resort">Resort</option>
-                            <option value="pousada">Pousada</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Categoria
-                            (Estrelas)</label>
-                        <input type="number" min="1" max="5" [ngModel]="category()"
-                            (ngModelChange)="category.set($event)" name="category"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Localização & Checks -->
-            <section>
-                <div class="mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-500" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    <h3 class="text-xs tracking-widest font-bold text-slate-800 uppercase">Localização e Horários</h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</label>
-                        <input type="text" [ngModel]="city()" (ngModelChange)="city.set($event)" name="city"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estado (UF)</label>
-                        <input type="text" [ngModel]="state()" (ngModelChange)="state.set($event)" name="state"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">País</label>
-                        <input type="text" [ngModel]="country()" (ngModelChange)="country.set($event)" name="country"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Check-in Padrão</label>
-                        <input type="text" [ngModel]="checkin()" (ngModelChange)="checkin.set($event)" name="checkin"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;" placeholder="Ex: 14:00">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Check-out
-                            Padrão</label>
-                        <input type="text" [ngModel]="checkout()" (ngModelChange)="checkout.set($event)" name="checkout"
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                            style="border-radius: 2px;" placeholder="Ex: 12:00">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Canais de Comunicação -->
-            <section>
-                <div class="mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-500" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                        <h3 class="text-xs tracking-widest font-bold text-slate-800 uppercase">Canais de Contato</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Telefones -->
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Telefones</label>
-                            <button type="button" (click)="addPhone()"
-                                class="text-xs font-bold text-brand-600 hover:text-brand-700">+ Add Tel</button>
-                        </div>
-                        <div class="space-y-2">
-                            @for(p of phones(); track p._tempId; let i = $index) {
-                            <div class="flex items-center gap-2">
-                                <input type="text" [(ngModel)]="p.phone" [name]="'phone_'+i"
-                                    class="flex-grow px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                                    style="border-radius: 2px;" placeholder="(11) 90000-0000">
-                                <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer">
-                                    <input type="checkbox" [(ngModel)]="p.is_whatsapp" [name]="'is_zap_'+i"
-                                        class="rounded border-slate-300 text-green-500 focus:ring-green-500">
-                                    <span class="font-bold text-green-600">WP</span>
-                                </label>
-                                <button type="button" (click)="removePhone(p._tempId)"
-                                    class="p-2 text-slate-400 hover:text-red-500 bg-slate-50 border border-slate-100 transition-colors"
-                                    style="border-radius: 2px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18" />
-                                        <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>
-                                </button>
-                            </div>
-                            }
-                            @if(phones().length === 0) {
-                            <p class="text-xs text-slate-400 italic">Nenhum telefone listado.</p>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Emails -->
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">E-mails</label>
-                            <button type="button" (click)="addEmail()"
-                                class="text-xs font-bold text-brand-600 hover:text-brand-700">+ Add Email</button>
-                        </div>
-                        <div class="space-y-2">
-                            @for(e of emails(); track e._tempId; let i = $index) {
-                            <div class="flex items-center gap-2">
-                                <select [(ngModel)]="e.type" [name]="'email_type_'+i"
-                                    class="w-28 px-2 py-2 bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
-                                    style="border-radius: 2px;">
-                                    <option value="reservas">Reservas</option>
-                                    <option value="financeiro">Financeiro</option>
-                                    <option value="executivo">Executivo</option>
-                                </select>
-                                <input type="email" [(ngModel)]="e.email" [name]="'email_'+i"
-                                    class="flex-grow px-3 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-                                    style="border-radius: 2px;" placeholder="email@hotel.com">
-                                <button type="button" (click)="removeEmail(e._tempId)"
-                                    class="p-2 text-slate-400 hover:text-red-500 bg-slate-50 border border-slate-100 transition-colors"
-                                    style="border-radius: 2px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18" />
-                                        <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>
-                                </button>
-                            </div>
-                            }
-                            @if(emails().length === 0) {
-                            <p class="text-xs text-slate-400 italic">Nenhum email listado.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Galeria de Imagens -->
-            <section>
-                <div class="mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-500" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <polyline points="21 15 16 10 5 21" />
-                        </svg>
-                        <h3 class="text-xs tracking-widest font-bold text-slate-800 uppercase">Mídia & Imagens <span
-                                class="text-slate-400 font-normal normal-case">({{images().length}}/3)</span></h3>
-                    </div>
-                    @if(images().length < 3) { <div>
-                        <input type="file" id="hotel-image-upload" class="hidden" accept="image/*"
-                            (change)="onFileSelected($event)">
-                        <label for="hotel-image-upload"
-                            class="cursor-pointer text-xs font-bold text-white bg-slate-800 hover:bg-black px-3 py-1.5 transition-colors"
-                            style="border-radius: 2px;">
-                            Fazer Upload
-                        </label>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome Comercial *</label>
+                <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" required
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400"
+                    placeholder="Ex: Grand Plaza">
+                @if(hotelForm.form.get('name')?.touched && hotelForm.form.get('name')?.invalid) {
+                <span class="text-[10px] text-red-500 mt-1 font-bold">Obrigatório</span>
                 }
+            </div>
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Marca/Rede</label>
+                <input type="text" [ngModel]="brand()" (ngModelChange)="brand.set($event)" name="brand"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400"
+                    placeholder="Ex: Accor, Wyndham">
+            </div>
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tipo</label>
+                <select [ngModel]="type()" (ngModelChange)="type.set($event)" name="type"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                    <option value="hotel">Hotel</option>
+                    <option value="resort">Resort</option>
+                    <option value="pousada">Pousada</option>
+                </select>
+            </div>
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Categoria
+                    (Estrelas)</label>
+                <input type="number" min="1" max="5" [ngModel]="category()" (ngModelChange)="category.set($event)"
+                    name="category"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400">
+            </div>
+        </div>
+    </div>
+
+    <!-- Localização & Checks -->
+    <div class="mb-6 border-b border-red-100 pb-4">
+        <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+            </svg>
+            Localização e Horários
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cidade</label>
+                <input type="text" [ngModel]="city()" (ngModelChange)="city.set($event)" name="city"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400">
+            </div>
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Estado (UF)</label>
+                <input type="text" [ngModel]="state()" (ngModelChange)="state.set($event)" name="state"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400">
+            </div>
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">País</label>
+                <input type="text" [ngModel]="country()" (ngModelChange)="country.set($event)" name="country"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400">
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            @for(img of images(); track img._tempId; let i = $index) {
-            <div class="relative bg-slate-50 border border-slate-200 overflow-hidden group" style="border-radius: 2px;">
-                <div class="aspect-[4/3] w-full relative bg-slate-100 flex items-center justify-center">
-                    @if(img.isUploading) {
-                    <div class="flex flex-col items-center justify-center text-brand-500">
-                        <svg class="animate-spin h-6 w-6 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <span class="text-[10px] uppercase font-bold tracking-wider">Enviando...</span>
-                    </div>
-                    } @else {
-                    <img [src]="img.image_url" class="block w-full h-full object-cover">
-                    <div
-                        class="absolute inset-x-0 bottom-0 top-auto bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <input type="text" [(ngModel)]="img.description" [name]="'img_desc_'+i"
-                            placeholder="Descrição opcional..."
-                            class="w-full bg-black/50 text-white placeholder-slate-300 text-xs px-2 py-1 border border-white/20 focus:outline-none focus:border-white"
-                            style="border-radius: 2px;">
-                    </div>
-                    <button type="button" (click)="removeImage(img._tempId)"
-                        class="absolute top-2 right-2 w-7 h-7 bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-sm"
-                        style="border-radius: 2px;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Check-in Padrão</label>
+                <input type="text" [ngModel]="checkin()" (ngModelChange)="checkin.set($event)" name="checkin"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400"
+                    placeholder="Ex: 14:00">
+            </div>
+            <div class="flex flex-col group">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Check-out Padrão</label>
+                <input type="text" [ngModel]="checkout()" (ngModelChange)="checkout.set($event)" name="checkout"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400"
+                    placeholder="Ex: 12:00">
+            </div>
+        </div>
+    </div>
+
+    <!-- Canais de Comunicação -->
+    <div class="mb-6 border-b border-red-100 pb-4">
+        <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                Canais de Contato
+            </div>
+        </h3>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Telefones -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Telefones</label>
+                    <button type="button" (click)="addPhone()"
+                        class="text-xs font-bold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 transition-all flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
+                        Adicionar
                     </button>
+                </div>
+                <div class="space-y-3">
+                    @for(p of phones(); track p._tempId; let i = $index) {
+                    <div
+                        class="p-4 border border-slate-200 rounded-xl relative hover:shadow-sm transition-shadow bg-slate-50 flex items-center gap-2">
+                        <input type="text" [(ngModel)]="p.phone" [name]="'phone_'+i"
+                            class="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                            placeholder="(11) 90000-0000">
+
+                        <label
+                            class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer px-3 py-2.5 bg-white border border-slate-200 rounded-lg transition-colors">
+                            <input type="checkbox" [(ngModel)]="p.is_whatsapp" [name]="'is_zap_'+i"
+                                class="rounded border-slate-300 text-green-500 focus:ring-green-500">
+                            <span class="font-bold text-green-600">WP</span>
+                        </label>
+
+                        <button type="button" (click)="removePhone(p._tempId)"
+                            class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 bg-white border border-slate-200 rounded-lg transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    }
+                    @if(phones().length === 0) {
+                    <p class="text-[10px] text-slate-400 italic">Nenhum telefone listado.</p>
                     }
                 </div>
             </div>
-            }
-            @if(images().length === 0) {
-            <div class="col-span-1 md:col-span-3 py-8 flex flex-col items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-slate-400"
-                style="border-radius: 2px;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 opacity-50 mb-2" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+
+            <!-- Emails -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">E-mails</label>
+                    <button type="button" (click)="addEmail()"
+                        class="text-xs font-bold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 transition-all flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Adicionar
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    @for(e of emails(); track e._tempId; let i = $index) {
+                    <div
+                        class="p-4 border border-slate-200 rounded-xl relative hover:shadow-sm transition-shadow bg-slate-50 flex flex-col md:flex-row gap-2">
+
+                        <select [(ngModel)]="e.type" [name]="'email_type_'+i"
+                            class="md:w-32 w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                            <option value="reservas">Reservas</option>
+                            <option value="financeiro">Financeiro</option>
+                            <option value="executivo">Executivo</option>
+                        </select>
+
+                        <div class="flex-1 flex gap-2">
+                            <input type="email" [(ngModel)]="e.email" [name]="'email_'+i"
+                                class="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                placeholder="email@hotel.com">
+
+                            <button type="button" (click)="removeEmail(e._tempId)"
+                                class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 bg-white border border-slate-200 rounded-lg transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    }
+                    @if(emails().length === 0) {
+                    <p class="text-[10px] text-slate-400 italic">Nenhum e-mail listado.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Galeria de Imagens -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <polyline points="21 15 16 10 5 21" />
                 </svg>
-                <p class="text-xs uppercase tracking-widest font-bold">Nenhuma Imagem Anexada</p>
-            </div>
-            }
+                Mídia & Imagens <span class="text-slate-400 font-normal normal-case">({{images().length}}/3)</span>
+            </h3>
+            @if(images().length < 3) { <div>
+                <input type="file" id="hotel-image-upload" class="hidden" accept="image/*"
+                    (change)="onFileSelected($event)">
+                <label for="hotel-image-upload"
+                    class="cursor-pointer text-xs font-bold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 transition-all flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Fazer Upload
+                </label>
         </div>
-        </section>
-
-</div>
-
-<!-- Rodapé Actions -->
-<div class="bg-slate-50 p-6 flex items-center justify-end gap-3 border-t border-slate-200">
-    @if(hotelToEdit) {
-    <button type="button" (click)="cancel.emit()"
-        class="px-5 py-2.5 text-sm font-bold tracking-wide text-slate-600 hover:text-slate-900 transition-colors">
-        Cancelar
-    </button>
-    }
-    <button type="submit" [disabled]="!hotelForm.form.valid || isLoading"
-        class="flex items-center gap-2 px-8 py-2.5 text-sm uppercase tracking-widest font-bold text-white bg-slate-900 hover:bg-black disabled:opacity-50 transition-colors shadow-sm"
-        style="border-radius: 2px;">
-        @if (isLoading) {
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
-        </svg>
         }
-        {{ hotelToEdit ? 'Salvar Edição' : 'Cadastrar Hotel' }}
-    </button>
-</div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @for(img of images(); track img._tempId; let i = $index) {
+        <div
+            class="relative bg-slate-50 border border-slate-200 overflow-hidden group rounded-xl hover:shadow-sm transition-shadow">
+            <div class="aspect-[4/3] w-full relative bg-slate-100 flex items-center justify-center">
+                @if(img.isUploading) {
+                <div class="flex flex-col items-center justify-center text-red-500">
+                    <svg class="animate-spin h-6 w-6 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <span class="text-[10px] uppercase font-bold tracking-wider">Enviando...</span>
+                </div>
+                } @else {
+                <img [src]="img.image_url" class="block w-full h-full object-cover">
+                <div
+                    class="absolute inset-x-0 bottom-0 top-auto bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <input type="text" [(ngModel)]="img.description" [name]="'img_desc_'+i"
+                        placeholder="Descrição opcional..."
+                        class="w-full bg-black/50 text-white placeholder-slate-300 text-xs px-3 py-2 border border-white/20 rounded-lg focus:outline-none focus:border-white transition-all">
+                </div>
+                <button type="button" (click)="removeImage(img._tempId)"
+                    class="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all rounded-lg shadow-sm backdrop-blur-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+                }
+            </div>
+        </div>
+        }
+        @if(images().length === 0) {
+        <div
+            class="col-span-1 md:col-span-3 py-10 flex flex-col items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-slate-400 rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 opacity-50 mb-3" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+            </svg>
+            <p class="text-xs uppercase tracking-widest font-bold text-slate-500">Nenhuma Imagem Anexada</p>
+            <p class="text-[10px] text-slate-400 mt-1">Faça upload de até 3 fotos do hotel</p>
+        </div>
+        }
+    </div>
+    </div>
+
+    <!-- AÇÕES -->
+    <div class="flex justify-end gap-4 pt-4 border-t border-slate-100">
+        @if(hotelToEdit) {
+        <button type="button" (click)="cancel.emit()"
+            class="px-6 py-3 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-semibold transition-all shadow-sm">
+            Cancelar
+        </button>
+        }
+
+        <button type="submit" [disabled]="!hotelForm.form.valid || isLoading"
+            class="px-8 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2">
+            @if(isLoading) {
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            Salvando...
+            } @else {
+            @if(hotelToEdit) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span>Salvar Edição</span>
+            } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 13 13 13 21" />
+                <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span>Cadastrar Hotel</span>
+            }
+            }
+        </button>
+    </div>
 
 </form>
-</div>
