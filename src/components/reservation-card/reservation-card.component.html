@@ -60,6 +60,18 @@
       </div>
       <h3 class="text-xl font-bold text-slate-800 font-mono">{{ reservation.reservation_number }}</h3>
 
+      <!-- Destination Display -->
+      @if (reservation.destination) {
+      <p class="text-sm font-semibold text-slate-600 flex items-center gap-1.5 mt-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        {{ reservation.destination }}
+      </p>
+      }
+
       <!-- Voucher Display with Click Action -->
       @if (reservation.flight_voucher) {
       <button type="button" (click)="onVoucherClick($event)"
@@ -146,10 +158,19 @@
 
       <!-- Group 1: Pré-venda -->
       <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2">
-          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Pré-venda</h5>
+        <div class="flex items-center gap-2 mb-2 cursor-pointer group"
+          (click)="isPreVendaExpanded = !isPreVendaExpanded">
+          <h5
+            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
+            Pré-venda</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
+            [class.rotate-180]="isPreVendaExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </div>
+        @if (isPreVendaExpanded) {
         <div class="space-y-2">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.contract"
@@ -187,14 +208,23 @@
               [class.opacity-60]="reservation.checklist.voucher_sent">Voucher enviado?</span>
           </label>
         </div>
+        }
       </div>
 
       <!-- Group 2: Hotel -->
       <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2">
-          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Hotel</h5>
+        <div class="flex items-center gap-2 mb-2 cursor-pointer group" (click)="isHotelExpanded = !isHotelExpanded">
+          <h5
+            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
+            Hotel</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
+            [class.rotate-180]="isHotelExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </div>
+        @if (isHotelExpanded) {
         <div class="space-y-2">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.hotel_email"
@@ -214,14 +244,23 @@
               [class.opacity-60]="reservation.checklist.hotel_confirmed">Hotel confirmado!</span>
           </label>
         </div>
+        }
       </div>
 
       <!-- Group 3: Voo -->
       <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2">
-          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Voo</h5>
+        <div class="flex items-center gap-2 mb-2 cursor-pointer group" (click)="isVooExpanded = !isVooExpanded">
+          <h5
+            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
+            Voo</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
+            [class.rotate-180]="isVooExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </div>
+        @if (isVooExpanded) {
         <div class="space-y-2">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.flight_registered"
@@ -268,14 +307,24 @@
               [class.opacity-60]="reservation.checklist.checkin_inbound">Check-in VOLTA?</span>
           </label>
         </div>
+        }
       </div>
 
       <!-- Group 4: Pós-viagem (New) -->
       <div>
-        <div class="flex items-center gap-2 mb-2">
-          <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80">Pós-viagem</h5>
+        <div class="flex items-center gap-2 mb-2 cursor-pointer group"
+          (click)="isPosViagemExpanded = !isPosViagemExpanded">
+          <h5
+            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
+            Pós-viagem</h5>
           <div class="h-px flex-grow bg-slate-300/30"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
+            [class.rotate-180]="isPosViagemExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </div>
+        @if (isPosViagemExpanded) {
         <div class="space-y-2">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" [checked]="reservation.checklist.post_trip"
@@ -286,6 +335,7 @@
               [class.opacity-60]="reservation.checklist.post_trip">Pós-viagem</span>
           </label>
         </div>
+        }
       </div>
 
     </div>

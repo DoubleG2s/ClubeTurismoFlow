@@ -29,6 +29,7 @@ export class ReservationFormComponent implements OnInit {
   private initForm() {
     this.reservationForm = this.fb.group({
       reservation_number: ['', Validators.required],
+      destination: ['', Validators.required],
       date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
       // return_date e flight_voucher agora são OBRIGATÓRIOS
       return_date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
@@ -44,6 +45,7 @@ export class ReservationFormComponent implements OnInit {
 
       this.reservationForm.patchValue({
         reservation_number: this.reservationToEdit.reservation_number,
+        destination: this.reservationToEdit.destination || '',
         date: this.reservationToEdit.date,
         return_date: this.reservationToEdit.return_date || '',
         flight_voucher: this.reservationToEdit.flight_voucher || '',
@@ -116,6 +118,7 @@ export class ReservationFormComponent implements OnInit {
 
       const payload = {
         reservation_number: formValue.reservation_number,
+        destination: formValue.destination,
         date: formValue.date,
         return_date: formValue.return_date, // Agora obrigatório
         flight_voucher: formValue.flight_voucher, // Agora obrigatório

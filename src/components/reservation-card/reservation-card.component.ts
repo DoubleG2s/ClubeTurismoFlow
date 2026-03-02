@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation, ReservationChecklist } from '../../models/reservation';
@@ -15,6 +15,37 @@ export class ReservationCardComponent {
   @Output() remove = new EventEmitter<string>();
   @Output() edit = new EventEmitter<string>();
   @Output() addToFlights = new EventEmitter<Reservation>();
+
+  // UI State for collapse
+  isPreVendaExpanded = true;
+  isHotelExpanded = true;
+  isVooExpanded = true;
+  isPosViagemExpanded = true;
+
+  ngOnInit() {
+    this.checkInitialCollapse();
+  }
+
+  checkInitialCollapse() {
+    const c = this.reservation.checklist;
+
+    // Se todos de pré-venda concluidos
+    if (c.contract && c.contract_signed && c.payment && c.voucher_sent) {
+      this.isPreVendaExpanded = false;
+    }
+
+    if (c.hotel_email && c.hotel_confirmed) {
+      this.isHotelExpanded = false;
+    }
+
+    if (c.flight_registered && c.seats_assigned && c.seats_assigned_inbound && c.checkin_outbound && c.checkin_inbound) {
+      this.isVooExpanded = false;
+    }
+
+    if (c.post_trip) {
+      this.isPosViagemExpanded = false;
+    }
+  }
 
   get isComplete(): boolean {
     return Object.values(this.reservation.checklist).every(status => status === true);
@@ -62,6 +93,21 @@ export class ReservationCardComponent {
       ...this.reservation.checklist,
       [key]: checked
     };
+
+    // Auto-collapse if the group just became complete
+    const c = updatedChecklist;
+    if (this.isPreVendaExpanded && c.contract && c.contract_signed && c.payment && c.voucher_sent) {
+      this.isPreVendaExpanded = false;
+    }
+    if (this.isHotelExpanded && c.hotel_email && c.hotel_confirmed) {
+      this.isHotelExpanded = false;
+    }
+    if (this.isVooExpanded && c.flight_registered && c.seats_assigned && c.seats_assigned_inbound && c.checkin_outbound && c.checkin_inbound) {
+      this.isVooExpanded = false;
+    }
+    if (this.isPosViagemExpanded && c.post_trip) {
+      this.isPosViagemExpanded = false;
+    }
 
     this.update.emit({
       id: this.reservation.id,

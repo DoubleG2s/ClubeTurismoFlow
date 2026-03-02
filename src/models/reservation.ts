@@ -24,6 +24,7 @@ export interface Reservation {
   reservation_number: string;
   date: string; // Data de Ida (dd/mm/yyyy)
   return_date?: string; // Data de Volta (dd/mm/yyyy) - Novo Campo
+  destination?: string; // Destino - Novo Campo
   flight_voucher?: string; // Voucher de Voo (6 chars) - Novo Campo
   passengers: string[]; // Stored as JSONB in Supabase
   checklist: ReservationChecklist; // Stored as JSONB in Supabase

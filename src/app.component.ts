@@ -88,6 +88,7 @@ export class AppComponent implements OnInit {
 
   // --- FILTERS & SORTING STATE ---
   searchTerm = signal('');
+  activeQuickFilter = signal<'hoje' | 'amanha' | 'em_viagem' | null>(null);
   showAdvancedFilters = signal(false);
 
   // ... (Sinais de filtro mantidos iguais) ...
@@ -119,6 +120,33 @@ export class AppComponent implements OnInit {
         res.reservation_number.toLowerCase().includes(term) ||
         (res.flight_voucher && res.flight_voucher.toLowerCase().includes(term))
       );
+    }
+
+    // Quick Filters Logic
+    const qFilter = this.activeQuickFilter();
+    if (qFilter) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTime = today.getTime();
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowTime = tomorrow.getTime();
+
+      result = result.filter(res => {
+        const resDate = this.parseDate(res.date);
+        const resReturn = res.return_date ? this.parseDate(res.return_date) : 0;
+
+        if (qFilter === 'hoje') {
+          return resDate === todayTime || resReturn === todayTime;
+        } else if (qFilter === 'amanha') {
+          return resDate === tomorrowTime || resReturn === tomorrowTime;
+        } else if (qFilter === 'em_viagem') {
+          if (!resReturn) return false;
+          return todayTime >= resDate && todayTime <= resReturn;
+        }
+        return true;
+      });
     }
 
     const dStart = this.parseDate(this.activeDateStart());
@@ -164,7 +192,8 @@ export class AppComponent implements OnInit {
       this.activeDateStart() ||
       this.activeDateEnd() ||
       this.activeReturnStart() ||
-      this.activeReturnEnd()
+      this.activeReturnEnd() ||
+      this.activeQuickFilter() !== null
     );
   });
 
@@ -228,6 +257,7 @@ export class AppComponent implements OnInit {
 
   clearFilters() {
     this.searchTerm.set('');
+    this.activeQuickFilter.set(null);
     this.draftDateStart.set('');
     this.draftDateEnd.set('');
     this.draftReturnStart.set('');
@@ -238,6 +268,14 @@ export class AppComponent implements OnInit {
     this.activeReturnEnd.set('');
     this.sortField.set('date');
     this.sortDirection.set('desc');
+  }
+
+  toggleQuickFilter(filter: 'hoje' | 'amanha' | 'em_viagem') {
+    if (this.activeQuickFilter() === filter) {
+      this.activeQuickFilter.set(null);
+    } else {
+      this.activeQuickFilter.set(filter);
+    }
   }
 
   onDateInput(event: Event, signalSetter: any) {
