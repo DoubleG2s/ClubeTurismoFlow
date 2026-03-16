@@ -38,7 +38,7 @@ import { Credit } from '../../models/credit';
               </div>
               <input type="text" [(ngModel)]="formData.client_name" name="client_name" required
                 class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
-                placeholder="Ex: João da Silva">
+                placeholder="Ex: Nome Completo">
             </div>
           </div>
 
@@ -80,9 +80,9 @@ import { Credit } from '../../models/credit';
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span class="text-slate-500 font-bold text-sm">R$</span>
               </div>
-              <input type="text" [(ngModel)]="displayValue" (blur)="onValueBlur()" (input)="onValueInput($event)" name="value" required
+              <input type="text" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="displayValue" (blur)="onValueBlur()" (input)="onValueInput($event)" (keydown)="preventLetters($event)" name="value" required
                 class="w-full pl-9 pr-3 py-2 bg-amber-50/30 border border-amber-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-right"
-                placeholder="0,00">
+                placeholder="0">
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ export class CreditFormComponent {
     if (credit) {
       this.isEditMode.set(true);
       this.formData = { ...credit };
-      this.displayValue = credit.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      this.displayValue = credit.value ? credit.value.toLocaleString('pt-BR') : '0';
     } else {
       this.resetForm();
     }
@@ -155,20 +155,30 @@ export class CreditFormComponent {
 
   displayValue: string = '';
 
+  preventLetters(event: KeyboardEvent) {
+    const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Enter'];
+    if (allowedKeys.includes(event.key)) return;
+    
+    // Prevent default if character is not a digit
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   onValueInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let val = input.value.replace(/\D/g, '');
-    let numericValue = parseInt(val, 10) / 100;
+    let numericValue = parseInt(val, 10);
     
     if (isNaN(numericValue)) numericValue = 0;
     
     this.formData.value = numericValue;
-    this.displayValue = numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    this.displayValue = numericValue > 0 ? numericValue.toLocaleString('pt-BR') : '';
   }
 
   onValueBlur() {
     if (!this.displayValue) {
-      this.displayValue = '0,00';
+      this.displayValue = '0';
       this.formData.value = 0;
     }
   }
