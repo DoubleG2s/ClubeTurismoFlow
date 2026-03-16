@@ -82,7 +82,7 @@ import { Credit } from '../../models/credit';
               </div>
               <input type="text" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="displayValue" (blur)="onValueBlur()" (input)="onValueInput($event)" (keydown)="preventLetters($event)" name="value" required
                 class="w-full pl-9 pr-3 py-2 bg-amber-50/30 border border-amber-200 rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-right"
-                placeholder="0">
+                placeholder="0,00">
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ export class CreditFormComponent {
     if (credit) {
       this.isEditMode.set(true);
       this.formData = { ...credit };
-      this.displayValue = credit.value ? credit.value.toLocaleString('pt-BR') : '0';
+      this.displayValue = credit.value ? credit.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
     } else {
       this.resetForm();
     }
@@ -159,7 +159,7 @@ export class CreditFormComponent {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Enter'];
     if (allowedKeys.includes(event.key)) return;
     
-    // Prevent default if character is not a digit
+    // Prevent default if character is not a digit (blocks letters and negative symbols like -)
     if (!/^[0-9]$/.test(event.key)) {
       event.preventDefault();
     }
@@ -168,17 +168,17 @@ export class CreditFormComponent {
   onValueInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let val = input.value.replace(/\D/g, '');
-    let numericValue = parseInt(val, 10);
+    let numericValue = parseInt(val, 10) / 100;
     
     if (isNaN(numericValue)) numericValue = 0;
     
     this.formData.value = numericValue;
-    this.displayValue = numericValue > 0 ? numericValue.toLocaleString('pt-BR') : '';
+    this.displayValue = numericValue > 0 ? numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
   }
 
   onValueBlur() {
     if (!this.displayValue) {
-      this.displayValue = '0';
+      this.displayValue = '0,00';
       this.formData.value = 0;
     }
   }
