@@ -22,6 +22,7 @@ import { LoginComponent } from './components/login/login.component';
 import { UserListComponent } from './components/user-management/user-list.component';
 import { CreditFormComponent } from './components/credit-form/credit-form.component';
 import { CreditCardComponent } from './components/credit-card/credit-card.component';
+import { HotelEmailGeneratorComponent } from './components/hotel-email-generator/hotel-email-generator.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
@@ -48,7 +49,8 @@ import { Credit } from './models/credit';
     LoginComponent,
     UserListComponent,
     CreditFormComponent,
-    CreditCardComponent
+    CreditCardComponent,
+    HotelEmailGeneratorComponent
   ],
   templateUrl: './app.component.html',
 })
@@ -66,6 +68,7 @@ export class AppComponent implements OnInit {
   // State
   activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos');
   activeReservaTab = signal<'reservas' | 'creditos'>('reservas');
+  activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
 
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
@@ -509,6 +512,10 @@ export class AppComponent implements OnInit {
 
   switchReservaTab(tab: 'reservas' | 'creditos') {
     this.activeReservaTab.set(tab);
+  }
+
+  switchHotelTab(tab: 'hoteis' | 'email') {
+    this.activeHotelTab.set(tab);
   }
 
   // --- Credit Actions ---

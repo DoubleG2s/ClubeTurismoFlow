@@ -563,6 +563,34 @@
     @if (activeTab() === 'hotel') {
     <div class="animate-fade-in space-y-8">
 
+      <!-- Navigation Bar for Sub-Tabs -->
+      <div class="border-b border-slate-200 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+          <button
+            (click)="switchHotelTab('hoteis')"
+            [class.border-red-500]="activeHotelTab() === 'hoteis'"
+            [class.text-red-600]="activeHotelTab() === 'hoteis'"
+            [class.border-transparent]="activeHotelTab() !== 'hoteis'"
+            [class.text-slate-500]="activeHotelTab() !== 'hoteis'"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-red-600 transition-colors">
+            Cadastro de Hotéis
+          </button>
+          <button
+            (click)="switchHotelTab('email')"
+            [class.border-rose-500]="activeHotelTab() === 'email'"
+            [class.text-rose-600]="activeHotelTab() === 'email'"
+            [class.border-transparent]="activeHotelTab() !== 'email'"
+            [class.text-slate-500]="activeHotelTab() !== 'email'"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-rose-600 transition-colors">
+            Envio de E-mail
+          </button>
+        </nav>
+      </div>
+
+      <!-- Cadastro de Hotéis Content -->
+      @if (activeHotelTab() === 'hoteis') {
+      <div class="space-y-8 animate-fade-in">
+
       <!-- Add Hotel Form Section -->
       <section>
         <div class="flex items-center justify-between mb-5 pl-1">
@@ -611,6 +639,16 @@
         </div>
         }
       </section>
+
+      </div>
+      }
+
+      <!-- Envio de E-mail Content -->
+      @if (activeHotelTab() === 'email') {
+      <div class="animate-fade-in transition-all">
+        <app-hotel-email-generator></app-hotel-email-generator>
+      </div>
+      }
 
     </div>
     }
