@@ -6,6 +6,7 @@ import { ReservationService } from './services/reservation.service';
 import { QuoteService } from './services/quote.service';
 import { AuthService } from './services/auth.service';
 import { HotelService } from './services/hotel.service';
+import { CreditService } from './services/credit.service';
 
 import { FlightFormComponent } from './components/flight-form/flight-form.component';
 import { FlightCardComponent } from './components/flight-card/flight-card.component';
@@ -19,11 +20,14 @@ import { HotelDetailsComponent } from './components/hotel-details/hotel-details.
 import { ConfirmModalComponent } from './components/shared/confirm-modal/confirm-modal.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserListComponent } from './components/user-management/user-list.component';
+import { CreditFormComponent } from './components/credit-form/credit-form.component';
+import { CreditCardComponent } from './components/credit-card/credit-card.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
 import { Quote } from './models/quote';
 import { Hotel } from './models/hotel';
+import { Credit } from './models/credit';
 
 @Component({
   selector: 'app-root',
@@ -42,7 +46,9 @@ import { Hotel } from './models/hotel';
     HotelDetailsComponent,
     ConfirmModalComponent,
     LoginComponent,
-    UserListComponent
+    UserListComponent,
+    CreditFormComponent,
+    CreditCardComponent
   ],
   templateUrl: './app.component.html',
 })
@@ -51,6 +57,7 @@ export class AppComponent implements OnInit {
   private reservationService = inject(ReservationService);
   private quoteService = inject(QuoteService);
   private hotelService = inject(HotelService);
+  private creditService = inject(CreditService);
   public authService = inject(AuthService);
 
   // ViewChild para controlar o formulário de cotação
@@ -58,6 +65,7 @@ export class AppComponent implements OnInit {
 
   // State
   activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos');
+  activeReservaTab = signal<'reservas' | 'creditos'>('reservas');
 
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
@@ -81,6 +89,11 @@ export class AppComponent implements OnInit {
   // Hotel Details View State
   selectedHotelDetails = signal<Hotel | null>(null);
   showHotelDetailsModal = signal(false);
+
+  // Credit State
+  editingCredit = signal<Credit | null>(null);
+  showCreditEditModal = signal(false);
+  isSavingCredit = signal(false);
 
   // Shared Modal State
   showConfirmDeleteModal = signal(false);
@@ -108,6 +121,7 @@ export class AppComponent implements OnInit {
   reservations = this.reservationService.reservations;
   quotes = this.quoteService.quotes;
   hotels = this.hotelService.hotels;
+  credits = this.creditService.credits;
 
   // Computed filtered reservations (mantido igual)
   filteredReservations = computed(() => {
@@ -210,7 +224,8 @@ export class AppComponent implements OnInit {
     this.flightService.isLoading() ||
     this.reservationService.isLoading() ||
     this.quoteService.isLoading() ||
-    this.hotelService.isLoading()
+    this.hotelService.isLoading() ||
+    this.creditService.isLoading()
   );
 
   ngOnInit() {
@@ -490,5 +505,40 @@ export class AppComponent implements OnInit {
 
   switchTab(tab: 'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios') {
     this.activeTab.set(tab);
+  }
+
+  switchReservaTab(tab: 'reservas' | 'creditos') {
+    this.activeReservaTab.set(tab);
+  }
+
+  // --- Credit Actions ---
+  async onAddCredit(data: Omit<Credit, 'id' | 'created_at' | 'expiration_date'>) {
+    this.isSavingCredit.set(true);
+    await this.creditService.addCredit(data);
+    this.isSavingCredit.set(false);
+  }
+
+  async onUpdateCredit(event: { id: string, data: Partial<Credit> }) {
+    this.isSavingCredit.set(true);
+    await this.creditService.updateCredit(event.id, event.data);
+    this.isSavingCredit.set(false);
+    this.closeCreditEditModal();
+  }
+
+  onRemoveCredit(id: string) {
+    this.creditService.removeCredit(id);
+  }
+
+  startEditCredit(id: string) {
+    const credit = this.credits().find(c => c.id === id);
+    if (credit) {
+      this.editingCredit.set(credit);
+      this.showCreditEditModal.set(true);
+    }
+  }
+
+  closeCreditEditModal() {
+    this.showCreditEditModal.set(false);
+    this.editingCredit.set(null);
   }
 }
