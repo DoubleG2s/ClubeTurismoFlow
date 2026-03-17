@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed, signal, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation, ReservationChecklist } from '../../models/reservation';
@@ -7,7 +7,8 @@ import { Reservation, ReservationChecklist } from '../../models/reservation';
   selector: 'app-reservation-card',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './reservation-card.component.html'
+  templateUrl: './reservation-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReservationCardComponent {
   @Input({ required: true }) reservation!: Reservation;

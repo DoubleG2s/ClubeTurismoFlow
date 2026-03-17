@@ -125,7 +125,7 @@
         <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Passageiros</h4>
       </div>
       <div class="flex flex-wrap gap-2">
-        @for (passenger of reservation.passengers; track $index) {
+        @for (passenger of reservation.passengers; track passenger) {
         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border" [ngClass]="{
               'bg-white text-emerald-900 border-emerald-200': isComplete,
               'bg-slate-100 text-slate-900 border-slate-200': !isComplete

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed, signal, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Quote } from '../../models/quote';
 
@@ -6,7 +6,8 @@ import { Quote } from '../../models/quote';
   selector: 'app-quote-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './quote-card.component.html'
+  templateUrl: './quote-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QuoteCardComponent {
   @Input({ required: true }) quote!: Quote;

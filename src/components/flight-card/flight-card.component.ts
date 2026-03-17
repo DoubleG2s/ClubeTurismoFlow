@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Flight } from '../../models/flight';
 
@@ -6,7 +6,8 @@ import { Flight } from '../../models/flight';
   selector: 'app-flight-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './flight-card.component.html'
+  templateUrl: './flight-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlightCardComponent {
   @Input({ required: true }) flight!: Flight;

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Credit, getCreditStatusAndDays, CreditStatus } from '../../models/credit';
 
@@ -117,7 +117,8 @@ import { Credit, getCreditStatusAndDays, CreditStatus } from '../../models/credi
     </div>
   `,
   // Needed to expose Math to template
-  styles: [`:host { display: block; height: 100%; }`]
+  styles: [`:host { display: block; height: 100%; }`],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreditCardComponent {
   Math = Math;
