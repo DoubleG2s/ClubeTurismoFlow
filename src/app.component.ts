@@ -69,6 +69,7 @@ export class AppComponent implements OnInit {
   activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos');
   activeReservaTab = signal<'reservas' | 'creditos'>('reservas');
   activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
+  activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
 
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
@@ -516,6 +517,10 @@ export class AppComponent implements OnInit {
 
   switchHotelTab(tab: 'hoteis' | 'email') {
     this.activeHotelTab.set(tab);
+  }
+
+  switchCotacaoTab(tab: 'cadastro' | 'calculadora') {
+    this.activeCotacaoTab.set(tab);
   }
 
   // --- Credit Actions ---
