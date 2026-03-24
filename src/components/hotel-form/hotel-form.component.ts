@@ -51,6 +51,9 @@ export class HotelFormComponent implements OnInit {
     deletedPhoneIds = signal<string[]>([]);
     deletedImageIds = signal<string[]>([]);
 
+    uniqueId = Math.random().toString(36).substring(2, 9);
+    toastMessage = signal<{text: string, type: 'success' | 'error'} | null>(null);
+
     ngOnInit() {
         if (this.hotelToEdit) {
             this.id.set(this.hotelToEdit.id);
@@ -127,9 +130,11 @@ export class HotelFormComponent implements OnInit {
                     }
                     return img;
                 }));
+                this.showToast('Imagem adicionada com sucesso!', 'success');
             } else {
                 // Handle error (just remove placeholder)
                 this.images.update(current => current.filter(i => i._tempId !== tempId));
+                this.showToast('Erro ao enviar imagem', 'error');
             }
         }
     }
@@ -138,6 +143,14 @@ export class HotelFormComponent implements OnInit {
         const item = this.images().find(i => i._tempId === tempId);
         if (item && item.id) this.deletedImageIds.update(ids => [...ids, item.id!]);
         this.images.update(current => current.filter(i => i._tempId !== tempId));
+        this.showToast('Imagem removida com sucesso!', 'success');
+    }
+
+    showToast(text: string, type: 'success' | 'error' = 'success') {
+        this.toastMessage.set({ text, type });
+        setTimeout(() => {
+            this.toastMessage.set(null);
+        }, 3000);
     }
 
     onSubmit() {
