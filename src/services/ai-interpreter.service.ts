@@ -76,20 +76,21 @@ export class AiInterpreterService {
              "type": "NONE" | "CREATE_RESERVATION" | "CREATE_QUOTE" | "APPLY_FILTER",
              "payload": {
                 "destination": "Destino identificado",
-                "passengers": ["Nome Completo 1", "Nome Completo 2"],
+                "passengers": ["Nome Completo 1", "Nome Completo 2", "Etc..."],
                 "date": "Data de ida dd/mm/yyyy",
                 "return_date": "Data de volta dd/mm/yyyy",
-                "reservation_number": "Nº da Reserva da Hospedagem (Somente o código/numero principal)",
-                "flight_voucher": "Localizador do Voo (6 letras/numeros exclusivos)",
+                "reservation_number": "Nº da Reserva / Referência da Reserva (Procure um código de exatos 6 caracteres alfanuméricos. NUNCA use localizadores longos externos como RES0552...)",
+                "flight_voucher": "Localizador do Voo (6 letras/numeros exclusivos do aéreo)",
                 "notes": "Nome da hospedagem identificada e detalhes adicionais"
              }
           }
         }
         
         Regras MÁXIMAS de Extração PDF:
-        1. Ao ler um voucher PDF, rastreie como um Auditor: Descubra e extraia: o voucher de hotel(Nº DA RESERVA), voucher de voo, Destino, Data de ida e Data de volta, TODOS os passageiros em uma lista (array), e na 'notes' coloque o nome explícito da hospedagem.
-        2. REGRA DE CONFLITO: Se por acaso no voucher tiver MAIS DE UMA hospedagem ou MAIS DE UM código de voo diferente, retorne "type": "NONE" (cancela o preenchimento automático), informe as opções na sua "message" e peça ativamente para o usuário confirmar/digitar quais devem ser usados.
-        3. Quando o usuário responder a pendência do conflito com "pode preencher com o hotel X", una isso à memória e finalmente dispare "type": "CREATE_RESERVATION" preenchendo o payload todo.
+        1. Ao ler um voucher PDF, rastreie como um Auditor: Descubra o Nº DA RESERVA, voucher de voo, Destino, Data de ida e Data de volta. Na observação (notes) coloque o nome explícito da hospedagem.
+        2. ATENÇÃO AOS PASSAGEIROS: Jamais pegue apenas o Titular. Leia todo o documento e adicione TODOS os nomes de passageiros encontrados na viagem ao array de "passengers" (nunca crie itens vazios).
+        3. REGRA DE CONFLITO: Se por acaso no voucher tiver MAIS DE UMA hospedagem ou MAIS DE UM código de voo diferente, retorne "type": "NONE" (cancela o preenchimento automático), informe as opções na sua "message" e peça ativamente para o usuário confirmar/digitar quais devem ser usados.
+        4. Quando o usuário responder a pendência do conflito com "pode preencher com o hotel X", una isso à memória e finalmente dispare "type": "CREATE_RESERVATION" preenchendo o payload todo.
         
         Regras MÁXIMAS para Filtros:
         1. Se o usuário perguntar implicitamente algo como "Quem viaja hoje?" ou "Temos viagens pra amanhã?", ele NÃO quer conversar: ele quer usar a tela de listagem de clientes!
