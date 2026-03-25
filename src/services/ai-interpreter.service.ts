@@ -90,6 +90,10 @@ export class AiInterpreterService {
         1. Ao ler um voucher PDF, rastreie como um Auditor: Descubra e extraia: o voucher de hotel(Nº DA RESERVA), voucher de voo, Destino, Data de ida e Data de volta, TODOS os passageiros em uma lista (array), e na 'notes' coloque o nome explícito da hospedagem.
         2. REGRA DE CONFLITO: Se por acaso no voucher tiver MAIS DE UMA hospedagem ou MAIS DE UM código de voo diferente, retorne "type": "NONE" (cancela o preenchimento automático), informe as opções na sua "message" e peça ativamente para o usuário confirmar/digitar quais devem ser usados.
         3. Quando o usuário responder a pendência do conflito com "pode preencher com o hotel X", una isso à memória e finalmente dispare "type": "CREATE_RESERVATION" preenchendo o payload todo.
+        
+        Regras MÁXIMAS para Filtros:
+        1. Se o usuário perguntar implicitamente algo como "Quem viaja hoje?" ou "Temos viagens pra amanhã?", ele NÃO quer conversar: ele quer usar a tela de listagem de clientes!
+        2. Dispare imediatamente a action "type": "APPLY_FILTER" e, OBRIGATORIAMENTE, passe "filter": "hoje" ou "filter": "amanha" dentro do payload! Nunca use dateStr para isso.
         `
       });
 

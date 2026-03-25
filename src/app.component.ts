@@ -531,8 +531,16 @@ export class AppComponent implements OnInit {
   // --- Ai Assistant Actions ---
   @ViewChild('aiChat') aiChatComp!: AiChatComponent;
 
+  isTabChanging(action: AiAction): boolean {
+    if (action.type === 'CREATE_RESERVATION') return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas');
+    if (action.type === 'CREATE_QUOTE') return !(this.activeTab() === 'cotacoes' && this.activeCotacaoTab() === 'cadastro');
+    if (action.type === 'APPLY_FILTER') return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas');
+    return false;
+  }
+
   handleAiAction(action: AiAction) {
-    if (action.type !== 'CONFIRM_TAB_SWITCH' && this.isAnyFormDirty()) {
+    // Só aciona o alerta se a ação for forçar o usuário a mudar de aba/layout perdendo dados atuais
+    if (action.type !== 'CONFIRM_TAB_SWITCH' && this.isTabChanging(action) && this.isAnyFormDirty()) {
       const response = this.aiChatComp['aiInterpreter'].blockForTabConfirmation(action);
       this.aiChatComp.addBotMessage(response.message);
       return;
