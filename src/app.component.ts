@@ -24,6 +24,7 @@ import { CreditFormComponent } from './components/credit-form/credit-form.compon
 import { CreditCardComponent } from './components/credit-card/credit-card.component';
 import { HotelEmailGeneratorComponent } from './components/hotel-email-generator/hotel-email-generator.component';
 import { AiChatComponent } from './components/ai-chat/ai-chat.component';
+import { CalendarioEmbarquesComponent } from './components/calendario-embarques/calendario-embarques.component';
 import { AiAction } from './services/ai-interpreter.service';
 
 import { Flight } from './models/flight';
@@ -53,7 +54,8 @@ import { Credit } from './models/credit';
     CreditFormComponent,
     CreditCardComponent,
     HotelEmailGeneratorComponent,
-    AiChatComponent
+    AiChatComponent,
+    CalendarioEmbarquesComponent
   ],
   templateUrl: './app.component.html',
 })
@@ -69,8 +71,8 @@ export class AppComponent implements OnInit {
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
 
   // State
-  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('voos');
-  activeReservaTab = signal<'reservas' | 'creditos'>('reservas');
+  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('reservas');
+  activeReservaTab = signal<'reservas' | 'creditos' | 'calendario'>('reservas');
   activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
   activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
 
@@ -516,7 +518,7 @@ export class AppComponent implements OnInit {
     this.activeTab.set(tab);
   }
 
-  switchReservaTab(tab: 'reservas' | 'creditos') {
+  switchReservaTab(tab: 'reservas' | 'creditos' | 'calendario') {
     this.activeReservaTab.set(tab);
   }
 

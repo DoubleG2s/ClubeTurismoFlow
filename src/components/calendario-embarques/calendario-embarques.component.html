@@ -1,0 +1,238 @@
+<div class="calendario-page">
+  <section class="hero-card">
+    <div>
+      <div class="hero-badge">Calendário operacional de passageiros</div>
+      <h1>Embarques de ida e volta</h1>
+      <p>
+        Visualização mensal com intensidade por volume e detalhamento diário em painel lateral.
+      </p>
+    </div>
+
+    <div class="month-nav">
+      <button type="button" class="nav-button" (click)="previousMonth()" title="Mês Anterior">
+        ‹
+      </button>
+      
+      <button type="button" class="nav-button today-btn" (click)="resetToToday()">
+        Hoje
+      </button>
+
+      <div class="month-label">
+        {{ monthNames[currentDate.getMonth()] }} de {{ currentDate.getFullYear() }}
+      </div>
+
+      <button type="button" class="nav-button" (click)="nextMonth()" title="Próximo Mês">
+        ›
+      </button>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-label">Idas no mês visível</span>
+      <strong>{{ summary.ida }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-label">Voltas no mês visível</span>
+      <strong>{{ summary.volta }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-label">Movimentos totais</span>
+      <strong>{{ summary.total }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-label">Pico de Embarques</span>
+      <strong>{{ formatDatePtBr(summary.pico?.date) }}</strong>
+      @if (summary.pico) {
+        <small>{{ summary.pico.total }} passageiros circulando</small>
+      }
+    </article>
+  </section>
+
+  <section class="calendar-card">
+    <header class="calendar-header">
+      <div>
+        <h2>Visão Mensal</h2>
+        <p>Tons de azul mais fortes indicam dias com maior volume de passageiros.</p>
+      </div>
+    </header>
+
+    <div class="weekdays-grid">
+      @for (day of weekDays; track $index) {
+        <div class="weekday">
+          {{ day }}
+        </div>
+      }
+    </div>
+
+    <div class="calendar-grid">
+      @for (cell of monthGrid; track trackByDate($index, cell)) {
+        <button
+          type="button"
+          class="day-cell relative"
+          [ngClass]="[
+            cell.resumo ? getIntensityClass(cell.resumo.total) : 'intensity-0',
+            selectedDay?.date === cell.key ? 'selected' : '',
+            !cell.isCurrentMonth ? 'opacity-30' : 'opacity-100'
+          ]"
+          [disabled]="!cell.resumo"
+          (click)="selectDay(cell)"
+        >
+          @if (cell.date) {
+            <div class="day-cell__header">
+              <span class="day-number">{{ cell.date.getDate() }}</span>
+              @if (cell.resumo) {
+                <span class="day-total">{{ cell.resumo.total }} pax</span>
+              }
+            </div>
+
+            @if (cell.resumo) {
+              <div class="day-cell__content">
+                <div>🛫 Ida: {{ cell.resumo.ida }}</div>
+                <div>🛬 Volta: {{ cell.resumo.volta }}</div>
+                <div class="day-cell__strong">Total: {{ cell.resumo.total }}</div>
+              </div>
+            } @else {
+              <div class="day-cell__empty">Sem movimentos</div>
+            }
+          } @else {
+            <div class="empty-cell"></div>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="legend">
+      <div><span class="legend-dot intensity-1"></span> 1–2 px</div>
+      <div><span class="legend-dot intensity-2"></span> 3–6 px</div>
+      <div><span class="legend-dot intensity-3"></span> 7–11 px</div>
+      <div><span class="legend-dot intensity-4"></span> +12 px</div>
+      <div class="ml-4 flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-slate-200 inline-block rounded-full"></span> Vazio</div>
+    </div>
+  </section>
+
+  @if (drawerOpen) {
+    <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+  }
+
+  <aside class="drawer" [class.drawer--open]="drawerOpen">
+    <div class="drawer__header">
+      <div>
+        <p class="drawer__eyebrow">Movimentação Operacional</p>
+        <h3>{{ formatDatePtBr(selectedDay?.date) }}</h3>
+        @if (selectedDay) {
+          <p class="drawer__subtitle">
+            {{ selectedDay.total }} passageiros movimentados no dia
+          </p>
+        }
+      </div>
+
+      <button type="button" class="drawer__close text-slate-500 hover:text-slate-800 hover:bg-slate-200" (click)="closeDrawer()">
+        ×
+      </button>
+    </div>
+
+    @if (selectedDay) {
+      <div class="drawer__summary">
+        <div class="drawer-summary-card ida shadow-sm">
+          <span>Ida</span>
+          <strong>{{ selectedDay.ida }}</strong>
+        </div>
+
+        <div class="drawer-summary-card volta shadow-sm">
+          <span>Volta</span>
+          <strong>{{ selectedDay.volta }}</strong>
+        </div>
+
+        <div class="drawer-summary-card total shadow-sm">
+          <span>Total de Pax</span>
+          <strong>{{ selectedDay.total }}</strong>
+        </div>
+      </div>
+    }
+
+    <div class="drawer__content">
+      @if (selectedDay?.reservas?.length) {
+        @for (reserva of selectedDay!.reservas; track trackByReserva($index, reserva)) {
+          <article class="reservation-card hover:bg-slate-50 transition-colors">
+            <div class="reservation-card__top">
+              <div>
+                <small class="font-medium text-slate-500 block mb-0.5">Nº da Reserva</small>
+                <h4 class="font-bold text-slate-800 uppercase text-lg leading-tight">{{ reserva.reservationNumber }}</h4>
+              </div>
+
+              <!-- Indicador do Status -->
+              <span class="reservation-badge" [ngClass]="reserva.tipo.toLowerCase()">
+                {{ reserva.tipo === 'IDA' ? '🛫 IDA' : '🛬 VOLTA' }}
+              </span>
+            </div>
+
+            <div class="reservation-card__meta">
+              <span class="font-medium">📍 Destino: {{ reserva.destino }}</span>
+              <span>🏢 Vínculo: {{ reserva.fornecedor }}</span>
+            </div>
+
+            <div class="reservation-card__footer flex justify-between items-center bg-slate-100/60 p-3 rounded-lg mt-3 text-sm font-semibold">
+               <span class="text-slate-600">Total de Passageiros:</span>
+               <button 
+                 type="button" 
+                 (click)="openPassengersModal(reserva, $event)"
+                 title="Ver lista de passageiros"
+                 class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-800 px-3 py-1.5 rounded-md shadow-sm transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                 {{ reserva.passageiros }} pax
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+               </button>
+            </div>
+          </article>
+        }
+      } @else {
+        <div class="empty-reservations text-center py-10 text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+          <p>Nenhuma reserva computada neste dia.</p>
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Passengers Modal -->
+  @if (isPassengersModalOpen && selectedReservationForModal) {
+    <div class="fixed inset-0 z-[2000] flex items-center justify-center p-4" style="background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px);" (click)="closePassengersModal()">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in" (click)="$event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div>
+            <h3 class="font-bold text-slate-800 text-lg leading-tight">Lista de Passageiros</h3>
+            <span class="text-xs text-slate-500 font-medium tracking-wide">RESERVA: {{ selectedReservationForModal.reservationNumber }}</span>
+          </div>
+          <button type="button" (click)="closePassengersModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg p-1.5 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <div class="p-6 max-h-[60vh] overflow-y-auto">
+          <ul class="space-y-3">
+            @for (pax of selectedReservationForModal.listaPassageiros; track $index) {
+              <li class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 shadow-sm transition-transform hover:translate-x-1">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 shadow-inner">
+                  {{ $index + 1 }}
+                </div>
+                <span class="font-medium text-slate-700 capitalize flex-1">{{ pax }}</span>
+              </li>
+            }
+            @if (!selectedReservationForModal.listaPassageiros || selectedReservationForModal.listaPassageiros.length === 0) {
+              <li class="text-slate-500 italic text-center text-sm py-4">Nenhum passageiro detalhado nesta reserva.</li>
+            }
+          </ul>
+        </div>
+        
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+          <button type="button" (click)="closePassengersModal()" class="px-5 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-300 transition-colors focus:ring-2 focus:ring-slate-400 focus:outline-none">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

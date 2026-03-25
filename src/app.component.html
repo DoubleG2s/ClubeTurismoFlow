@@ -254,6 +254,15 @@
             class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-amber-600 transition-colors">
             Controle de Créditos
           </button>
+          <button
+            (click)="switchReservaTab('calendario')"
+            [class.border-sky-500]="activeReservaTab() === 'calendario'"
+            [class.text-sky-600]="activeReservaTab() === 'calendario'"
+            [class.border-transparent]="activeReservaTab() !== 'calendario'"
+            [class.text-slate-500]="activeReservaTab() !== 'calendario'"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-sky-600 transition-colors">
+            Calendário
+          </button>
         </nav>
       </div>
 
@@ -491,6 +500,13 @@
           </div>
           }
         </section>
+      </div>
+      }
+
+      <!-- Calendário Content -->
+      @if (activeReservaTab() === 'calendario') {
+      <div class="animate-fade-in transition-all">
+        <app-calendario-embarques [rawReservations]="filteredReservations()"></app-calendario-embarques>
       </div>
       }
 
