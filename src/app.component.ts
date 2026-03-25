@@ -23,6 +23,7 @@ import { UserListComponent } from './components/user-management/user-list.compon
 import { CreditFormComponent } from './components/credit-form/credit-form.component';
 import { CreditCardComponent } from './components/credit-card/credit-card.component';
 import { HotelEmailGeneratorComponent } from './components/hotel-email-generator/hotel-email-generator.component';
+import { AiChatComponent } from './components/ai-chat/ai-chat.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
@@ -50,7 +51,8 @@ import { Credit } from './models/credit';
     UserListComponent,
     CreditFormComponent,
     CreditCardComponent,
-    HotelEmailGeneratorComponent
+    HotelEmailGeneratorComponent,
+    AiChatComponent
   ],
   templateUrl: './app.component.html',
 })
