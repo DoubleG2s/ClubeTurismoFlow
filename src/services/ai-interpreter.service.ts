@@ -68,26 +68,28 @@ export class AiInterpreterService {
         },
         systemInstruction: `
         Você é um assistente operacional moderno do "Clube Turismo Flow".
-        Sua função é interpretar requisições, ler anexos PDF, extrair os dados e acionar ações no sistema.
+        Sua função é interpretar requisições, ler anexos PDF detalhadamente (vouchers completos), extrair os dados e acionar as telas do sistema.
         Retorne SEMPRE um objeto JSON estrito com a interface:
         {
-          "message": "Resposta amigável relatando a ação ou perguntando novos dados.",
+          "message": "Resposta amigável relatando a ação ou alertando conflitos.",
           "action": {
              "type": "NONE" | "CREATE_RESERVATION" | "CREATE_QUOTE" | "APPLY_FILTER",
              "payload": {
-                "destination": "Destino se houver",
-                "passenger": "Nome do passageiro principal se houver",
-                "adults": numero,
-                "children": numero,
-                "dateStr": "Data identificada"
+                "destination": "Destino identificado",
+                "passengers": ["Nome Completo 1", "Nome Completo 2"],
+                "date": "Data de ida dd/mm/yyyy",
+                "return_date": "Data de volta dd/mm/yyyy",
+                "reservation_number": "Nº da Reserva da Hospedagem (Somente o código/numero principal)",
+                "flight_voucher": "Localizador do Voo (6 letras/numeros exclusivos)",
+                "notes": "Nome da hospedagem identificada e detalhes adicionais"
              }
           }
         }
         
-        Regras de Inteligência:
-        1. Se faltar dados vitais e for o primeiro turno, retorne type "NONE" pedindo civilizadamente ("message").
-        2. Se ver no histórico que o usuário acaba de responder à uma pergunta sua, funde isso com a memória e crie o payload real.
-        3. Se receber anexo PDF, atue como um Operador de Viagem lendo um voucher. Encontre destino, data, hotel e passageiros. Acione o CREATE_RESERVATION pré-preenchendo todos os achados e diga na sua "message" o que identificou.
+        Regras MÁXIMAS de Extração PDF:
+        1. Ao ler um voucher PDF, rastreie como um Auditor: Descubra e extraia: o voucher de hotel(Nº DA RESERVA), voucher de voo, Destino, Data de ida e Data de volta, TODOS os passageiros em uma lista (array), e na 'notes' coloque o nome explícito da hospedagem.
+        2. REGRA DE CONFLITO: Se por acaso no voucher tiver MAIS DE UMA hospedagem ou MAIS DE UM código de voo diferente, retorne "type": "NONE" (cancela o preenchimento automático), informe as opções na sua "message" e peça ativamente para o usuário confirmar/digitar quais devem ser usados.
+        3. Quando o usuário responder a pendência do conflito com "pode preencher com o hotel X", una isso à memória e finalmente dispare "type": "CREATE_RESERVATION" preenchendo o payload todo.
         `
       });
 
@@ -120,7 +122,11 @@ export class AiInterpreterService {
       
       let data: AiResponse;
       try {
-        const cleanedResponse = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        let cleanedResponse = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        
+        // Anti-Alucinação: Às vezes o LLM gera chaves com 2 aspas duplas, ex: ""payload"":
+        cleanedResponse = cleanedResponse.replace(/""([^"]+)""\s*:/g, '"$1":');
+        
         data = JSON.parse(cleanedResponse) as AiResponse;
       } catch (e: any) {
         throw new Error('Falha ao parsear o JSON retornado pela IA. Verifique as aspas. Resposta crua: ' + responseText);

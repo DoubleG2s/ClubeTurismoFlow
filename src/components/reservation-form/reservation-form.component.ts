@@ -44,12 +44,17 @@ export class ReservationFormComponent implements OnInit, OnChanges {
     if (changes['prefillData'] && this.prefillData && !this.isEditMode()) {
        this.reservationForm.patchValue({
          destination: this.prefillData.destination || '',
-         date: this.prefillData.date || ''
+         date: this.prefillData.date || '',
+         return_date: (this.prefillData as any).return_date || '',
+         flight_voucher: (this.prefillData as any).flight_voucher || '',
+         reservation_number: (this.prefillData as any).reservation_number || '',
+         notes: (this.prefillData as any).notes || ''
        });
        
-       if (this.prefillData.passengers && this.prefillData.passengers.length > 0 && this.prefillData.passengers[0]) {
+       const px = (this.prefillData as any).passengers;
+       if (px && Array.isArray(px) && px.length > 0) {
          this.passengers.clear();
-         this.prefillData.passengers.forEach((p: string) => {
+         px.forEach((p: string) => {
            this.passengers.push(this.fb.control(p, Validators.required));
          });
        }
