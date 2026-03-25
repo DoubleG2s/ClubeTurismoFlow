@@ -53,10 +53,13 @@ export class ReservationFormComponent implements OnInit, OnChanges {
        
        const px = (this.prefillData as any).passengers;
        if (px && Array.isArray(px) && px.length > 0) {
-         this.passengers.clear();
-         px.forEach((p: string) => {
-           this.passengers.push(this.fb.control(p, Validators.required));
-         });
+         const validPassengers = px.filter(p => typeof p === 'string' && p.trim().length > 0);
+         if (validPassengers.length > 0) {
+           this.passengers.clear();
+           validPassengers.forEach((p: string) => {
+             this.passengers.push(this.fb.control(p.trim(), Validators.required));
+           });
+         }
        }
     }
   }

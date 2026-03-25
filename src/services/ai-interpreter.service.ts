@@ -88,7 +88,7 @@ export class AiInterpreterService {
         
         Regras MÁXIMAS de Extração PDF:
         1. Ao ler um voucher PDF, rastreie como um Auditor: Descubra o Nº DA RESERVA, voucher de voo, Destino, Data de ida e Data de volta. Na observação (notes) coloque o nome explícito da hospedagem.
-        2. ATENÇÃO AOS PASSAGEIROS: Jamais pegue apenas o Titular. Leia todo o documento e adicione TODOS os nomes de passageiros encontrados na viagem ao array de "passengers" (nunca crie itens vazios).
+        2. ATENÇÃO AOS PASSAGEIROS: Jamais pegue apenas o Titular. Busque os nomes na sessão "VOUCHER DE HOTEL" ou "HÓSPEDES", leia todo o documento e extraia rigorosamente TODOS os nomes de passageiros encontrados na viagem para o array "passengers". NUNCA coloque strings vazias (ex: "") no array. Se só houver 1 passageiro, o array deve ter tamanho 1.
         3. REGRA DE CONFLITO: Se por acaso no voucher tiver MAIS DE UMA hospedagem ou MAIS DE UM código de voo diferente, retorne "type": "NONE" (cancela o preenchimento automático), informe as opções na sua "message" e peça ativamente para o usuário confirmar/digitar quais devem ser usados.
         4. Quando o usuário responder a pendência do conflito com "pode preencher com o hotel X", una isso à memória e finalmente dispare "type": "CREATE_RESERVATION" preenchendo o payload todo.
         
