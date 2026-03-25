@@ -553,11 +553,18 @@ export class AppComponent implements OnInit {
     if (action.type === 'CREATE_RESERVATION') {
       this.activeTab.set('reservas');
       this.activeReservaTab.set('reservas');
+      
+      const p = action.payload || {};
       this.prefilledReservationData.set({
-        passengers: action.payload.passenger ? [action.payload.passenger] : [],
-        date: action.payload.dateStr || ''
-      });
-      // the layout uses prefilledReservationData - we'll implement that in html soon
+        destination: p.destination || '',
+        passengers: Array.isArray(p.passengers) ? p.passengers : (p.passenger ? [p.passenger] : []),
+        date: p.date || p.dateStr || '',
+        return_date: p.return_date || '',
+        reservation_number: p.reservation_number || '',
+        flight_voucher: p.flight_voucher || '',
+        notes: p.notes || ''
+      } as any);
+      
     } else if (action.type === 'CREATE_QUOTE') {
       this.activeTab.set('cotacoes');
       this.activeCotacaoTab.set('cadastro');
