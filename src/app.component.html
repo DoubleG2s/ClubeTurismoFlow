@@ -269,7 +269,7 @@
             Nova Reserva
           </h2>
         </div>
-        <app-reservation-form (save)="onAddReservation($event)"></app-reservation-form>
+        <app-reservation-form (save)="onAddReservation($event)" [prefillData]="prefilledReservationData()"></app-reservation-form>
       </section>
 
       <!-- Reservations List Header & Controls -->
@@ -548,7 +548,7 @@
           </div>
         </div>
 
-        <app-quote-form (save)="onAddQuote($event)" [isLoading]="isSavingQuote()"></app-quote-form>
+        <app-quote-form (save)="onAddQuote($event)" [isLoading]="isSavingQuote()" [prefillData]="prefilledQuoteData()"></app-quote-form>
       </section>
 
       <!-- Quotes Grid -->
@@ -884,7 +884,7 @@
   }
 
   <!-- AI Chat Global Component -->
-  <app-ai-chat></app-ai-chat>
+  <app-ai-chat #aiChat (onAiAction)="handleAiAction($event)"></app-ai-chat>
 
   }
 </div>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, OnInit, signal, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Reservation } from '../../models/reservation';
@@ -9,8 +9,9 @@ import { Reservation } from '../../models/reservation';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './reservation-form.component.html',
 })
-export class ReservationFormComponent implements OnInit {
+export class ReservationFormComponent implements OnInit, OnChanges {
   @Input() reservationToEdit: Reservation | null = null;
+  @Input() prefillData: Partial<Reservation> | null = null;
   @Output() save = new EventEmitter<Omit<Reservation, 'id' | 'created_at'>>();
   @Output() update = new EventEmitter<{ id: string, data: Partial<Reservation> }>();
   @Output() cancel = new EventEmitter<void>();
@@ -37,6 +38,22 @@ export class ReservationFormComponent implements OnInit {
       passengers: this.fb.array([this.createPassengerControl()]),
       notes: ['']
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['prefillData'] && this.prefillData && !this.isEditMode()) {
+       this.reservationForm.patchValue({
+         destination: this.prefillData.destination || '',
+         date: this.prefillData.date || ''
+       });
+       
+       if (this.prefillData.passengers && this.prefillData.passengers.length > 0 && this.prefillData.passengers[0]) {
+         this.passengers.clear();
+         this.prefillData.passengers.forEach((p: string) => {
+           this.passengers.push(this.fb.control(p, Validators.required));
+         });
+       }
+    }
   }
 
   ngOnInit() {

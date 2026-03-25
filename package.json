@@ -3,9 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "node inject-env.js && ng serve",
-    "build": "node inject-env.js && ng build",
-    "preview": "ng serve --configuration=production"
+    "inject": "node inject-env.js",
+    "dev": "npm run inject && ng serve",
+    "vercel:dev": "npm run inject && npx --yes vercel dev",
+    "build": "npm run inject && ng build",
+    "preview": "npm run inject && ng serve --configuration=production"
   },
   "dependencies": {
     "@angular/animations": "^21.0.0",
@@ -14,6 +16,7 @@
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
     "@angular/platform-browser": "^21.0.0",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.0.0",
     "rxjs": "^7.8.2",
     "tailwindcss": "^3.4.0"

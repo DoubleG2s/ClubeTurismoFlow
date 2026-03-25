@@ -50,7 +50,7 @@
         [ngClass]="msg.sender === 'user' ? 'self-end' : 'self-start'">
         
         <div 
-          class="px-4 py-2.5 rounded-2xl text-sm"
+          class="px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap"
           [ngClass]="msg.sender === 'user' ? 
             'bg-brand-600 text-white rounded-tr-none shadow-sm' : 
             'bg-white text-slate-700 rounded-tl-none border border-slate-200 shadow-sm'">
@@ -61,22 +61,55 @@
         </span>
       </div>
     }
+
+    @if (isLoading()) {
+      <div class="flex self-start max-w-[85%] animate-fade-in">
+        <div class="px-4 py-3 rounded-2xl bg-white text-slate-700 rounded-tl-none border border-slate-200 shadow-sm flex items-center space-x-2">
+           <div class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style="animation-delay:-0.3s"></div>
+           <div class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style="animation-delay:-0.15s"></div>
+           <div class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce"></div>
+           <span class="ml-2 text-xs text-slate-500 italic">Pensando...</span>
+        </div>
+      </div>
+    }
   </div>
 
   <!-- Intput Area -->
-  <div class="p-3 bg-white border-t border-slate-100 shrink-0">
+  <div class="p-3 bg-white border-t border-slate-100 shrink-0 relative">
+    
+    @if (selectedFile()) {
+      <div class="absolute -top-10 left-3 flex items-center gap-2 bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-md z-10 animate-fade-in">
+        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        <span class="truncate max-w-[150px]">{{ selectedFile()?.name }}</span>
+        <button (click)="removeFile()" class="p-0.5 hover:bg-slate-600 rounded-full transition-colors ml-1" title="Remover PDF">
+          <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    }
+
     <div class="relative flex items-center">
+      <input type="file" #fileInput accept="application/pdf" class="hidden" (change)="onFileSelected($event)" />
+
+      <button [disabled]="isLoading()" (click)="fileInput.click()" class="absolute left-2 p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center focus:outline-none" title="Anexar Vouncher (PDF)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+        </svg>
+      </button>
+
       <textarea 
         [ngModel]="inputText()"
         (ngModelChange)="inputText.set($event)"
         (keydown)="handleKeyDown($event)"
-        placeholder="Digite sua mensagem..."
-        class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl pl-4 pr-12 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all max-h-24 min-h-[44px]"
+        placeholder="Descreva comando ou anexe vouchers..."
+        [disabled]="isLoading()"
+        class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm disabled:opacity-60 rounded-xl pl-9 pr-12 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all max-h-24 min-h-[44px]"
         rows="1">
       </textarea>
       <button 
         (click)="sendMessage()"
-        [disabled]="!inputText().trim()"
+        [disabled]="isLoading() || (!inputText().trim() && !selectedFile())"
         class="absolute right-2 p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors disabled:opacity-40 disabled:hover:bg-transparent flex items-center justify-center">
         <!-- Ícone Sent/Enviar -->
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transform -rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -89,7 +122,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
-      <span class="text-[10px] font-medium text-slate-400">IA mockada para simulação</span>
+      <span class="text-[10px] font-medium text-slate-400">Assistente Integrado IA ClubeFlow</span>
     </div>
   </div>
 </div>

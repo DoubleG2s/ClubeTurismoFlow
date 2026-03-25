@@ -24,6 +24,7 @@ import { CreditFormComponent } from './components/credit-form/credit-form.compon
 import { CreditCardComponent } from './components/credit-card/credit-card.component';
 import { HotelEmailGeneratorComponent } from './components/hotel-email-generator/hotel-email-generator.component';
 import { AiChatComponent } from './components/ai-chat/ai-chat.component';
+import { AiAction } from './services/ai-interpreter.service';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
@@ -81,12 +82,14 @@ export class AppComponent implements OnInit {
   // Reservation Edit State
   editingReservation = signal<Reservation | null>(null);
   showReservationEditModal = signal(false);
+  prefilledReservationData = signal<Partial<Reservation> | null>(null);
 
   // Quote State
   editingQuote = signal<Quote | null>(null);
   showQuoteEditModal = signal(false);
   usdExchangeRate = signal<number>(6.00);
-  isSavingQuote = signal(false); // Novo estado
+  isSavingQuote = signal(false);
+  prefilledQuoteData = signal<Partial<Quote> | null>(null);
 
   // Hotel State
   editingHotel = signal<Hotel | null>(null);
@@ -523,6 +526,53 @@ export class AppComponent implements OnInit {
 
   switchCotacaoTab(tab: 'cadastro' | 'calculadora') {
     this.activeCotacaoTab.set(tab);
+  }
+
+  // --- Ai Assistant Actions ---
+  @ViewChild('aiChat') aiChatComp!: AiChatComponent;
+
+  handleAiAction(action: AiAction) {
+    if (action.type !== 'CONFIRM_TAB_SWITCH' && this.isAnyFormDirty()) {
+      const response = this.aiChatComp['aiInterpreter'].blockForTabConfirmation(action);
+      this.aiChatComp.addBotMessage(response.message);
+      return;
+    }
+
+    if (action.type === 'CONFIRM_TAB_SWITCH') {
+      action = action.payload; // Extract the original action
+    }
+
+    if (action.type === 'CREATE_RESERVATION') {
+      this.activeTab.set('reservas');
+      this.activeReservaTab.set('reservas');
+      this.prefilledReservationData.set({
+        passengers: action.payload.passenger ? [action.payload.passenger] : [],
+        date: action.payload.dateStr || ''
+      });
+      // the layout uses prefilledReservationData - we'll implement that in html soon
+    } else if (action.type === 'CREATE_QUOTE') {
+      this.activeTab.set('cotacoes');
+      this.activeCotacaoTab.set('cadastro');
+      this.prefilledQuoteData.set({
+        title: action.payload?.destination ? `Cotação para ${action.payload.destination}` : '',
+        adults: action.payload?.adults || 2,
+        children: action.payload?.children || 0
+      } as any);
+    } else if (action.type === 'APPLY_FILTER') {
+      this.activeTab.set('reservas');
+      this.activeReservaTab.set('reservas');
+      if (action.payload?.filter === 'hoje' || action.payload?.filter === 'amanha') {
+        this.activeQuickFilter.set(action.payload.filter);
+      }
+    }
+  }
+
+  isAnyFormDirty(): boolean {
+    // Simple mock logic: if the user is on the main add screen, we mock a dirty form state
+    // In a real app we would check `this.reservationForm.dirty`
+    if (this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas') return true;
+    if (this.activeTab() === 'cotacoes' && this.activeCotacaoTab() === 'cadastro') return true;
+    return false;
   }
 
   // --- Credit Actions ---

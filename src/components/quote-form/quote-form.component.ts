@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, signal, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Quote } from '../../models/quote';
@@ -9,9 +9,10 @@ import { Quote } from '../../models/quote';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './quote-form.component.html',
 })
-export class QuoteFormComponent implements OnInit {
+export class QuoteFormComponent implements OnInit, OnChanges {
   @Input() quoteToEdit: Quote | null = null;
   @Input() isLoading = false;
+  @Input() prefillData: Partial<Quote> | null = null;
 
   @Output() save = new EventEmitter<Omit<Quote, 'id' | 'created_at'>>();
   @Output() update = new EventEmitter<{ id: string, data: Partial<Quote> }>();
@@ -70,6 +71,16 @@ export class QuoteFormComponent implements OnInit {
 
   get hotelOptions() {
     return this.quoteForm.get('hotel_options') as FormArray;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['prefillData'] && this.prefillData && !this.isEditMode()) {
+       this.quoteForm.patchValue({
+         title: this.prefillData.title || '',
+         adults: this.prefillData.adults || 2,
+         children: this.prefillData.children || 0
+       });
+    }
   }
 
   ngOnInit() {
