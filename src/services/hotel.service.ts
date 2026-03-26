@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { supabase } from './supabase';
 import { Hotel, HotelEmail, HotelPhone, HotelImage } from '../models/hotel';
+import { TenantService } from './tenant.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,6 +12,7 @@ export class HotelService {
 
     readonly hotels = this._hotels.asReadonly();
     readonly isLoading = this._isLoading.asReadonly();
+    private tenantService = inject(TenantService);
 
     constructor() {
         this.loadHotels();
@@ -20,9 +22,15 @@ export class HotelService {
         this._isLoading.set(true);
         try {
             // Usando select encadeado para buscar todas as relações 1:N com as FKs apropriadas
-            const { data, error } = await supabase
+            let query = supabase
                 .from('hotels')
                 .select('*, hotel_emails(*), hotel_phones(*), hotel_images(*)');
+
+            // Preparação futura para RLS/Filtro Multi-Tenant:
+            // const companyId = this.tenantService.getCurrentCompanyId();
+            // if (companyId) query = query.eq('company_id', companyId);
+
+            const { data, error } = await query;
 
             if (error) throw error;
 
@@ -64,11 +72,13 @@ export class HotelService {
         images: Omit<HotelImage, 'id' | 'hotel_id' | 'created_at'>[]
     ): Promise<boolean> {
         this._isLoading.set(true);
+        const companyPayload = this.tenantService.getCompanyPayload();
         try {
             // 1. Inserir hotel raiz
+            const hotelFullData = { ...hotelData, ...companyPayload };
             const { data: newHotel, error: hotelError } = await supabase
                 .from('hotels')
-                .insert(hotelData)
+                .insert(hotelFullData)
                 .select()
                 .single();
 
@@ -80,18 +90,18 @@ export class HotelService {
             const promises: Promise<any>[] = [];
 
             if (emails.length > 0) {
-                const emailsToInsert = emails.map(e => ({ ...e, hotel_id: hotelId }));
+                const emailsToInsert = emails.map(e => ({ ...e, hotel_id: hotelId, ...companyPayload }));
                 promises.push(supabase.from('hotel_emails').insert(emailsToInsert) as any);
             }
 
             if (phones.length > 0) {
-                const phonesToInsert = phones.map(p => ({ ...p, hotel_id: hotelId }));
+                const phonesToInsert = phones.map(p => ({ ...p, hotel_id: hotelId, ...companyPayload }));
                 promises.push(supabase.from('hotel_phones').insert(phonesToInsert) as any);
             }
 
             if (images.length > 0) {
                 // Assegurar limite visual na Request de 3 imagens no máx.
-                const imagesToInsert = images.slice(0, 3).map(i => ({ ...i, hotel_id: hotelId }));
+                const imagesToInsert = images.slice(0, 3).map(i => ({ ...i, hotel_id: hotelId, ...companyPayload }));
                 promises.push(supabase.from('hotel_images').insert(imagesToInsert) as any);
             }
 
@@ -124,6 +134,7 @@ export class HotelService {
             }
 
             const promises: Promise<any>[] = [];
+            const companyPayload = this.tenantService.getCompanyPayload();
 
             // Remover relações órfãs
             if (deletedEmailIds.length > 0) promises.push(supabase.from('hotel_emails').delete().in('id', deletedEmailIds) as any);
@@ -131,11 +142,11 @@ export class HotelService {
             if (deletedImageIds.length > 0) promises.push(supabase.from('hotel_images').delete().in('id', deletedImageIds) as any);
 
             // Cadastrar novas relações
-            if (newEmails.length > 0) promises.push(supabase.from('hotel_emails').insert(newEmails.map(e => ({ ...e, hotel_id: hotelId }))) as any);
-            if (newPhones.length > 0) promises.push(supabase.from('hotel_phones').insert(newPhones.map(p => ({ ...p, hotel_id: hotelId }))) as any);
+            if (newEmails.length > 0) promises.push(supabase.from('hotel_emails').insert(newEmails.map(e => ({ ...e, hotel_id: hotelId, ...companyPayload }))) as any);
+            if (newPhones.length > 0) promises.push(supabase.from('hotel_phones').insert(newPhones.map(p => ({ ...p, hotel_id: hotelId, ...companyPayload }))) as any);
 
             // Checar limite de imagens (existentes + novas <= 3) é lidado via UI e via Trigger do Supabase, aqui só enviamos.
-            if (newImages.length > 0) promises.push(supabase.from('hotel_images').insert(newImages.map(i => ({ ...i, hotel_id: hotelId }))) as any);
+            if (newImages.length > 0) promises.push(supabase.from('hotel_images').insert(newImages.map(i => ({ ...i, hotel_id: hotelId, ...companyPayload }))) as any);
 
             await Promise.all(promises);
             await this.loadHotels();

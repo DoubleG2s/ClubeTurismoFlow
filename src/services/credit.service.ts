@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { environment } from '../environments/environment';
 import { Credit } from '../models/credit';
 import { AuthService } from './auth.service';
+import { TenantService } from './tenant.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ import { AuthService } from './auth.service';
 export class CreditService {
   private supabase: SupabaseClient;
   private authService = inject(AuthService);
+  private tenantService = inject(TenantService);
   
   // State
   credits = signal<Credit[]>([]);
@@ -42,10 +44,16 @@ export class CreditService {
   async fetchCredits() {
     this.isLoading.set(true);
     try {
-      const { data, error } = await this.supabase
+      let query = this.supabase
         .from('credits')
         .select('*')
         .order('expiration_date', { ascending: true }); // Vencimentos mais próximos primeiro
+        
+      // Preparação futura para RLS/Filtro Multi-Tenant:
+      // const companyId = this.tenantService.getCurrentCompanyId();
+      // if (companyId) query = query.eq('company_id', companyId);
+
+      const { data, error } = await query;
         
       if (error) {
         console.error('Error fetching credits:', error);
@@ -63,9 +71,14 @@ export class CreditService {
   async addCredit(creditData: Omit<Credit, 'id' | 'created_at' | 'expiration_date'>) {
     this.isLoading.set(true);
     try {
+      const payload = {
+        ...creditData,
+        ...this.tenantService.getCompanyPayload()
+      };
+
       const { data, error } = await this.supabase
         .from('credits')
-        .insert(creditData)
+        .insert(payload)
         .select()
         .single();
         

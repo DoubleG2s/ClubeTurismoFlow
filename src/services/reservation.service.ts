@@ -2,12 +2,14 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Reservation } from '../models/reservation';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
+import { TenantService } from './tenant.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationService {
   private authService = inject(AuthService);
+  private tenantService = inject(TenantService);
 
   // State
   private reservationsSignal = signal<Reservation[]>([]);
@@ -24,10 +26,16 @@ export class ReservationService {
   async loadReservations() {
     this.loadingSignal.set(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('reservations')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Preparação futura para RLS/Filtro Multi-Tenant:
+      // const companyId = this.tenantService.getCurrentCompanyId();
+      // if (companyId) query = query.eq('company_id', companyId);
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -81,6 +89,7 @@ export class ReservationService {
       // Prepare payload with explicit new checklist structure
       const payload = {
         ...reservation,
+        ...this.tenantService.getCompanyPayload(),
         created_by: user?.id,
         author_name: profile?.name || 'Sistema',
         checklist: {

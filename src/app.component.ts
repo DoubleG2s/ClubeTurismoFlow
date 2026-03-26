@@ -27,6 +27,8 @@ import { AiChatComponent } from './components/ai-chat/ai-chat.component';
 import { CalendarioEmbarquesComponent } from './components/calendario-embarques/calendario-embarques.component';
 import { AiAction } from './services/ai-interpreter.service';
 
+import { AdminMasterComponent } from './components/admin-master/admin-master.component';
+
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
 import { Quote } from './models/quote';
@@ -55,7 +57,8 @@ import { Credit } from './models/credit';
     CreditCardComponent,
     HotelEmailGeneratorComponent,
     AiChatComponent,
-    CalendarioEmbarquesComponent
+    CalendarioEmbarquesComponent,
+    AdminMasterComponent
   ],
   templateUrl: './app.component.html',
 })
@@ -71,7 +74,7 @@ export class AppComponent implements OnInit {
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
 
   // State
-  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios'>('reservas');
+  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios' | 'admin'>('reservas');
   activeReservaTab = signal<'reservas' | 'creditos' | 'calendario'>('reservas');
   activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
   activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
@@ -514,7 +517,7 @@ export class AppComponent implements OnInit {
     this.itemToDelete.set(null);
   }
 
-  switchTab(tab: 'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios') {
+  switchTab(tab: 'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios' | 'admin') {
     this.activeTab.set(tab);
   }
 

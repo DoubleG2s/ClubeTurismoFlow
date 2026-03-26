@@ -49,8 +49,16 @@
           </div>
 
           <div class="flex items-center border-l border-slate-200 pl-4 ml-2 space-x-1">
-            <!-- Admin Users Button (Icon Only) -->
+            <!-- Admin Master & Users Buttons -->
             @if (authService.isAdmin()) {
+            <button (click)="switchTab('admin')" [class.text-slate-900]="activeTab() === 'admin'"
+              [class.bg-slate-100]="activeTab() === 'admin'"
+              class="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer mr-1"
+              title="Admin Master">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </button>
             <button (click)="switchTab('usuarios')" [class.text-brand-600]="activeTab() === 'usuarios'"
               [class.bg-brand-50]="activeTab() === 'usuarios'"
               class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all cursor-pointer"
@@ -718,6 +726,11 @@
     <!-- Admin Tab: User Management -->
     @if (activeTab() === 'usuarios' && authService.isAdmin()) {
     <app-user-list></app-user-list>
+    }
+
+    <!-- Admin Master -->
+    @if (activeTab() === 'admin' && authService.isAdmin()) {
+    <app-admin-master></app-admin-master>
     }
 
   </main>

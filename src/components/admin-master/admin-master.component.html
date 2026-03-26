@@ -1,0 +1,358 @@
+<div class="animate-fade-in space-y-8">
+  <div class="flex items-center gap-3 mb-5 pl-1">
+    <h2 class="text-2xl font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+      <span class="w-2 h-8 bg-slate-800 rounded-full inline-block"></span>
+      Admin Master
+    </h2>
+  </div>
+
+  <!-- Navigation Bar for Sub-Tabs -->
+  <div class="border-b border-slate-200 mb-6">
+    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+      <button
+        (click)="setTab('empresas')"
+        [class.border-slate-800]="activeAdminTab() === 'empresas'"
+        [class.text-slate-900]="activeAdminTab() === 'empresas'"
+        [class.border-transparent]="activeAdminTab() !== 'empresas'"
+        [class.text-slate-500]="activeAdminTab() !== 'empresas'"
+        class="whitespace-nowrap pb-4 px-1 border-b-2 font-bold text-sm hover:text-slate-800 transition-colors">
+        🏢 Gestão de Empresas
+      </button>
+      <button
+        (click)="setTab('usuarios')"
+        [class.border-indigo-500]="activeAdminTab() === 'usuarios'"
+        [class.text-indigo-600]="activeAdminTab() === 'usuarios'"
+        [class.border-transparent]="activeAdminTab() !== 'usuarios'"
+        [class.text-slate-500]="activeAdminTab() !== 'usuarios'"
+        class="whitespace-nowrap pb-4 px-1 border-b-2 font-bold text-sm hover:text-indigo-600 transition-colors">
+        👥 Usuários x Empresas
+      </button>
+    </nav>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex justify-center p-12">
+      <svg class="animate-spin h-8 w-8 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+    </div>
+  } @else {
+
+    <!-- EMPRESAS TAB -->
+    @if (activeAdminTab() === 'empresas') {
+      <div class="space-y-6 animate-fade-in">
+        
+        <div class="flex justify-between items-center">
+          <p class="text-slate-500 text-sm">Gerencie todos os tenants (empresas) do sistema. O isolamento de dados baseia-se nestes registros.</p>
+          <button (click)="openCreateCompany()" class="px-5 py-2.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-md shadow-slate-900/20 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nova Empresa
+          </button>
+        </div>
+
+        @if (companies().length > 0) {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (c of companies(); track c.id) {
+              <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition group flex flex-col h-full">
+                <div class="flex justify-between items-start mb-4">
+                  <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-xl uppercase">
+                    {{ c.name.substring(0,2) }}
+                  </div>
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="openViewCompany(c)" class="p-1.5 text-slate-400 hover:text-sky-600 bg-slate-50 rounded bg-transparent" title="Detalhes">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    <button (click)="openEditCompany(c)" class="p-1.5 text-slate-400 hover:text-amber-600 bg-slate-50 rounded bg-transparent" title="Editar">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button (click)="promptDeleteCompany(c)" class="p-1.5 text-slate-400 hover:text-red-600 bg-slate-50 rounded bg-transparent" title="Excluir">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 leading-tight">{{ c.name }}</h3>
+                <p class="text-xs font-mono text-slate-400 mt-1 mb-4">{{ c.slug }}</p>
+                
+                <div class="mt-auto pt-4 border-t border-slate-100 flex justify-between items-center">
+                  <span class="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-600 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    {{ getUsersCountForCompany(c.id) }} Usuários
+                  </span>
+                  <span class="text-xs text-slate-400">Desde {{ c.created_at | date:'MMM yyyy' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
+            <h3 class="text-base font-semibold text-slate-900">Nenhuma empresa encontrada</h3>
+            <p class="mt-1 text-sm text-slate-500">O sistema precisa de pelo menos uma empresa para funcionar.</p>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- USUARIOS TAB -->
+    @if (activeAdminTab() === 'usuarios') {
+      <div class="space-y-6 animate-fade-in">
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-slate-500 text-sm">Vincule os usuários do sistema às empresas. Um usuário só pode acessar dados da empresa vinculada.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-bold">
+                  <th class="px-6 py-4">Usuário</th>
+                  <th class="px-6 py-4">Email</th>
+                  <th class="px-6 py-4">Role</th>
+                  <th class="px-6 py-4">Empresa (Tenant)</th>
+                  <th class="px-6 py-4 text-right">Controles</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-sm">
+                @for (u of users(); track u.id) {
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-semibold text-slate-900">{{ u.name }}</td>
+                    <td class="px-6 py-4 text-slate-500">{{ u.email }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-2.5 py-1 rounded text-xs font-bold"
+                            [ngClass]="u.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'">
+                        {{ u.role }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      @if (u.companies) {
+                        <span class="font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">{{ u.companies.name }}</span>
+                      } @else {
+                        <span class="text-slate-400 italic">Sem vínculo</span>
+                      }
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <button (click)="openBindModal(u)" class="text-indigo-600 hover:text-indigo-800 font-bold px-3 py-1 bg-indigo-50 hover:bg-indigo-100 rounded transition text-xs">
+                        Configurar Vínculo
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+  } <!-- end else (not loading) -->
+
+</div>
+
+<!-- COMPANY MODAL -->
+@if (showCompanyModal()) {
+  <div class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-company" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeCompanyModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-900">{{ editingCompanyId() ? 'Editar Empresa' : 'Nova Empresa' }}</h3>
+            <button (click)="closeCompanyModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">Nome da Empresa *</label>
+              <input type="text" [ngModel]="companyDraft().name" (ngModelChange)="updateSlugAutomatic($event)"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-slate-800 transition"
+                placeholder="Ex: Clube Turismo Jardim">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">Slug (Identificador) *</label>
+              <input type="text" [ngModel]="companyDraft().slug" (ngModelChange)="companyDraft().slug = $event"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-slate-800 bg-slate-50 text-slate-600 font-mono transition"
+                placeholder="Ex: clube-turismo-jardim">
+              <p class="text-xs text-slate-400 mt-1">Usado internamente. Deve ser único e sem espaços.</p>
+            </div>
+          </div>
+
+          <div class="mt-8 flex justify-end gap-3">
+            <button (click)="closeCompanyModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
+            <button (click)="saveCompany()" [disabled]="isSaving() || !companyDraft().name || !companyDraft().slug"
+              class="px-6 py-2.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 transition shadow-md disabled:opacity-50 flex items-center gap-2">
+              @if (isSaving()) {
+                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Salvando...
+              } @else {
+                Salvar Empresa
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- VIEW COMPANY MODAL -->
+@if (showViewModal() && viewingCompany()) {
+  <div class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-view" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeViewModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-md sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6 p-8">
+          <div class="w-16 h-16 rounded-2xl bg-slate-100 border-2 border-slate-50 flex items-center justify-center text-slate-800 font-bold text-2xl uppercase mb-6 shadow-sm mx-auto">
+            {{ viewingCompany()!.name.substring(0,2) }}
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 text-center mb-1">{{ viewingCompany()!.name }}</h3>
+          <p class="text-sm font-mono text-slate-500 text-center bg-slate-50 py-1.5 px-3 rounded-lg mx-auto table mb-6">{{ viewingCompany()!.slug }}</p>
+          
+          <div class="border-t border-slate-100 pt-6 space-y-4">
+            <div class="flex justify-between items-center px-4 py-3 bg-slate-50 rounded-xl">
+              <span class="text-sm font-bold text-slate-500">Data de Criação</span>
+              <span class="text-sm font-semibold text-slate-900">{{ viewingCompany()!.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 bg-slate-50 rounded-xl">
+              <span class="text-sm font-bold text-slate-500">UUID (Banco)</span>
+              <span class="text-xs font-mono text-slate-900 max-w-[150px] truncate" [title]="viewingCompany()!.id">{{ viewingCompany()!.id }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-xl">
+              <span class="text-sm font-bold text-indigo-700">Usuários Ativos</span>
+              <span class="text-lg font-black text-indigo-900">{{ getUsersCountForCompany(viewingCompany()!.id) }}</span>
+            </div>
+          </div>
+
+          <div class="mt-8 flex justify-center">
+            <button (click)="closeViewModal()" class="px-8 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- DELETE CONFIRM MODAL -->
+@if (showDeleteModal() && companyToDelete()) {
+  <div class="fixed inset-0 z-[110] overflow-y-auto" aria-labelledby="modal-delete" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeDeleteModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-md sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 text-center mb-2">Excluir Empresa</h3>
+          <p class="text-slate-500 text-center text-sm mb-6">Tem certeza que deseja excluir a empresa <span class="font-bold text-slate-800">{{companyToDelete()!.name}}</span>? Esta ação não pode ser desfeita e requer a desvinculação prévia de usuários.</p>
+          
+          @if (deleteError()) {
+            <p class="text-xs font-bold text-red-600 bg-red-50 p-3 rounded-lg text-center mb-6 border border-red-100">{{ deleteError() }}</p>
+          }
+
+          <div class="flex justify-center gap-3">
+            <button (click)="closeDeleteModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
+            <button (click)="confirmDeleteCompany()" [disabled]="isSaving()"
+              class="px-6 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition shadow-md disabled:opacity-50">
+              {{ isSaving() ? 'Excluindo...' : 'Sim, Excluir' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- USER BIND MODAL -->
+@if (showBindModal() && selectedUser()) {
+  <div class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-bind" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeBindModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-slate-100">
+        <div class="bg-indigo-600 px-6 py-5 rounded-t-2xl flex items-center justify-between">
+          <h3 class="text-xl font-bold text-white">Vínculo de Usuário</h3>
+          <button (click)="closeBindModal()" class="text-white hover:text-indigo-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="bg-white px-6 py-6 pb-6">
+          <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <p class="text-xs uppercase font-bold text-slate-400 mb-1">Usuário Selecionado</p>
+            <p class="text-base font-bold text-slate-900">{{ selectedUser()!.name }}</p>
+            <p class="text-sm text-slate-500">{{ selectedUser()!.email }}</p>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Selecione a Empresa (Tenant) *</label>
+              <select [ngModel]="selectedCompanyIdForBind()" (ngModelChange)="selectedCompanyIdForBind.set($event)"
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition appearance-none bg-white">
+                <option value="">-- NENHUMA (DESVINCULAR) --</option>
+                @for (c of companies(); track c.id) {
+                  <option [value]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+            
+            <p class="text-xs text-slate-500 bg-amber-50 text-amber-800 p-3 rounded-lg border border-amber-100 flex gap-2 items-start mt-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Ao vincular um usuário, ele terá acesso de leitura e gravação aos dados isolados desta empresa. 
+              Desvincular o usuário limitará imediatamente suas interações, até que a premissa full RLS entre em vigor.
+            </p>
+          </div>
+
+          <div class="mt-8 flex justify-between gap-3">
+            <div>
+              @if (selectedUser()!.company_id) {
+                <button (click)="removeUserBind(selectedUser()!)" [disabled]="isSaving()" class="px-4 py-2.5 rounded-xl font-bold text-red-600 bg-white border border-red-200 hover:bg-red-50 transition text-sm">
+                  Desvincular Agora
+                </button>
+              }
+            </div>
+            <div class="flex gap-2">
+              <button (click)="closeBindModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
+              <button (click)="saveUserBind()" [disabled]="isSaving()"
+                class="px-6 py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md disabled:opacity-50 flex items-center gap-2">
+                @if (isSaving()) {
+                  <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                }
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

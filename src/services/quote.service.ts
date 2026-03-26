@@ -2,12 +2,14 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Quote } from '../models/quote';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
+import { TenantService } from './tenant.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuoteService {
   private authService = inject(AuthService);
+  private tenantService = inject(TenantService);
 
   // State
   private quotesSignal = signal<Quote[]>([]);
@@ -24,10 +26,16 @@ export class QuoteService {
   async loadQuotes() {
     this.loadingSignal.set(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('quotes')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Preparação futura para RLS/Filtro Multi-Tenant:
+      // const companyId = this.tenantService.getCurrentCompanyId();
+      // if (companyId) query = query.eq('company_id', companyId);
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -58,6 +66,7 @@ export class QuoteService {
     try {
       const payload = {
         ...quote,
+        ...this.tenantService.getCompanyPayload(),
         created_by: user?.id,
         author_name: profile?.name || 'Sistema'
       };

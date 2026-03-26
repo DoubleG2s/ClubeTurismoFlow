@@ -2,12 +2,14 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Flight } from '../models/flight';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
+import { TenantService } from './tenant.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FlightService {
   private authService = inject(AuthService);
+  private tenantService = inject(TenantService);
   
   // State
   private flightsSignal = signal<Flight[]>([]);
@@ -25,10 +27,16 @@ export class FlightService {
   async loadFlights() {
     this.loadingSignal.set(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('flights')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Preparação futura para RLS/Filtro Multi-Tenant:
+      // const companyId = this.tenantService.getCurrentCompanyId();
+      // if (companyId) query = query.eq('company_id', companyId);
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
@@ -49,6 +57,7 @@ export class FlightService {
     try {
       const newFlightPayload = {
         ...flight,
+        ...this.tenantService.getCompanyPayload(),
         confirmed: false, // Default
         created_by: user?.id,
         author_name: profile?.name || 'Sistema'
