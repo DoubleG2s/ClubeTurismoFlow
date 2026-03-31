@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { Quote } from '../models/quote';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
@@ -20,22 +20,27 @@ export class QuoteService {
   readonly isLoading = computed(() => this.loadingSignal());
 
   constructor() {
-    this.loadQuotes();
+    effect(() => {
+      const companyId = this.tenantService.getCurrentCompanyId();
+      if (companyId) {
+        this.loadQuotes();
+      } else {
+        this.quotesSignal.set([]);
+      }
+    });
   }
 
   async loadQuotes() {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     this.loadingSignal.set(true);
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('quotes')
         .select('*')
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
-
-      // Preparação futura para RLS/Filtro Multi-Tenant:
-      // const companyId = this.tenantService.getCurrentCompanyId();
-      // if (companyId) query = query.eq('company_id', companyId);
-
-      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -105,6 +110,9 @@ export class QuoteService {
   }
 
   async updateQuote(id: string, updates: Partial<Quote>) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     this.quotesSignal.update(current =>
       current.map(q => q.id === id ? { ...q, ...updates } : q)
     );
@@ -113,7 +121,8 @@ export class QuoteService {
       const { error } = await supabase
         .from('quotes')
         .update(updates)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
     } catch (error) {
@@ -123,6 +132,9 @@ export class QuoteService {
   }
 
   async removeQuote(id: string) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     // 1. Snapshot previous state for rollback
     const previousState = this.quotesSignal();
 
@@ -134,7 +146,8 @@ export class QuoteService {
       const { error, count } = await supabase
         .from('quotes')
         .delete({ count: 'exact' })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
 

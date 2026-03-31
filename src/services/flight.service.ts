@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { Flight } from '../models/flight';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
@@ -21,22 +21,27 @@ export class FlightService {
 
   constructor() {
     // Initial load
-    this.loadFlights();
+    effect(() => {
+      const companyId = this.tenantService.getCurrentCompanyId();
+      if (companyId) {
+        this.loadFlights();
+      } else {
+        this.flightsSignal.set([]);
+      }
+    });
   }
 
   async loadFlights() {
     this.loadingSignal.set(true);
     try {
-      let query = supabase
+      const companyId = this.tenantService.getCurrentCompanyId();
+      if (!companyId) return;
+
+      const { data, error } = await supabase
         .from('flights')
         .select('*')
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
-
-      // Preparação futura para RLS/Filtro Multi-Tenant:
-      // const companyId = this.tenantService.getCurrentCompanyId();
-      // if (companyId) query = query.eq('company_id', companyId);
-
-      const { data, error } = await query;
 
       if (error) throw error;
       
@@ -81,6 +86,9 @@ export class FlightService {
   }
 
   async updateFlight(id: string, updates: Partial<Omit<Flight, 'id' | 'created_at'>>) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     // Optimistic Update
     this.flightsSignal.update(current => 
       current.map(f => f.id === id ? { ...f, ...updates } : f)
@@ -90,7 +98,8 @@ export class FlightService {
       const { error } = await supabase
         .from('flights')
         .update(updates)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
     } catch (error) {
@@ -101,6 +110,9 @@ export class FlightService {
   }
 
   async removeFlight(id: string) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     // Optimistic UI update
     const previousState = this.flightsSignal();
     this.flightsSignal.update(current => current.filter(f => f.id !== id));
@@ -109,7 +121,8 @@ export class FlightService {
       const { error } = await supabase
         .from('flights')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
     } catch (error) {

@@ -23,8 +23,8 @@ export class CreditService {
     
     // Fetch initial credits reactively when session changes
     effect(() => {
-      const session = this.authService.session();
-      if (session) {
+      const companyId = this.tenantService.getCurrentCompanyId();
+      if (companyId) {
         this.fetchCredits();
       } else {
         this.credits.set([]);
@@ -44,16 +44,14 @@ export class CreditService {
   async fetchCredits() {
     this.isLoading.set(true);
     try {
-      let query = this.supabase
+      const companyId = this.tenantService.getCurrentCompanyId();
+      if (!companyId) return;
+
+      const { data, error } = await this.supabase
         .from('credits')
         .select('*')
+        .eq('company_id', companyId)
         .order('expiration_date', { ascending: true }); // Vencimentos mais próximos primeiro
-        
-      // Preparação futura para RLS/Filtro Multi-Tenant:
-      // const companyId = this.tenantService.getCurrentCompanyId();
-      // if (companyId) query = query.eq('company_id', companyId);
-
-      const { data, error } = await query;
         
       if (error) {
         console.error('Error fetching credits:', error);
@@ -105,12 +103,16 @@ export class CreditService {
   }
 
   async updateCredit(id: string, creditData: Partial<Credit>) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return false;
+
     this.isLoading.set(true);
     try {
       const { data, error } = await this.supabase
         .from('credits')
         .update(creditData)
         .eq('id', id)
+        .eq('company_id', companyId)
         .select()
         .single();
         
@@ -137,6 +139,9 @@ export class CreditService {
   }
 
   async removeCredit(id: string) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     this.isLoading.set(true);
     // Optimistic delete for absolute immediate feedback
     this.credits.update(current => current.filter(c => c.id !== id));
@@ -145,7 +150,8 @@ export class CreditService {
       const { error } = await this.supabase
         .from('credits')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
         
       if (error) {
         console.error('Error deleting credit:', error);

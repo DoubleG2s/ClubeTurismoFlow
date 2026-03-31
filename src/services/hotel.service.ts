@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, effect } from '@angular/core';
 import { supabase } from './supabase';
 import { Hotel, HotelEmail, HotelPhone, HotelImage } from '../models/hotel';
 import { TenantService } from './tenant.service';
@@ -15,22 +15,27 @@ export class HotelService {
     private tenantService = inject(TenantService);
 
     constructor() {
-        this.loadHotels();
+        effect(() => {
+            const companyId = this.tenantService.getCurrentCompanyId();
+            if (companyId) {
+                this.loadHotels();
+            } else {
+                this._hotels.set([]);
+            }
+        });
     }
 
     async loadHotels() {
+        const companyId = this.tenantService.getCurrentCompanyId();
+        if (!companyId) return;
+
         this._isLoading.set(true);
         try {
             // Usando select encadeado para buscar todas as relações 1:N com as FKs apropriadas
-            let query = supabase
+            const { data, error } = await supabase
                 .from('hotels')
-                .select('*, hotel_emails(*), hotel_phones(*), hotel_images(*)');
-
-            // Preparação futura para RLS/Filtro Multi-Tenant:
-            // const companyId = this.tenantService.getCurrentCompanyId();
-            // if (companyId) query = query.eq('company_id', companyId);
-
-            const { data, error } = await query;
+                .select('*, hotel_emails(*), hotel_phones(*), hotel_images(*)')
+                .eq('company_id', companyId);
 
             if (error) throw error;
 
@@ -125,11 +130,14 @@ export class HotelService {
         deletedPhoneIds: string[],
         deletedImageIds: string[]
     ): Promise<boolean> {
+        const companyId = this.tenantService.getCurrentCompanyId();
+        if (!companyId) return false;
+
         this._isLoading.set(true);
         try {
             // Atualizar dados principais
             if (Object.keys(hotelData).length > 0) {
-                const { error } = await supabase.from('hotels').update(hotelData).eq('id', hotelId);
+                const { error } = await supabase.from('hotels').update(hotelData).eq('id', hotelId).eq('company_id', companyId);
                 if (error) throw error;
             }
 
@@ -159,9 +167,12 @@ export class HotelService {
     }
 
     async deleteHotel(id: string): Promise<boolean> {
+        const companyId = this.tenantService.getCurrentCompanyId();
+        if (!companyId) return false;
+
         this._isLoading.set(true);
         try {
-            const { error } = await supabase.from('hotels').delete().eq('id', id);
+            const { error } = await supabase.from('hotels').delete().eq('id', id).eq('company_id', companyId);
             if (error) throw error;
 
             this._hotels.update(hotels => hotels.filter(h => h.id !== id));

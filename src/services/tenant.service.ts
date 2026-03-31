@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 export class TenantService {
   private authService = inject(AuthService);
 
-  constructor() {}
+  constructor() { }
 
   /**
    * Obtém o company_id dinamicamente com base no perfil do usuário logado do AuthService.
@@ -25,6 +25,11 @@ export class TenantService {
    */
   getCompanyPayload(): { company_id: string } | {} {
     const id = this.getCurrentCompanyId();
-    return id ? { company_id: id } : {};
+    if (!id) {
+      // Em vez de retornar {}, jogamos um erro ou logamos, 
+      // pois não deve existir insert sem empresa em um sistema multi-tenant.
+      throw new Error('Tentativa de criar registro sem um Company ID ativo.');
+    }
+    return { company_id: id };
   }
 }

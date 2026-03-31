@@ -3,6 +3,7 @@ import { Reservation } from '../models/reservation';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
 import { TenantService } from './tenant.service';
+import { effect } from '@angular/core'; // Adicione ao import do @angular/core
 
 @Injectable({
   providedIn: 'root'
@@ -20,25 +21,41 @@ export class ReservationService {
   readonly isLoading = computed(() => this.loadingSignal());
 
   constructor() {
-    this.loadReservations();
+    // O effect roda sempre que o valor de um sinal usado dentro dele muda
+    effect(() => {
+      const companyId = this.tenantService.getCurrentCompanyId();
+      if (companyId) {
+        console.log('Filtro reativo: Empresa detectada!', companyId);
+        console.log('Tenant detectado pelo Effect! Carregando reservas...');
+        this.loadReservations();
+      }
+    });
   }
 
   async loadReservations() {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    console.log('Filtrando pela empresa ID:', companyId);
+    console.log('Tipo do ID:', typeof companyId);
+    if (!companyId) {
+      console.error('ERRO: companyId está vazio ou indefinido!');
+      this.reservationsSignal.set([]);
+      return;
+    }
+
     this.loadingSignal.set(true);
     try {
-      let query = supabase
+      console.log(`Buscando no Supabase: table=reservations, filter=company_id.eq.${companyId}`);
+      const { data, error } = await supabase
         .from('reservations')
         .select('*')
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
-      // Preparação futura para RLS/Filtro Multi-Tenant:
-      // const companyId = this.tenantService.getCurrentCompanyId();
-      // if (companyId) query = query.eq('company_id', companyId);
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
+      if (error) {
+        console.error('Erro retornado pelo Supabase:', error);
+        throw error;
+      }
+      console.log('Quantidade de registros retornados pelo banco:', data?.length || 0);
       if (data) {
         // Ensure checklist defaults exist if null in DB or structure changed
         const processedData = data.map((item: any) => {
@@ -133,6 +150,9 @@ export class ReservationService {
   }
 
   async updateReservation(id: string, updates: Partial<Reservation>) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     // Optimistic Update
     this.reservationsSignal.update(current =>
       current.map(r => r.id === id ? { ...r, ...updates } as Reservation : r)
@@ -142,7 +162,8 @@ export class ReservationService {
       const { error } = await supabase
         .from('reservations')
         .update(updates)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
     } catch (error) {
@@ -152,6 +173,9 @@ export class ReservationService {
   }
 
   async removeReservation(id: string) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return;
+
     const previousState = this.reservationsSignal();
     this.reservationsSignal.update(current => current.filter(r => r.id !== id));
 
@@ -159,7 +183,8 @@ export class ReservationService {
       const { error } = await supabase
         .from('reservations')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
     } catch (error) {
