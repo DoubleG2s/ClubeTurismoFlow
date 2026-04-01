@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from './services/flight.service';
@@ -28,6 +28,8 @@ import { CalendarioEmbarquesComponent } from './components/calendario-embarques/
 import { AiAction } from './services/ai-interpreter.service';
 
 import { AdminMasterComponent } from './components/admin-master/admin-master.component';
+import { SubscriptionComponent } from './app/pages/subscription/subscription'; // Importando a tela SaaS
+import { SubscriptionService } from './services/subscription.service';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
@@ -58,7 +60,8 @@ import { Credit } from './models/credit';
     HotelEmailGeneratorComponent,
     AiChatComponent,
     CalendarioEmbarquesComponent,
-    AdminMasterComponent
+    AdminMasterComponent,
+    SubscriptionComponent
   ],
   templateUrl: './app.component.html',
 })
@@ -69,12 +72,14 @@ export class AppComponent implements OnInit {
   private hotelService = inject(HotelService);
   private creditService = inject(CreditService);
   public authService = inject(AuthService);
+  private subscriptionService = inject(SubscriptionService);
 
   // ViewChild para controlar o formulário de cotação
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
 
   // State
-  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios' | 'admin'>('reservas');
+  activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios' | 'admin' | 'assinatura'>('reservas');
+  isLockedOut = signal<boolean>(false); // Catraca SaaS
   activeReservaTab = signal<'reservas' | 'creditos' | 'calendario'>('reservas');
   activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
   activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
@@ -242,8 +247,34 @@ export class AppComponent implements OnInit {
     this.creditService.isLoading()
   );
 
+  constructor() {
+    // Escuta o status de autenticação para checar regras da empresa ativa
+    effect(() => {
+       const user = this.authService.session();
+       if (user) {
+          // Quando o usuário loga e a company id está resolvida
+          this.checkSubscriptionStatus();
+       }
+    });
+  }
+
   ngOnInit() {
-    // Data loaded in services
+  }
+
+  async checkSubscriptionStatus() {
+     const status = await this.subscriptionService.getCompanyStatus();
+     
+     if (!status || status.subscription_status !== 'active') {
+        console.log('[Auth] Empresa inativa, trancando UI');
+        this.isLockedOut.set(true);
+        this.activeTab.set('assinatura');
+     } else {
+        // Liberado
+        this.isLockedOut.set(false);
+        if (this.activeTab() === 'assinatura') {
+           this.activeTab.set('reservas'); // Restaura aba padrao
+        }
+     }
   }
 
   // --- Hotel Methods ---
