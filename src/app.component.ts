@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, ViewChild, effect } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from './services/flight.service';
@@ -67,7 +67,7 @@ import { Credit } from './models/credit';
   ],
   templateUrl: './app.component.html',
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   private flightService = inject(FlightService);
   private reservationService = inject(ReservationService);
   private quoteService = inject(QuoteService);
@@ -75,13 +75,17 @@ export class AppComponent implements OnInit {
   private creditService = inject(CreditService);
   public authService = inject(AuthService);
   private subscriptionService = inject(SubscriptionService);
+  private readonly pendingEmbeddedCheckoutStorageKey = 'clube-turismo-flow:pending-embedded-checkout';
+  private readonly accessGateStoragePrefix = 'clube-turismo-flow:access-gate';
 
   // ViewChild para controlar o formulário de cotação
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
+  @ViewChild(SubscriptionComponent) subscriptionView?: SubscriptionComponent;
 
   // State
   activeTab = signal<'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'usuarios' | 'admin' | 'assinatura'>('reservas');
   isLockedOut = signal<boolean>(false); // Catraca SaaS
+  isCheckingSubscriptionAccess = signal<boolean>(false);
   activeReservaTab = signal<'reservas' | 'creditos' | 'calendario'>('reservas');
   activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
   activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
@@ -367,20 +371,61 @@ export class AppComponent implements OnInit {
     this.creditService.isLoading()
   );
 
+  private accessCheckSequence = 0;
+  private lastAccessGateKey: string | null = null;
+  private returnFromSubscriptionHandler = () => {
+    if (!this.isLockedOut()) {
+      this.subscriptionView?.dismissEmbeddedCheckoutForNavigation();
+      this.activeTab.set('reservas');
+    }
+  };
+
+  private buildAccessGateStorageKey(accessGateKey: string) {
+    return `${this.accessGateStoragePrefix}:${accessGateKey}`;
+  }
+
+  private readPersistedAccessGate(accessGateKey: string): 'open' | 'locked' | null {
+    try {
+      return (sessionStorage.getItem(this.buildAccessGateStorageKey(accessGateKey)) as 'open' | 'locked' | null) || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private persistAccessGate(accessGateKey: string, state: 'open' | 'locked') {
+    try {
+      sessionStorage.setItem(this.buildAccessGateStorageKey(accessGateKey), state);
+    } catch {
+      // Seguimos sem persistencia se o navegador bloquear o storage.
+    }
+  }
+
   constructor() {
     // Escuta o status de autenticação para checar regras da empresa ativa
     effect(() => {
-       const user = this.authService.session();
-       if (user) {
-          // Quando o usuário loga e a company id está resolvida
-          this.checkSubscriptionStatus();
+       const session = this.authService.session();
+       const profile = this.authService.profile();
+       const companyId = profile?.company_id || null;
+
+       if (session?.user && companyId) {
+          const accessGateKey = `${session.user.id}:${companyId}`;
+
+          if (this.lastAccessGateKey === accessGateKey) {
+            return;
+          }
+
+          this.lastAccessGateKey = accessGateKey;
+          void this.refreshSubscriptionAccessGate(true);
+       } else {
+          this.lastAccessGateKey = null;
+          this.isCheckingSubscriptionAccess.set(false);
        }
     });
   }
 
   ngOnInit() {
     const params = new URLSearchParams(window.location.search);
-    
+
     const publicToken = params.get('public_quote');
     if (publicToken) {
       this.isFullscreenProposal.set(true);
@@ -410,8 +455,9 @@ export class AppComponent implements OnInit {
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
       }
     }
-    
+
     this.fetchExchangeRate();
+    window.addEventListener('clube-turismo-flow:return-from-subscription', this.returnFromSubscriptionHandler);
   }
 
   async fetchExchangeRate() {
@@ -428,20 +474,71 @@ export class AppComponent implements OnInit {
     }
   }
 
-  async checkSubscriptionStatus() {
-     const status = await this.subscriptionService.getCompanyStatus();
-     
-     if (!status || status.subscription_status !== 'active') {
-        console.log('[Auth] Empresa inativa, trancando UI');
+  ngOnDestroy() {
+    window.removeEventListener('clube-turismo-flow:return-from-subscription', this.returnFromSubscriptionHandler);
+  }
+
+  private async refreshSubscriptionAccessGate(showLoader = true) {
+     const currentSequence = ++this.accessCheckSequence;
+     if (showLoader) {
+       this.isCheckingSubscriptionAccess.set(true);
+     }
+
+     try {
+        // Nota humana:
+        // para bloquear rapido no login, a decisao principal usa apenas o
+        // status da empresa. Historico e gerenciamento carregam depois.
+        const status = await this.subscriptionService.getCompanyStatus({ force: true });
+
+        if (currentSequence !== this.accessCheckSequence) {
+          return;
+        }
+
+        if (!status || (status.subscription_status !== 'active' && status.subscription_status !== 'trial')) {
+           console.log('[Auth] Empresa inativa, trancando UI');
+           this.isLockedOut.set(true);
+           this.activeTab.set('assinatura');
+           if (this.lastAccessGateKey) {
+             this.persistAccessGate(this.lastAccessGateKey, 'locked');
+           }
+        } else {
+           this.isLockedOut.set(false);
+           if (this.lastAccessGateKey) {
+             this.persistAccessGate(this.lastAccessGateKey, 'open');
+           }
+           if (this.hasPendingEmbeddedCheckout()) {
+              this.activeTab.set('assinatura');
+           } else if (this.activeTab() === 'assinatura') {
+              this.activeTab.set('reservas');
+           }
+
+           // O preload completo continua acontecendo, mas sem segurar a catraca.
+           void this.subscriptionService.preloadSubscriptionData({ force: true });
+        }
+     } catch (error) {
+        if (currentSequence !== this.accessCheckSequence) {
+          return;
+        }
+
+        console.error('Erro ao verificar acesso da assinatura:', error);
         this.isLockedOut.set(true);
         this.activeTab.set('assinatura');
-     } else {
-        // Liberado
-        this.isLockedOut.set(false);
-        if (this.activeTab() === 'assinatura') {
-           this.activeTab.set('reservas'); // Restaura aba padrao
+        if (this.lastAccessGateKey) {
+          this.persistAccessGate(this.lastAccessGateKey, 'locked');
+        }
+     } finally {
+        if (currentSequence === this.accessCheckSequence) {
+          this.isCheckingSubscriptionAccess.set(false);
         }
      }
+  }
+
+  private hasPendingEmbeddedCheckout(): boolean {
+    try {
+      return !!sessionStorage.getItem(this.pendingEmbeddedCheckoutStorageKey);
+    } catch {
+      return false;
+    }
   }
 
   // --- Hotel Methods ---
@@ -959,5 +1056,9 @@ export class AppComponent implements OnInit {
   closeCreditEditModal() {
     this.showCreditEditModal.set(false);
     this.editingCredit.set(null);
+  }
+
+  isSubscriptionTabActive() {
+    return this.activeTab() === 'assinatura';
   }
 }

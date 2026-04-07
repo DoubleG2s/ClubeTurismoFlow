@@ -3,45 +3,40 @@ const dotenv = require('dotenv');
 
 console.log('🟢 inject-env.js iniciado');
 
-/**
- * Carrega .env.local se existir (desenvolvimento local)
- */
 if (fs.existsSync('.env.local')) {
-    dotenv.config({ path: '.env.local' });
-    console.log('📝 .env.local carregado');
+  dotenv.config({ path: '.env.local' });
+  console.log('📝 .env.local carregado');
 }
 
-// Captura as variáveis (prioriza o que o dotenv carregou ou variáveis de sistema/Vercel)
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const STRIPE_PUBLISHABLE_KEY =
+  process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
 
-// Logs de verificação (sem exibir as chaves por segurança)
-console.log('SUPABASE_URL:', SUPABASE_URL ? '✅ OK' : '❌ MISSING');
-console.log('SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? '✅ OK' : '❌ MISSING');
-console.log('GEMINI_API_KEY:', GEMINI_API_KEY ? '✅ OK' : '❌ MISSING');
+console.log('📝 SUPABASE_URL:', SUPABASE_URL ? '✅ OK' : '❌ MISSING');
+console.log('📝 SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? '✅ OK' : ' ❌ MISSING');
+console.log('📝 GEMINI_API_KEY:', GEMINI_API_KEY ? '✅ OK' : '❌ MISSING');
+console.log('📝 STRIPE_PUBLISHABLE_KEY:', STRIPE_PUBLISHABLE_KEY ? '✅ OK' : '❌ MISSING');
 
-const files = [
-    'src/environments/environment.ts',
-    'src/environments/environment.prod.ts'
+const environmentFiles = [
+  { path: 'src/environments/environment.ts', production: false },
+  { path: 'src/environments/environment.prod.ts', production: true }
 ];
 
-files.forEach((file) => {
-    if (!fs.existsSync(file)) {
-        console.warn(`⚠️ Arquivo não encontrado: ${file}`);
-        return;
-    }
+for (const file of environmentFiles) {
+  const content =
+`export const environment = {
+  production: ${file.production},
+  supabaseUrl: '${SUPABASE_URL}',
+  supabaseAnonKey: '${SUPABASE_ANON_KEY}',
+  geminiApiKey: '${GEMINI_API_KEY}',
+  stripePublishableKey: '${STRIPE_PUBLISHABLE_KEY}'
+};
+`;
 
-    let content = fs.readFileSync(file, 'utf8');
-
-    // Realiza as substituições dos placeholders pelas chaves reais
-    content = content
-        .replace('SUPABASE_URL_PLACEHOLDER', SUPABASE_URL)
-        .replace('SUPABASE_ANON_KEY_PLACEHOLDER', SUPABASE_ANON_KEY)
-        .replace('GEMINI_API_KEY_PLACEHOLDER', GEMINI_API_KEY);
-
-    fs.writeFileSync(file, content);
-    console.log(`✅ Variáveis injetadas em ${file}`);
-});
+  fs.writeFileSync(file.path, content, 'utf8');
+  console.log(`📁 Variaveis injetadas em ${file.path}`);
+}
 
 console.log('🏁 inject-env.js finalizado');

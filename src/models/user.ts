@@ -4,6 +4,10 @@ export interface UserProfile {
   name: string;
   role: 'admin' | 'agent';
   company_id?: string;
-  companies?: any; // Para joins do Supabase
+  companies?: {
+    id?: string;
+    name?: string;
+    slug?: string;
+  } | null; // Join opcional com a empresa atual do usuario
   created_at: string;
 }

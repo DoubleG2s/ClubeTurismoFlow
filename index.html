@@ -28,9 +28,51 @@
     }
   </script>
   <style>
+    :root {
+      color-scheme: light;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f3f4f6;
+      margin: 0;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    app-root {
+      display: block;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      touch-action: manipulation;
+    }
+
+    input,
+    select,
+    textarea {
+      min-height: 44px;
+    }
+
+    img,
+    svg,
+    canvas,
+    video {
+      max-width: 100%;
     }
 
     /* Custom scrollbar for better look */
@@ -142,6 +184,12 @@
       }
       .qp-hotel-card, .qp-service-card, .qp-accordion {
         transition: none !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        overflow-x: hidden;
       }
     }
   </style>

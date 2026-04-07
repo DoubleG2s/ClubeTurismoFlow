@@ -24,7 +24,13 @@ export class AdminMasterComponent implements OnInit {
   // Company Form Modal States
   showCompanyModal = signal(false);
   editingCompanyId = signal<string | null>(null);
-  companyDraft = signal<{ name: string, slug: string }>({ name: '', slug: '' });
+  companyDraft = signal<{ name: string, slug: string, tax_id: string, billing_email: string, billing_postal_code: string }>({
+    name: '',
+    slug: '',
+    tax_id: '',
+    billing_email: '',
+    billing_postal_code: ''
+  });
   isSaving = signal(false);
 
   // View Company Modal States
@@ -65,13 +71,19 @@ export class AdminMasterComponent implements OnInit {
   // --- Gestão de Empresas ---
   openCreateCompany() {
     this.editingCompanyId.set(null);
-    this.companyDraft.set({ name: '', slug: '' });
+    this.companyDraft.set({ name: '', slug: '', tax_id: '', billing_email: '', billing_postal_code: '' });
     this.showCompanyModal.set(true);
   }
 
   openEditCompany(company: Company) {
     this.editingCompanyId.set(company.id);
-    this.companyDraft.set({ name: company.name, slug: company.slug });
+    this.companyDraft.set({
+      name: company.name,
+      slug: company.slug,
+      tax_id: company.tax_id || '',
+      billing_email: company.billing_email || '',
+      billing_postal_code: company.billing_postal_code || ''
+    });
     this.showCompanyModal.set(true);
   }
 
@@ -81,6 +93,18 @@ export class AdminMasterComponent implements OnInit {
 
   updateSlugAutomatic(name: string) {
     this.companyDraft.update(d => ({ ...d, name, slug: this.generateSlugFromName(name) }));
+  }
+
+  updateCompanyTaxId(taxId: string) {
+    this.companyDraft.update(draft => ({ ...draft, tax_id: taxId }));
+  }
+
+  updateCompanyBillingPostalCode(billing_postal_code: string) {
+    this.companyDraft.update(draft => ({ ...draft, billing_postal_code }));
+  }
+
+  updateCompanyBillingEmail(billing_email: string) {
+    this.companyDraft.update(draft => ({ ...draft, billing_email }));
   }
 
   async saveCompany() {

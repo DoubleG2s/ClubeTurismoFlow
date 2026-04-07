@@ -1,11 +1,16 @@
 import '@angular/compiler';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { LOCALE_ID, provideZonelessChangeDetection } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { AppComponent } from './src/app.component';
+
+registerLocaleData(localePt);
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideZonelessChangeDetection()
+    provideZonelessChangeDetection(),
+    { provide: LOCALE_ID, useValue: 'pt-BR' }
   ]
 }).catch(err => console.error(err));
 

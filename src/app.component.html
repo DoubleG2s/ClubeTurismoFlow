@@ -1,4 +1,4 @@
-<div class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-100 selection:text-brand-700">
+﻿<div class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-100 selection:text-brand-700">
 
   @if (isFullscreenProposal()) {
     <app-quote-proposal [quoteId]="proposalQuoteId()" [publicToken]="publicQuoteToken()"></app-quote-proposal>
@@ -13,16 +13,36 @@
   </div>
   } @else if (!authService.session()) {
   <app-login></app-login>
+  } @else if (isCheckingSubscriptionAccess()) {
+  <div class="flex-grow flex items-center justify-center px-6 py-12 bg-slate-50">
+    <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/60">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-lg shadow-amber-500/30">
+        <svg class="h-7 w-7 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+          <path class="opacity-90" fill="currentColor" d="M12 2a10 10 0 0 1 10 10h-3a7 7 0 0 0-7-7V2z"></path>
+        </svg>
+      </div>
+
+      <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Verificando seu acesso</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-500">
+        Estamos carregando os dados da sua empresa e conferindo o status da assinatura antes de abrir a plataforma.
+      </p>
+
+      <div class="mt-6 overflow-hidden rounded-full bg-slate-100">
+        <div class="h-2 w-full animate-pulse bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600"></div>
+      </div>
+    </div>
+  </div>
   } @else {
   <!-- Authenticated App Content -->
 
   <!-- Header (Branding only) -->
   <header class="bg-white border-b border-slate-200 z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 md:h-20 gap-4">
+      <div class="flex flex-col gap-3 py-3 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:py-0 md:h-20">
 
         <!-- Logo Area with Notebook Icon -->
-        <div class="flex items-center gap-3 group cursor-default">
+        <div class="flex items-center justify-center gap-3 group cursor-default sm:justify-start">
           <div
             class="relative w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
@@ -37,25 +57,25 @@
               <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
             </span>
           </div>
-          <div>
-            <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">Clube Turismo Flow</h1>
-            <p class="text-xs text-slate-500 font-medium tracking-wide mt-0.5">Gestão Inteligente</p>
+          <div class="text-center sm:text-left">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-none">Clube Turismo Flow</h1>
+            <p class="text-[11px] sm:text-xs text-slate-500 font-medium tracking-wide mt-0.5">Gestão Inteligente</p>
           </div>
         </div>
 
         <!-- User Profile & Actions -->
-        <div class="flex items-center gap-4">
-          <div class="hidden md:flex flex-col text-right">
+        <div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end sm:gap-4">
+          <div class="min-w-0 hidden md:flex flex-col text-right">
             <span class="text-sm font-bold text-slate-700">{{ authService.profile()?.name }}</span>
             <span class="text-xs text-slate-500 uppercase font-semibold">{{ authService.profile()?.role }}</span>
           </div>
 
-          <div class="flex items-center border-l border-slate-200 pl-4 ml-2 space-x-1">
+          <div class="flex w-full items-center justify-end gap-1 overflow-x-auto border-t border-slate-200 pt-3 sm:ml-2 sm:w-auto sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
             <!-- Admin Master & Users Buttons -->
             @if (authService.isAdmin()) {
             <button (click)="switchTab('admin')" [class.text-slate-900]="activeTab() === 'admin'"
               [class.bg-slate-100]="activeTab() === 'admin'"
-              class="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer mr-1"
+              class="shrink-0 p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
               title="Admin Master">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -63,8 +83,8 @@
             </button>
             <button (click)="switchTab('usuarios')" [class.text-brand-600]="activeTab() === 'usuarios'"
               [class.bg-brand-50]="activeTab() === 'usuarios'"
-              class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all cursor-pointer"
-              title="Gerenciar Usuários">
+              class="shrink-0 p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all cursor-pointer"
+              title="Gerenciar UsuÃ¡rios">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -78,7 +98,7 @@
             <!-- Assinatura/SaaS Button -->
             <button (click)="switchTab('assinatura')" [class.text-amber-600]="activeTab() === 'assinatura'"
               [class.bg-amber-50]="activeTab() === 'assinatura'"
-              class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all cursor-pointer mr-2"
+              class="shrink-0 p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all cursor-pointer"
               title="Minha Assinatura / SaaS">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="5" width="20" height="14" rx="2"></rect>
@@ -88,7 +108,7 @@
 
             <!-- Logout Button -->
             <button (click)="onLogout()"
-              class="relative z-50 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+              class="relative z-50 shrink-0 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
               title="Sair">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -108,13 +128,13 @@
   @if (!isLockedOut()) {
   <div class="bg-white/50 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <nav class="flex space-x-6 -mb-px overflow-x-auto" aria-label="Tabs">
+      <nav class="flex space-x-4 sm:space-x-6 -mb-px overflow-x-auto" aria-label="Tabs">
 
         <!-- Tab Voos -->
         <button (click)="switchTab('voos')" [class.border-brand-500]="activeTab() === 'voos'"
           [class.text-brand-600]="activeTab() === 'voos'" [class.border-transparent]="activeTab() !== 'voos'"
           [class.text-slate-500]="activeTab() !== 'voos'"
-          class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-brand-600 focus:outline-none whitespace-nowrap">
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-brand-600 focus:outline-none whitespace-nowrap">
           <div [ngClass]="{
                 'bg-brand-50': activeTab() === 'voos',
                 'group-hover:bg-brand-50': activeTab() !== 'voos'
@@ -129,11 +149,11 @@
           <span class="tracking-wide">Voos</span>
         </button>
 
-        <!-- Tab Gestão de Reservas -->
+        <!-- Tab GestÃ£o de Reservas -->
         <button (click)="switchTab('reservas')" [class.border-emerald-500]="activeTab() === 'reservas'"
           [class.text-emerald-600]="activeTab() === 'reservas'" [class.border-transparent]="activeTab() !== 'reservas'"
           [class.text-slate-500]="activeTab() !== 'reservas'"
-          class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-emerald-600 focus:outline-none whitespace-nowrap">
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-emerald-600 focus:outline-none whitespace-nowrap">
           <div [ngClass]="{
                 'bg-emerald-50': activeTab() === 'reservas',
                 'group-hover:bg-emerald-50': activeTab() !== 'reservas'
@@ -153,11 +173,11 @@
           <span class="tracking-wide">Gestão de Reservas</span>
         </button>
 
-        <!-- Tab Cotações (New) -->
+        <!-- Tab CotaÃ§Ãµes (New) -->
         <button (click)="switchTab('cotacoes')" [class.border-purple-500]="activeTab() === 'cotacoes'"
           [class.text-purple-600]="activeTab() === 'cotacoes'" [class.border-transparent]="activeTab() !== 'cotacoes'"
           [class.text-slate-500]="activeTab() !== 'cotacoes'"
-          class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-purple-600 focus:outline-none whitespace-nowrap">
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-purple-600 focus:outline-none whitespace-nowrap">
           <div [ngClass]="{
                 'bg-purple-50': activeTab() === 'cotacoes',
                 'group-hover:bg-purple-50': activeTab() !== 'cotacoes'
@@ -175,7 +195,7 @@
         <button (click)="switchTab('hotel')" [class.border-red-500]="activeTab() === 'hotel'"
           [class.text-red-600]="activeTab() === 'hotel'" [class.border-transparent]="activeTab() !== 'hotel'"
           [class.text-slate-500]="activeTab() !== 'hotel'"
-          class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-red-600 focus:outline-none whitespace-nowrap">
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-red-600 focus:outline-none whitespace-nowrap">
           <div [ngClass]="{
                 'bg-red-50': activeTab() === 'hotel',
                 'group-hover:bg-red-50': activeTab() !== 'hotel'
@@ -199,7 +219,10 @@
   }
 
   <!-- Main Content -->
-  <main class="flex-grow py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+  <main
+    class="flex-grow w-full"
+    [ngClass]="isSubscriptionTabActive() ? 'py-0 px-0 max-w-none mx-0' : 'py-5 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'"
+  >
 
     @if (activeTab() === 'assinatura') {
     <div class="animate-fade-in transition-all">
@@ -258,20 +281,20 @@
     </div>
     }
 
-    <!-- Gestão de Reservas Content -->
+    <!-- GestÃ£o de Reservas Content -->
     @if (activeTab() === 'reservas') {
     <div class="animate-fade-in space-y-8">
 
       <!-- Navigation Bar for Sub-Tabs -->
       <div class="border-b border-slate-200 mb-6">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav class="-mb-px flex space-x-5 overflow-x-auto" aria-label="Tabs">
           <button
             (click)="switchReservaTab('reservas')"
             [class.border-emerald-500]="activeReservaTab() === 'reservas'"
             [class.text-emerald-600]="activeReservaTab() === 'reservas'"
             [class.border-transparent]="activeReservaTab() !== 'reservas'"
             [class.text-slate-500]="activeReservaTab() !== 'reservas'"
-            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-emerald-600 transition-colors">
+            class="whitespace-nowrap shrink-0 pb-4 px-1 border-b-2 font-medium text-sm hover:text-emerald-600 transition-colors">
             Controle de Reservas
           </button>
           <button
@@ -280,7 +303,7 @@
             [class.text-amber-600]="activeReservaTab() === 'creditos'"
             [class.border-transparent]="activeReservaTab() !== 'creditos'"
             [class.text-slate-500]="activeReservaTab() !== 'creditos'"
-            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-amber-600 transition-colors">
+            class="whitespace-nowrap shrink-0 pb-4 px-1 border-b-2 font-medium text-sm hover:text-amber-600 transition-colors">
             Controle de Créditos
           </button>
           <button
@@ -565,7 +588,7 @@
       </div>
       }
 
-      <!-- Calendário Content -->
+       <!-- Calendário Content -->
       @if (activeReservaTab() === 'calendario') {
       <div class="animate-fade-in transition-all">
         <app-calendario-embarques [rawReservations]="reservations()"></app-calendario-embarques>
@@ -575,13 +598,13 @@
     </div>
     }
 
-    <!-- COTAÇÕES CONTENT (New Tab) -->
+     <!-- COTAÇÕES CONTENT (New Tab) -->
     @if (activeTab() === 'cotacoes') {
     <div class="animate-fade-in space-y-8">
 
       <!-- Navigation Bar for Sub-Tabs -->
       <div class="border-b border-slate-200 mb-6">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav class="-mb-px flex space-x-5 overflow-x-auto" aria-label="Tabs">
           <button
             (click)="switchCotacaoTab('cadastro')"
             [class.border-purple-500]="activeCotacaoTab() === 'cadastro'"
@@ -689,7 +712,7 @@
 
       <!-- Navigation Bar for Sub-Tabs -->
       <div class="border-b border-slate-200 mb-6">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav class="-mb-px flex space-x-5 overflow-x-auto" aria-label="Tabs">
           <button
             (click)="switchHotelTab('hoteis')"
             [class.border-red-500]="activeHotelTab() === 'hoteis'"
@@ -990,7 +1013,7 @@
   <!-- Global Confirm Delete Modal -->
   @if (showConfirmDeleteModal()) {
   <app-confirm-modal title="Excluir Hotel"
-    message="Tem certeza que deseja excluir esse hotel? Todos os dados vinculados (e-mails, imagens e telefones) também serão removidos permanentemente. Esta ação é irreversível."
+    message="Tem certeza que deseja excluir esse hotel? Todos os dados vinculados (e-mails, imagens e telefones) tambÃ©m serÃ£o removidos permanentemente. Esta aÃ§Ã£o Ã© irreversÃ­vel."
     confirmText="Sim, excluir" (confirm)="confirmDelete()" (cancel)="closeConfirmModal()">
   </app-confirm-modal>
   }

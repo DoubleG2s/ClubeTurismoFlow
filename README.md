@@ -1,63 +1,112 @@
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-<h1>✈️ Clube Turismo Flow</h1>
-<p><strong>Sistema de Gestão Multi-Tenant para Agências de Viagens</strong></p>
+<h1>Clube Turismo Flow</h1>
+<p><strong>Sistema de Gestao Multi-Tenant para Agencias de Viagens</strong></p>
 </div>
 
 ---
 
-## 📖 Visão Geral
+## Visao Geral
 
-O **Clube Turismo Flow** é uma plataforma inovadora desenvolvida para o gerenciamento operacional de agências de turismo. Focado na jornada completa do cliente, o sistema centraliza o controle de reservas, hotéis, voos, cotações e créditos com uma arquitetura técnica segura e ágil.
-
-Desenvolvido para escalar com múltiplos escritórios ou franquias operacionais, possui **arquitetura Multi-Tenant reativa**, assegurando que os dados de cada unidade permaneçam 100% isolados, protegidos e íntegros.
+O **Clube Turismo Flow** e uma plataforma para operacao de agencias de turismo com arquitetura multi-tenant, cobrindo reservas, hoteis, voos, cotacoes e creditos em um unico painel.
 
 ---
 
-## ✨ Principais Funcionalidades
+## Stack
 
-* 🏢 **Arquitetura Multi-Tenant Segura**: Proteção ativa contra manipulação de referência direta (IDOR). O estado do aplicativo é reativo (via Angular Signals/effects) isolando reservas, voos, cotações e hotéis dependendo do ID da empresa ativa.
-* 🛎️ **Gestão de Reservas**: Pipeline operacional do passageiro com checklist dinâmico interativo: desde a emissão de aéreos e vouchers, até etapas de pré-vendas e pós-viagem.
-* 🏨 **Catálogo de Hotéis**: Cadastro rico com suporte a múltiplas imagens (integrado ao *Supabase Storage*), listagem flexível de telefones e envio de comunicados por e-mail no próprio painel.
-* ✈️ **Controle de Voos & Cotações**: Acompanhamento de propostas, datas, localizadores e faturamento, permitindo visão transparente do funil de vendas.
-* 💳 **Gestão de Créditos**: Rastreio de créditos pendentes junto a cias aéreas e fornecedores para maximizar os resultados do caixa corporativo.
-
----
-
-## 🛠️ Stack Tecnológica
-
-* **Frontend:** [Angular](https://angular.dev/) (Arquitetura moderna com Standalone Components, Routing Avançado e gerenciamento de estado via Signals).
-* **UI/UX:** Tailwind CSS para estilos utilitários consistentes.
-* **Backend as a Service:** [Supabase](https://supabase.com/) (Banco de Dados PostgreSQL, Autenticação, Storage e Real-time).
+- Frontend: Angular
+- UI: Tailwind CSS
+- Backend/Data: Supabase
+- Billing: Stripe Embedded Checkout + Asaas + Webhooks
 
 ---
 
-## 🚀 Como Executar Localmente
+## Como Executar Localmente
 
-### Pré-requisitos
-* Node.js LTS ativo no ambiente
-* Conta e Projeto criados no Supabase (com as tabelas mapeadas)
+### Pre-requisitos
 
-### Passo a Passo
+- Node.js LTS
+- Projeto Supabase configurado
+- Conta Stripe com um `Price` mensal criado
+- Conta Asaas com API key ativa
 
-1. **Instale as dependências:**
-   ```bash
-   npm install
-   ```
+### Ambiente
 
-2. **Configuração de Ambiente:**
-   Certifique-se de configurar as chaves providas pelo Supabase no arquivo `.env.local` na raiz do projeto:
-   ```env
-   SUPABASE_URL=https://seu-projeto.supabase.co
-   SUPABASE_ANON_KEY=sua-anon-key-publica
-   ```
+Crie um arquivo `.env.local` com:
 
-3. **Inicie a Aplicação em Modo de Desenvolvimento:**
-   ```bash
-   npm run dev
-   ```
-   > Esse script roda o pre-flight de injeção de ambiente e inicializa o servidor na porta padrão (`http://localhost:3000` ou similar).
+```env
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_ANON_KEY=sua-anon-key-publica
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+GEMINI_API_KEY=sua-chave-opcional
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_MONTHLY_PRICE_ID=price_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+ASAAS_API_KEY=$aact_...
+ASAAS_BASE_URL=https://sandbox.asaas.com/api
+ASAAS_WEBHOOK_TOKEN=token-opcional
+ASAAS_MONTHLY_AMOUNT=370
+```
+
+Notas da Stripe:
+
+- `STRIPE_MONTHLY_PRICE_ID` precisa ser um `Price` recorrente mensal.
+- Configure o webhook para `POST /api/stripe/webhook`.
+- Eventos recomendados: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`.
+
+Notas do Asaas:
+
+- Configure o webhook para `POST /api/asaas/webhook`.
+- O token em `ASAAS_WEBHOOK_TOKEN` e opcional, mas recomendado.
+- O Pix e exibido na propria pagina; o checkout de debito so abre fora quando o usuario clicar.
+
+### Migracao Recomendada Sem Perder Dados
+
+Se voce quer o caminho recomendado com risco minimo:
+
+1. Rode o SQL em `supabase/migrations/20260406_hybrid_checkout.sql` no Supabase.
+2. O script adiciona os campos de status/provedor/metodo e cria a tabela de idempotencia `payment_webhook_events`.
+3. Nenhuma coluna antiga e removida.
+
+Resumo do que o script faz:
+
+- adiciona campos de status e identificadores em `companies`
+- adiciona colunas de rastreamento de cobranca em `saas_invoices`
+- cria `payment_webhook_events` para tolerancia a repeticao de webhook
+
+Isso permite usar Stripe e Asaas no mesmo checkout, com logs e sincronizacao mais robustos.
+
+### Instalar Dependencias
+
+```bash
+npm install
+```
+
+### Rodar em Desenvolvimento
+
+```bash
+npm run dev
+```
+
+Para simular as functions da pasta `api`, use:
+
+```bash
+npm run vercel:dev
+```
 
 ---
 
-*Desenvolvido com foco em alta performance, código limpo e experiência de usuário fluida.*
+## Fluxo de Checkout
+
+- Cartao de credito recorrente: Stripe Embedded Checkout dentro da pagina.
+- Pix: Asaas com QR Code e copia e cola exibidos dentro da propria UI.
+- Cartao de debito: Asaas com invoice hospedada aberta apenas quando o usuario clicar.
+- Os webhooks de Stripe e Asaas atualizam `subscription_status`, `payment_provider`, `payment_method`, `payment_status`, datas e historico de cobrancas.
+
+### Seguranca Multi-Tenant
+
+- As rotas Stripe validam a sessao autenticada do Supabase via token Bearer.
+- Para usuarios comuns, a empresa usada no backend vem de `profiles.company_id`.
+- Para admins, o `companyId` enviado no body pode ser usado como empresa alvo, desde que o usuario esteja autenticado.
+- Isso evita que um tenant tente operar a assinatura de outra empresa apenas alterando o payload no navegador.

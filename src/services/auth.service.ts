@@ -25,6 +25,26 @@ export class AuthService {
     this.init();
   }
 
+  private syncCompanySlugInUrl(profile: UserProfile | null) {
+    // Nota para o proximo dev:
+    // a autorizacao continua vindo do login + profiles.company_id.
+    // O slug na URL e so um espelho visual para facilitar suporte e teste.
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    const slug = profile?.companies?.slug?.trim();
+
+    if (slug) {
+      url.searchParams.set('empresa', slug);
+    } else {
+      url.searchParams.delete('empresa');
+    }
+
+    window.history.replaceState({}, '', url.toString());
+  }
+
   private async init() {
     this.loadingSignal.set(true);
     // 1. Get initial session
@@ -52,6 +72,7 @@ export class AuthService {
       this.profileSignal.set(null);
       this.userSignal.set(null);
       this.sessionSignal.set(null); // This triggers the UI to switch to Login
+      this.syncCompanySlugInUrl(null);
       return;
     }
 
@@ -59,6 +80,7 @@ export class AuthService {
     // This helps with TOKEN_REFRESHED events avoiding flickering
     if (this.profileSignal()?.id === session.user.id) {
        this.sessionSignal.set(session);
+       this.syncCompanySlugInUrl(this.profileSignal());
        return;
     }
 
@@ -68,6 +90,9 @@ export class AuthService {
     // Update all signals
     if (profile) {
       this.profileSignal.set(profile);
+      this.syncCompanySlugInUrl(profile);
+    } else {
+      this.syncCompanySlugInUrl(null);
     }
     this.userSignal.set(session.user);
     
@@ -80,7 +105,7 @@ export class AuthService {
   private async fetchProfileData(userId: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, companies(id, name, slug)')
       .eq('id', userId)
       .single();
     
@@ -123,6 +148,7 @@ export class AuthService {
     this.profileSignal.set(null);
     this.sessionSignal.set(null);
     this.userSignal.set(null);
+    this.syncCompanySlugInUrl(null);
 
     try {
       await supabase.auth.signOut();
