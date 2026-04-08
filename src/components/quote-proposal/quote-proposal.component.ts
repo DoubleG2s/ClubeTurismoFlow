@@ -11,6 +11,7 @@ import { QuoteService } from '../../services/quote.service';
 })
 export class QuoteProposalComponent implements OnInit {
   @Input() quoteId: string = '';
+  @Input() publicToken: string = '';
   
   private quoteService = inject(QuoteService);
   
@@ -46,7 +47,7 @@ export class QuoteProposalComponent implements OnInit {
   });
 
   ngOnInit() {
-    if (this.quoteId) {
+    if (this.quoteId || this.publicToken) {
       this.loadQuote();
     }
   }
@@ -54,18 +55,31 @@ export class QuoteProposalComponent implements OnInit {
   async loadQuote() {
     this.isLoading.set(true);
     try {
-      const q = this.quoteService.quotes().find(x => x.id === this.quoteId);
-      if (q) {
-        this.quote.set(q);
-        this.selectedHotelIndex.set(0);
+      if (this.publicToken) {
+        // Fluxo de Link Público
+        const q = await this.quoteService.getPublicQuote(this.publicToken);
+        if (q) {
+          this.quote.set(q);
+          this.selectedHotelIndex.set(0);
+        } else {
+          console.warn('Link público expirado, inválido ou bloqueado.');
+        }
         this.isLoading.set(false);
       } else {
-        setTimeout(() => {
-          const fetchedQ = this.quoteService.quotes().find(x => x.id === this.quoteId) || null;
-          this.quote.set(fetchedQ);
+        // Fluxo de Admin Logado
+        const q = this.quoteService.quotes().find(x => x.id === this.quoteId);
+        if (q) {
+          this.quote.set(q);
           this.selectedHotelIndex.set(0);
           this.isLoading.set(false);
-        }, 1500);
+        } else {
+          setTimeout(() => {
+            const fetchedQ = this.quoteService.quotes().find(x => x.id === this.quoteId) || null;
+            this.quote.set(fetchedQ);
+            this.selectedHotelIndex.set(0);
+            this.isLoading.set(false);
+          }, 1500);
+        }
       }
     } catch {
       this.isLoading.set(false);

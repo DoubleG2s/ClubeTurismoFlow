@@ -1,7 +1,7 @@
 <div class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-100 selection:text-brand-700">
 
   @if (isFullscreenProposal()) {
-    <app-quote-proposal [quoteId]="proposalQuoteId()"></app-quote-proposal>
+    <app-quote-proposal [quoteId]="proposalQuoteId()" [publicToken]="publicQuoteToken()"></app-quote-proposal>
   } @else if (authService.isLoading()) {
   <div class="flex-grow flex items-center justify-center">
     <svg class="animate-spin h-8 w-8 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

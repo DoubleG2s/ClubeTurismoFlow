@@ -87,6 +87,7 @@ export class AppComponent implements OnInit {
   activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
   isFullscreenProposal = signal<boolean>(false);
   proposalQuoteId = signal<string>('');
+  publicQuoteToken = signal<string>('');
 
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
@@ -265,6 +266,14 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     const params = new URLSearchParams(window.location.search);
+    
+    const publicToken = params.get('public_quote');
+    if (publicToken) {
+      this.isFullscreenProposal.set(true);
+      this.publicQuoteToken.set(publicToken);
+      return; // Break out, no auth needed
+    }
+
     const proposalId = params.get('proposal');
     if (proposalId) {
       this.isFullscreenProposal.set(true);

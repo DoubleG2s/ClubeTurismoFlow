@@ -83,24 +83,50 @@
   </div>
 
   <!-- Footer Actions -->
-  <div class="p-4 border-t border-slate-100 flex gap-2 bg-slate-50/30 rounded-b-2xl">
+  <!-- Footer Actions -->
+  <div class="p-4 border-t border-slate-100 flex flex-wrap gap-2 bg-slate-50/30 rounded-b-2xl">
     <button (click)="onShowProposal($event)"
-      class="flex-1 py-2 rounded-lg text-xs font-bold text-indigo-600 bg-white border border-slate-200 hover:text-indigo-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm flex items-center justify-center gap-1.5"
+      class="flex-1 min-w-[30%] py-2 rounded-lg text-xs font-bold text-indigo-600 bg-white border border-slate-200 hover:text-indigo-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm flex items-center justify-center gap-1.5"
       title="Abrir proposta">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      Proposta
+      Ver
     </button>
+
+    <!-- Public Link Button -->
+    <button (click)="onGeneratePublicLink($event)" [disabled]="isGeneratingLink()"
+      class="flex-1 min-w-[30%] py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 border"
+      [ngClass]="quote.is_public ? 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-purple-600'"
+      title="Link para Cliente">
+      
+      @if (isGeneratingLink()) {
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+      }
+      {{ quote.is_public ? 'Copiar' : 'Gerar Link' }}
+    </button>
+    
+    @if(quote.is_public) {
+      <button (click)="onRevokePublicLink($event)" class="px-2 py-2 rounded-lg text-xs font-bold text-red-400 bg-white border border-slate-200 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm" title="Revogar acesso público">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+      </button>
+    }
 
     <!-- View Button (New) -->
     <button (click)="onView($event)"
-      class="flex-1 py-2 rounded-lg text-xs font-bold text-emerald-600 bg-white border border-slate-200 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50 transition-all shadow-sm flex items-center justify-center gap-1.5"
+      class="px-3 py-2 rounded-lg text-xs font-bold text-emerald-600 bg-white border border-slate-200 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50 transition-all shadow-sm flex items-center justify-center"
       title="Visualizar e Copiar Texto">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
         <circle cx="12" cy="12" r="3" />
       </svg>
-      Texto
     </button>
 
     <button (click)="edit.emit(quote.id)"

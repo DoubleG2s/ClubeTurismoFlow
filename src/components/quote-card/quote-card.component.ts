@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, computed, signal, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, HostListener, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Quote } from '../../models/quote';
+import { QuoteService } from '../../services/quote.service';
 
 @Component({
   selector: 'app-quote-card',
@@ -15,9 +16,12 @@ export class QuoteCardComponent {
   @Output() edit = new EventEmitter<string>();
   @Output() remove = new EventEmitter<string>();
 
+  private quoteService = inject(QuoteService);
+
   showDeleteModal = signal(false);
   showViewModal = signal(false);
   generatedText = signal('');
+  isGeneratingLink = signal(false);
 
   // Helpers para exibição rápida no card
   mainHotel = computed(() => this.quote.hotel_options?.[0]);
@@ -50,10 +54,48 @@ export class QuoteCardComponent {
     window.open(window.location.origin + '?proposal=' + this.quote.id, '_blank');
   }
 
+  async onGeneratePublicLink(event: Event) {
+    event.stopPropagation();
+    
+    // Se já tiver um link, apenas copia
+    if (this.quote.is_public && this.quote.public_token) {
+      this.copyPublicLink();
+      return;
+    }
+
+    this.isGeneratingLink.set(true);
+    try {
+      const token = await this.quoteService.generatePublicLink(this.quote.id);
+      if (token) {
+        // Objeto é atualizado internamente pelo serviço via Signal, mas podemos garantir a cópia localmente
+        this.quote.public_token = token;
+        this.quote.is_public = true;
+        this.copyPublicLink();
+      }
+    } finally {
+      this.isGeneratingLink.set(false);
+    }
+  }
+
+  async onRevokePublicLink(event: Event) {
+    event.stopPropagation();
+    if (confirm('Tem certeza que deseja inativar o link público? O cliente não poderá mais ver esta cotação.')) {
+      await this.quoteService.revokePublicLink(this.quote.id);
+    }
+  }
+  
+  private copyPublicLink() {
+    const url = `${window.location.origin}/?public_quote=${this.quote.public_token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Link público copiado para a área de transferência!');
+    });
+  }
+
   confirmDelete() {
     this.remove.emit(this.quote.id);
     this.showDeleteModal.set(false);
   }
+
 
   cancelDelete() {
     this.showDeleteModal.set(false);

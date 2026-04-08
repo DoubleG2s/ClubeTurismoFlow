@@ -3,6 +3,8 @@ import { Quote } from '../models/quote';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
 import { TenantService } from './tenant.service';
+import { createClient } from '@supabase/supabase-js';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -158,9 +160,115 @@ export class QuoteService {
 
     } catch (error) {
       console.error('Erro ao remover cotação:', error);
-      // 5. Rollback on error
-      this.quotesSignal.set(previousState);
       alert('Não foi possível excluir a cotação. Verifique se você tem permissão.');
     }
   }
+
+  // --- PUBLIC SHARING SYSTEM ---
+
+  async generatePublicLink(quoteId: string, daysValid: number = 30): Promise<string | null> {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return null;
+
+    try {
+      const token = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + daysValid);
+
+      const { data, error } = await supabase
+        .from('quotes')
+        .update({
+          public_token: token,
+          is_public: true,
+          public_expires_at: expiresAt.toISOString()
+        })
+        .eq('id', quoteId)
+        .eq('company_id', companyId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // Optimistic refresh
+        this.quotesSignal.update(current =>
+          current.map(q => q.id === quoteId ? { ...q, public_token: token, is_public: true, public_expires_at: expiresAt.toISOString() } : q)
+        );
+        return token;
+      }
+      return null;
+    } catch (e: any) {
+      console.error('Erro ao gerar link:', e);
+      alert('Erro ao gerar link público exclusívo.');
+      return null;
+    }
+  }
+
+  async revokePublicLink(quoteId: string): Promise<boolean> {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) return false;
+
+    try {
+      const { error } = await supabase
+        .from('quotes')
+        .update({
+          is_public: false,
+          public_token: null, // Nulling it invalidates existing links
+          public_expires_at: null
+        })
+        .eq('id', quoteId)
+        .eq('company_id', companyId);
+
+      if (error) throw error;
+
+       // Optimistic Update
+      this.quotesSignal.update(current =>
+        current.map(q => q.id === quoteId ? { ...q, public_token: undefined, is_public: false, public_expires_at: undefined } : q)
+      );
+
+      return true;
+    } catch (e: any) {
+      console.error('Erro ao revogar do link:', e);
+      return false;
+    }
+  }
+
+  // This method BYPASSES tenant checks locally and sends a custom header for RLS
+  async getPublicQuote(token: string): Promise<Quote | null> {
+    // IMPORTANT: To query securely for an unauthenticated user via RLS (is_public and token verification),
+    // we use a specifically configured anon client so the Request Header holds the target token.
+    try {
+      const publicClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey, {
+        global: {
+          headers: { 'x-quote-token': token }
+        }
+      });
+
+      const { data, error } = await publicClient
+        .from('quotes')
+        .select('*')
+        .eq('public_token', token)
+        .maybeSingle();
+
+      if (error) {
+        console.error('RLS/DB Error:', error);
+        return null;
+      }
+
+      if (data) {
+        return {
+          ...data,
+          hotel_options: data.hotel_options || [],
+          flight_details: data.flight_details || {}
+        } as Quote;
+      }
+
+      return null;
+
+    } catch (e: any) {
+      console.error('Falha genérica na requisição publica:', e);
+      return null;
+    }
+  }
+
 }

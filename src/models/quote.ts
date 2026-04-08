@@ -54,4 +54,9 @@ export interface Quote {
   // Campos Legados (Mantidos para compatibilidade, mas podem ser ignorados na UI nova se vazios)
   city?: string;
   notes?: string;
+
+  // Compartilhamento
+  public_token?: string;
+  is_public?: boolean;
+  public_expires_at?: string;
 }
