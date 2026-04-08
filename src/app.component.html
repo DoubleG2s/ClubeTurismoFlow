@@ -1,6 +1,8 @@
 <div class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-100 selection:text-brand-700">
 
-  @if (authService.isLoading()) {
+  @if (isFullscreenProposal()) {
+    <app-quote-proposal [quoteId]="proposalQuoteId()"></app-quote-proposal>
+  } @else if (authService.isLoading()) {
   <div class="flex-grow flex items-center justify-center">
     <svg class="animate-spin h-8 w-8 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -691,7 +693,7 @@
           </div>
         </div>
 
-        <app-hotel-form (save)="onSaveHotel($event)" [isLoading]="hotelService.isLoading()"></app-hotel-form>
+        <app-hotel-form (save)="onSaveHotel($event)" [isLoading]="hotelService.isLoading()" [prefillName]="prefilledHotelName()"></app-hotel-form>
       </section>
 
       <!-- Hotel Grid -->

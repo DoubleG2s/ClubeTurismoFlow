@@ -61,9 +61,16 @@
       <input type="number" formControlName="children" min="0"
         class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
     </div>
-    <div class="flex flex-col group md:col-span-2">
+    <div class="flex items-center group md:col-span-1 pt-6">
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" formControlName="has_transfer"
+          class="w-5 h-5 rounded border-slate-300 text-purple-600 focus:ring-purple-500 transition-all cursor-pointer">
+        <span class="text-sm font-bold text-slate-700 select-none">Traslado (In / Out)</span>
+      </label>
+    </div>
+    <div class="flex flex-col group md:col-span-1">
       <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Passeio (Opcional)</label>
-      <input type="text" formControlName="tour_details" placeholder="Ex: City Tour Panorâmico"
+      <input type="text" formControlName="tour_details" placeholder="Ex: City Tour"
         class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
     </div>
   </div>
@@ -87,8 +94,13 @@
 
     <!-- IDA -->
     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-4" formGroupName="outbound">
-      <div class="flex items-center gap-2 mb-3">
+      <div class="flex items-center justify-between mb-3">
         <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-md">Ida</span>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="has_connection"
+            class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer">
+          <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Possui conexão?</span>
+        </label>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
@@ -114,12 +126,32 @@
             class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
         </div>
       </div>
+      @if (quoteForm.get('flight_details.outbound.has_connection')?.value) {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-200 border-dashed animate-fade-in">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Cidade da Conexão</label>
+          <input type="text" formControlName="connection_city" placeholder="Ex: GRU"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Horário da Conexão</label>
+          <input type="text" formControlName="connection_time" (input)="onTimeInput($event, 'outbound', 'connection_time')"
+            placeholder="HH:mm"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 placeholder-slate-400">
+        </div>
+      </div>
+      }
     </div>
 
     <!-- VOLTA -->
     <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl" formGroupName="inbound">
-      <div class="flex items-center gap-2 mb-3">
+      <div class="flex items-center justify-between mb-3">
         <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold uppercase rounded-md">Volta</span>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="has_connection"
+            class="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all cursor-pointer">
+          <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Possui conexão?</span>
+        </label>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
@@ -145,6 +177,21 @@
             class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
         </div>
       </div>
+      @if (quoteForm.get('flight_details.inbound.has_connection')?.value) {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-200 border-dashed animate-fade-in">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Cidade da Conexão</label>
+          <input type="text" formControlName="connection_city" placeholder="Ex: GRU"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Horário da Conexão</label>
+          <input type="text" formControlName="connection_time" (input)="onTimeInput($event, 'inbound', 'connection_time')"
+            placeholder="HH:mm"
+            class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 placeholder-slate-400">
+        </div>
+      </div>
+      }
     </div>
   </div>
 
@@ -195,10 +242,38 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="flex flex-col group">
+          <div class="flex flex-col group relative">
             <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Hotel</label>
-            <input type="text" formControlName="hotel_name" placeholder="Nome do Hotel"
+            <input type="text" formControlName="hotel_name" placeholder="Buscar Nome do Hotel..." autocomplete="off"
+              (focus)="activeHotelDropdownIndex.set($index)"
+              (blur)="onHotelBlur()"
               class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400">
+            
+            @if (activeHotelDropdownIndex() === $index) {
+              <div class="absolute top-[100%] mt-1 left-0 right-0 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-xl z-50 animate-fade-in divide-y divide-slate-100">
+                @if (getFilteredHotels($index).length > 0) {
+                  @for (h of getFilteredHotels($index); track h.id) {
+                    <div (mousedown)="selectHotelFromSearch($index, h)" class="p-3 hover:bg-purple-50 cursor-pointer flex justify-between items-center transition-colors">
+                      <div>
+                        <p class="text-sm font-bold text-slate-800">{{ h.name }}</p>
+                      </div>
+                      @if (h.hotel_images?.length) {
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <div class="p-4 text-center">
+                    <p class="text-xs text-slate-500 mb-2">Nenhum hotel encontrado.</p>
+                    <button type="button" (mousedown)="openHotelCreation($index)"
+                      class="text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 transition-colors inline-flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                      Cadastrar "{{ hotelOptions.at($index).get('hotel_name')?.value }}"
+                    </button>
+                  </div>
+                }
+              </div>
+            }
           </div>
           <div class="flex flex-col group">
             <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Regime</label>

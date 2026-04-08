@@ -1,4 +1,6 @@
 export interface HotelOption {
+  hotel_id?: string; // Vinculo direto com Hotel.id da DB
+  hotel_images?: string[]; // Array público armazenado pra cache da visualização da cotação
   hotel_name: string;
   regime: string; // Ex: Café da manhã
   accommodation: string; // Ex: Apto Luxo
@@ -12,6 +14,9 @@ export interface FlightSegment {
   destination_city: string;
   departure_time: string; // HH:mm
   arrival_time: string; // HH:mm
+  has_connection?: boolean;
+  connection_city?: string;
+  connection_time?: string; // HH:mm
 }
 
 export interface QuoteFlightDetails {
@@ -41,6 +46,7 @@ export interface Quote {
 
   // Detalhes Gerais
   tour_details?: string; // Opcional {passeio}
+  has_transfer?: boolean; // Traslado chegada e saída
 
   // Lista de Hotéis (Dinâmica)
   hotel_options: HotelOption[];

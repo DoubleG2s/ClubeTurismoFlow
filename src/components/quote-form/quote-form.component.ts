@@ -2,6 +2,8 @@ import { Component, EventEmitter, Input, Output, OnInit, SimpleChanges, OnChange
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Quote } from '../../models/quote';
+import { HotelService } from '../../services/hotel.service';
+import { Hotel } from '../../models/hotel';
 
 @Component({
   selector: 'app-quote-form',
@@ -20,6 +22,10 @@ export class QuoteFormComponent implements OnInit, OnChanges {
 
   quoteForm!: FormGroup; // Definite assignment
   isEditMode = signal(false);
+
+  // States do Autocomplete
+  hotelService = inject(HotelService);
+  activeHotelDropdownIndex = signal<number | null>(null);
 
   // Injeção do ChangeDetectorRef para garantir atualização da UI após recriar o form
   private cdr = inject(ChangeDetectorRef);
@@ -44,6 +50,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
 
       // Detalhes Gerais
       tour_details: [''], // Passeio (opcional)
+      has_transfer: [false], // Traslado chegada e saída
 
       // Voos (Nested Group)
       flight_details: this.fb.group({
@@ -51,13 +58,19 @@ export class QuoteFormComponent implements OnInit, OnChanges {
           origin_city: ['', Validators.required],
           destination_city: ['', Validators.required],
           departure_time: ['', Validators.required],
-          arrival_time: ['', Validators.required]
+          arrival_time: ['', Validators.required],
+          has_connection: [false],
+          connection_city: [''],
+          connection_time: ['']
         }),
         inbound: this.fb.group({
           origin_city: ['', Validators.required],
           destination_city: ['', Validators.required],
           departure_time: ['', Validators.required],
-          arrival_time: ['', Validators.required]
+          arrival_time: ['', Validators.required],
+          has_connection: [false],
+          connection_city: [''],
+          connection_time: ['']
         })
       }),
 
@@ -97,6 +110,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         adults: this.quoteToEdit.adults,
         children: this.quoteToEdit.children,
         tour_details: this.quoteToEdit.tour_details,
+        has_transfer: this.quoteToEdit.has_transfer || false,
         flight_details: this.quoteToEdit.flight_details
       });
 
@@ -118,6 +132,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
 
   createHotelOptionGroup(data?: any): FormGroup {
     return this.fb.group({
+      hotel_id: [data?.hotel_id || ''],
+      hotel_images: [data?.hotel_images || []],
       hotel_name: [data?.hotel_name || '', Validators.required],
       regime: [data?.regime || '', Validators.required],
       accommodation: [data?.accommodation || '', Validators.required],
@@ -136,6 +152,36 @@ export class QuoteFormComponent implements OnInit, OnChanges {
     if (this.hotelOptions.length > 1) {
       this.hotelOptions.removeAt(index);
     }
+  }
+
+  // --- AUTOCOMPLETE HOTÉIS ---
+
+  getFilteredHotels(index: number): Hotel[] {
+    const term = this.hotelOptions.at(index).get('hotel_name')?.value?.toLowerCase() || '';
+    const allHotels = this.hotelService.hotels();
+    if (!term) return allHotels;
+    return allHotels.filter(h => h.name.toLowerCase().includes(term));
+  }
+
+  selectHotelFromSearch(index: number, hotel: Hotel) {
+    const images = hotel.hotel_images ? hotel.hotel_images.map(img => img.image_url) : [];
+    this.hotelOptions.at(index).patchValue({
+      hotel_id: hotel.id,
+      hotel_name: hotel.name,
+      hotel_images: images
+    });
+    this.activeHotelDropdownIndex.set(null);
+  }
+
+  onHotelBlur() {
+    // Delay pequeno para permitir o clique na lista
+    setTimeout(() => this.activeHotelDropdownIndex.set(null), 200);
+  }
+
+  openHotelCreation(index: number) {
+     const term = this.hotelOptions.at(index).get('hotel_name')?.value || '';
+     // O app usa estado na querystring sem Angular router
+     window.open(`/?tab=hotel&new=${encodeURIComponent(term)}`, '_blank');
   }
 
   // --- MÁSCARA MONETÁRIA ---

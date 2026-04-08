@@ -30,6 +30,7 @@ import { AiAction } from './services/ai-interpreter.service';
 import { AdminMasterComponent } from './components/admin-master/admin-master.component';
 import { SubscriptionComponent } from './app/pages/subscription/subscription'; // Importando a tela SaaS
 import { SubscriptionService } from './services/subscription.service';
+import { QuoteProposalComponent } from './components/quote-proposal/quote-proposal.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
@@ -61,7 +62,8 @@ import { Credit } from './models/credit';
     AiChatComponent,
     CalendarioEmbarquesComponent,
     AdminMasterComponent,
-    SubscriptionComponent
+    SubscriptionComponent,
+    QuoteProposalComponent
   ],
   templateUrl: './app.component.html',
 })
@@ -83,6 +85,8 @@ export class AppComponent implements OnInit {
   activeReservaTab = signal<'reservas' | 'creditos' | 'calendario'>('reservas');
   activeHotelTab = signal<'hoteis' | 'email'>('hoteis');
   activeCotacaoTab = signal<'cadastro' | 'calculadora'>('cadastro');
+  isFullscreenProposal = signal<boolean>(false);
+  proposalQuoteId = signal<string>('');
 
   // Flight Edit State
   editingFlight = signal<Flight | null>(null);
@@ -104,6 +108,7 @@ export class AppComponent implements OnInit {
   // Hotel State
   editingHotel = signal<Hotel | null>(null);
   showHotelEditModal = signal(false);
+  prefilledHotelName = signal<string>('');
 
   // Hotel Details View State
   selectedHotelDetails = signal<Hotel | null>(null);
@@ -259,6 +264,29 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    const params = new URLSearchParams(window.location.search);
+    const proposalId = params.get('proposal');
+    if (proposalId) {
+      this.isFullscreenProposal.set(true);
+      this.proposalQuoteId.set(proposalId);
+      return;
+    }
+
+    const tab = params.get('tab');
+    if (tab === 'hotel') {
+      this.activeTab.set('hotel');
+      const newHotelName = params.get('new');
+      if (newHotelName) {
+        this.prefilledHotelName.set(newHotelName);
+        // Não precisamos abrir o modal pois quando activeTab === 'hotel', 
+        // o app-hotel-form é renderizado na listagem principal pela página se activeHotelTab === 'hoteis'.
+        // Vamos garantir que a subTab de hoteis esteja ativa.
+        this.activeHotelTab.set('hoteis');
+        
+        // Timeout pequeno só para rolar para o topo caso a div renderize atrasada
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
+      }
+    }
   }
 
   async checkSubscriptionStatus() {

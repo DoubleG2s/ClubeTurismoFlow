@@ -1,0 +1,569 @@
+@if (isLoading()) {
+<div class="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+  <p class="text-slate-500 font-medium">Buscando detalhes da proposta...</p>
+</div>
+} @else if (!quote()) {
+<div class="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+  <p class="text-red-500 font-bold text-xl mb-2">Cotação não encontrada</p>
+  <p class="text-slate-500">O link pode ter expirado ou estar incorreto.</p>
+</div>
+} @else {
+<div
+  class="h-screen overflow-y-auto scroll-smooth bg-slate-50/50 font-sans text-slate-800 pb-20 print:bg-white print:pb-0 print:overflow-visible print:h-auto">
+
+  <!-- BARRA DE NAVEGAÇÃO -->
+  <nav class="bg-white border-b border-slate-100 sticky top-0 z-50 print:hidden shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center gap-8">
+          <div class="font-black text-2xl tracking-tighter text-blue-700 select-none">CT FLOW</div>
+          <div class="hidden md:flex space-x-6 text-sm font-semibold text-slate-500">
+            <a href="#destino" class="hover:text-blue-600 transition-colors">Início</a>
+            <a href="#voo" class="hover:text-blue-600 transition-colors">Voo</a>
+            <a href="#hotel" class="hover:text-blue-600 transition-colors">Hotel</a>
+            <a href="#servicos" class="hover:text-blue-600 transition-colors">Serviços</a>
+            <a href="#valores" class="hover:text-blue-600 transition-colors">Valores</a>
+          </div>
+        </div>
+        <div>
+          <button (click)="printProposal()"
+            class="text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Imprimir
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTAINER CENTRAL -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
+
+    <!-- DESTINO PRINCIPAL -->
+    @if (quote(); as q) {
+    <section id="destino" class="text-center pt-8 pb-4 animate-fade-in">
+      <h1 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">{{ q.title }}</h1>
+      @if (q.subtitle) {
+      <p class="text-xl text-slate-500 mt-2 font-medium">{{ q.subtitle }}</p>
+      }
+      <div class="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-bold text-slate-600">
+        <div class="bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+          <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          {{ q.check_in }} a {{ q.check_out }}
+        </div>
+        <div class="bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          {{ durationDays() }} dias, {{ durationNights() }} noites
+        </div>
+        <div class="bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+          <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          {{ q.adults }} Adultos @if(q.children){ , {{ q.children }} Crianças }
+        </div>
+      </div>
+    </section>
+
+    <!-- DIVISOR -->
+    <hr class="border-slate-200/60" />
+
+    <!-- VOO -->
+    <section id="voo" class="scroll-mt-24">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z">
+            </path>
+          </svg>
+        </span>
+        Logística de Voos
+        <span
+          class="text-sm font-semibold text-slate-400 ml-auto bg-white px-3 py-1 rounded-full border border-slate-200">Operado
+          por {{ q.supplier }}</span>
+      </h2>
+
+      <div
+        class="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-6 relative">
+        <!-- Voo Ida -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-4">
+            <span
+              class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-black uppercase rounded shadow-sm tracking-wider">IDA</span>
+            <span class="text-slate-400 font-semibold text-sm">{{ q.check_in }}</span>
+          </div>
+
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 relative z-10">
+            <!-- Origem -->
+            <div class="text-center md:text-left flex-1">
+              <p class="text-3xl font-black text-slate-800">{{ q.flight_details.outbound.departure_time }}</p>
+              <p class="text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.outbound.origin_city }}</p>
+            </div>
+
+            <!-- Trajeto / Linha -->
+            <div class="flex-1 w-full flex flex-col items-center justify-center relative px-4">
+              <div
+                class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
+              </div>
+
+              <div class="bg-white z-10 px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
+                <svg class="w-5 h-5 text-blue-500 rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z">
+                  </path>
+                </svg>
+              </div>
+              @if (q.flight_details.outbound.has_connection && q.flight_details.outbound.connection_city) {
+              <p class="text-xs font-bold text-slate-500 mt-2 bg-white px-2">1 Parada em {{
+                q.flight_details.outbound.connection_city }} ({{ q.flight_details.outbound.connection_time }})</p>
+              } @else {
+              <p class="text-xs font-bold text-emerald-500 mt-2 bg-white px-2">Voo Direto</p>
+              }
+            </div>
+
+            <!-- Destino -->
+            <div class="text-center md:text-right flex-1">
+              <p class="text-3xl font-black text-slate-800">{{ q.flight_details.outbound.arrival_time }}</p>
+              <p class="text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.outbound.destination_city
+                }}</p>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-6 border-slate-100" />
+
+        <!-- Voo Volta -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-4">
+            <span
+              class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-black uppercase rounded shadow-sm tracking-wider">VOLTA</span>
+            <span class="text-slate-400 font-semibold text-sm">{{ q.check_out }}</span>
+          </div>
+
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 relative z-10">
+            <!-- Origem -->
+            <div class="text-center md:text-left flex-1">
+              <p class="text-3xl font-black text-slate-800">{{ q.flight_details.inbound.departure_time }}</p>
+              <p class="text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.inbound.origin_city }}</p>
+            </div>
+
+            <!-- Trajeto / Linha -->
+            <div class="flex-1 w-full flex flex-col items-center justify-center relative px-4">
+              <div
+                class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
+              </div>
+
+              <div class="bg-white z-10 px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
+                <svg class="w-5 h-5 text-orange-500 -rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z">
+                  </path>
+                </svg>
+              </div>
+              @if (q.flight_details.inbound.has_connection && q.flight_details.inbound.connection_city) {
+              <p class="text-xs font-bold text-slate-500 mt-2 bg-white px-2">1 Parada em {{
+                q.flight_details.inbound.connection_city }} ({{ q.flight_details.inbound.connection_time }})</p>
+              } @else {
+              <p class="text-xs font-bold text-emerald-500 mt-2 bg-white px-2">Voo Direto</p>
+              }
+            </div>
+
+            <!-- Destino -->
+            <div class="text-center md:text-right flex-1">
+              <p class="text-3xl font-black text-slate-800">{{ q.flight_details.inbound.arrival_time }}</p>
+              <p class="text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.inbound.destination_city }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOTEL -->
+    @if (q.hotel_options.length > 0) {
+    <section id="hotel" class="scroll-mt-24">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"></path>
+            <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"></path>
+            <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"></path>
+            <path d="M10 6h4"></path>
+            <path d="M10 10h4"></path>
+            <path d="M10 14h4"></path>
+            <path d="M10 18h4"></path>
+          </svg>
+        </span>
+        Hospedagem
+      </h2>
+
+      <div class="grid grid-cols-1 gap-6">
+        @for (hotel of q.hotel_options; track hotelIdx; let hotelIdx = $index) {
+        <div (click)="selectHotel(hotelIdx)"
+          class="bg-white rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgb(0,0,0,0.03)] overflow-hidden flex flex-col md:flex-row cursor-pointer border-2"
+          [class.border-blue-500]="selectedHotelIndex() === hotelIdx" [class.ring-4]="selectedHotelIndex() === hotelIdx"
+          [class.ring-blue-500/20]="selectedHotelIndex() === hotelIdx"
+          [class.border-transparent]="selectedHotelIndex() !== hotelIdx"
+          [class.hover:border-blue-200]="selectedHotelIndex() !== hotelIdx">
+
+          <!-- Imagem do Hotel -->
+          <div class="h-64 md:h-auto md:w-5/12 bg-slate-200 relative">
+            <!-- Badge -->
+            @if (selectedHotelIndex() === hotelIdx) {
+            <div
+              class="absolute top-4 left-4 z-20 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Selecionada
+            </div>
+            }
+            @if (hotel.hotel_images && hotel.hotel_images.length > 0) {
+            <img [src]="getHotelImage(hotelIdx, hotel.hotel_images)" alt="{{ hotel.hotel_name }}"
+              (click)="openExpandedImage($event, getHotelImage(hotelIdx, hotel.hotel_images))"
+              class="absolute inset-0 w-full h-full object-cover transition-all hover:scale-[1.02] cursor-pointer">
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none">
+            </div>
+
+            <div class="absolute bottom-4 left-4 right-4 text-white pointer-events-none">
+              <p class="font-bold text-lg leading-tight truncate drop-shadow-md">{{ hotel.hotel_name }}</p>
+            </div>
+
+            @if (hotel.hotel_images.length > 1) {
+            <!-- Stop propagation in div to avoid triggering selectHotel indirectly through clicking between images -->
+            <div (click)="$event.stopPropagation()"
+              class="absolute top-4 right-4 flex gap-1.5 bg-black/40 backdrop-blur-sm p-1.5 rounded-lg shadow-lg z-10">
+              @for (img of hotel.hotel_images | slice:0:4; track imgIndex; let imgIndex = $index) {
+              <img [src]="img" (click)="setHotelImage($event, hotelIdx, imgIndex)"
+                class="w-12 h-12 object-cover rounded-md border-2 cursor-pointer transition-all hover:opacity-80"
+                [class.border-blue-500]="(activeImageIndexPerHotel()[hotelIdx] || 0) === imgIndex"
+                [class.border-white/20]="(activeImageIndexPerHotel()[hotelIdx] || 0) !== imgIndex">
+              }
+              @if (hotel.hotel_images.length > 4) {
+              <div (click)="openExpandedImage($event, getHotelImage(hotelIdx, hotel.hotel_images))"
+                class="w-12 h-12 flex items-center justify-center text-xs font-bold text-white bg-black/70 cursor-pointer hover:bg-black/80 rounded-md border border-white/10 transition-colors">
+                +{{ hotel.hotel_images.length - 4 }}
+              </div>
+              }
+            </div>
+            }
+            } @else {
+            <!-- Fallback Gradient Placeholder -->
+            <div class="absolute inset-0 bg-gradient-to-tr from-blue-500 to-blue-400 opacity-90"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-6 text-center shadow-inner">
+              <div>
+                <svg class="w-16 h-16 text-white/50 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                  <path d="M9 7h6"></path>
+                  <path d="M9 11h6"></path>
+                  <path d="M9 15h6"></path>
+                </svg>
+                <p class="text-white font-bold text-lg leading-tight">{{ hotel.hotel_name }}</p>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- Detalhes Hotel -->
+          <div class="p-6 md:p-8 flex-1 flex flex-col justify-center relative">
+
+            <div class="absolute top-6 right-6">
+              <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shadow-sm"
+                [class.border-blue-600]="selectedHotelIndex() === $index"
+                [class.bg-blue-600]="selectedHotelIndex() === $index"
+                [class.border-slate-300]="selectedHotelIndex() !== $index">
+                @if (selectedHotelIndex() === $index) {
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                }
+              </div>
+            </div>
+
+            <h3 class="text-2xl font-black text-slate-800 mb-2 pr-8">{{ hotel.hotel_name }}</h3>
+            <div class="flex items-center gap-1 text-yellow-400 mb-4">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                </path>
+              </svg>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                </path>
+              </svg>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                </path>
+              </svg>
+              <svg class="w-4 h-4 fill-current text-yellow-400/30" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                </path>
+              </svg>
+            </div>
+
+            <div class="grid grid-cols-2 gap-y-4 gap-x-6">
+              <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Acomodação</p>
+                <p class="font-semibold text-slate-700 mt-1">{{ hotel.accommodation }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Regime</p>
+                <p class="font-semibold text-slate-700 mt-1">{{ hotel.regime }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Check-in</p>
+                <p class="font-semibold text-slate-700 mt-1"><span
+                    class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1"></span>{{ q.check_in }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Check-out</p>
+                <p class="font-semibold text-slate-700 mt-1"><span
+                    class="w-2 h-2 rounded-full bg-red-400 inline-block mr-1"></span>{{ q.check_out }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+    }
+
+    <!-- SERVIÇOS EXTRAS -->
+    <section id="servicos" class="scroll-mt-24">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </span>
+        Serviços Inclusos
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Transfer -->
+        @if (q.has_transfer) {
+        <div
+          class="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="bg-blue-50 text-blue-600 p-2.5 rounded-lg shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="8" rx="2" ry="2"></rect>
+              <path d="M3 11v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path>
+              <path d="M7 19v2"></path>
+              <path d="M17 19v2"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800">Transfer Regular</h4>
+            <p class="text-sm text-slate-500 mt-1 leading-snug">Transporte Aeroporto ➔ Hotel ➔ Aeroporto no destino.</p>
+          </div>
+        </div>
+        }
+
+        <!-- Seguro -->
+        <div
+          class="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="bg-red-50 text-red-600 p-2.5 rounded-lg shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800">Seguro Viagem</h4>
+            <p class="text-sm text-slate-500 mt-1 leading-snug">Cobertura médica hospitalar durante todo o período da
+              viagem.</p>
+          </div>
+        </div>
+
+        <!-- Bagagem -->
+        <div
+          class="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="bg-amber-50 text-amber-600 p-2.5 rounded-lg shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M20 7h-3V4c0-1.1-.9-2-2-2h-6c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-9-3h2v3h-2V4zM4 9h16v11H4V9z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800">Bagagem de Mão</h4>
+            <p class="text-sm text-slate-500 mt-1 leading-snug">Franquia de 1 mochila/bolsa pessoal (até 5kg) + 1 mala
+              de mão (até 10kg).</p>
+          </div>
+        </div>
+
+        <!-- Passeio Extra -->
+        @if (q.tour_details) {
+        <div
+          class="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
+          <div class="bg-fuchsia-50 text-fuchsia-600 p-2.5 rounded-lg shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800">Passeios e Atividades</h4>
+            <p class="text-sm text-slate-500 mt-1 leading-snug font-medium">{{ q.tour_details }}</p>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+    }
+
+    <!-- DIVISOR -->
+    <hr class="border-slate-200/60 my-10" />
+
+    <!-- VALORES E FORMAS DE PAGAMENTO -->
+    <section id="valores" class="grid grid-cols-1 md:grid-cols-5 gap-6 scroll-mt-24">
+
+      <!-- VALOR CARD (DESTAQUE) -->
+      <div
+        class="md:col-span-2 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-xl p-8 text-white flex flex-col justify-center">
+        <p class="text-blue-200 font-bold uppercase tracking-widest text-sm mb-2">Investimento Total</p>
+        <p class="text-4xl sm:text-5xl font-black tracking-tight drop-shadow-sm mb-4">{{ totalValue() }}</p>
+        <div
+          class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-sm font-semibold backdrop-blur-sm self-start">
+          <svg class="w-4 h-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Valor sujeito a alterações
+        </div>
+      </div>
+
+      <!-- FORMAS DE PAGAMENTO -->
+      <div class="md:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+        <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+          Formas de Pagamento
+        </h3>
+
+        <div class="space-y-6">
+          <div class="flex gap-4">
+            <div class="mt-1">
+              <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold">1
+              </div>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800 mb-1">Cartão de Crédito</p>
+              <p class="text-slate-500 text-sm leading-relaxed">Em até <span class="font-bold text-blue-600">10x sem
+                  juros</span> no cartão de crédito. É possível utilizar mais de um cartão ou cartão de terceiros
+                (mediante foto de documento).</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="mt-1">
+              <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold">2
+              </div>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800 mb-1">Entrada + Boleto Bancário</p>
+              <p class="text-slate-500 text-sm leading-relaxed">Entrada mínima de 10% (via PIX, desc ou crédito) e o
+                saldo restante parcelado em até <span class="font-bold text-blue-600">12x no boleto sem juros</span>
+                (Sujeito à aprovação bancária e análise de score do CPF do titular da compra e viagem).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER / CONTATO -->
+    <footer class="mt-16 pt-8 pb-12 border-t border-slate-200 text-center">
+      <div class="max-w-md mx-auto">
+        <div
+          class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 transform -rotate-3">
+          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+            </path>
+          </svg>
+        </div>
+        <p class="font-black text-slate-800 text-lg mb-1">Clube Turismo - Jardinópolis</p>
+        <p class="text-slate-500 text-sm mb-4">Converse com seu agente para fechar os últimos detalhes desta viagem
+          inesquecível.</p>
+        <p class="text-[11px] text-red-500 font-bold uppercase tracking-wider">Atenção: Este documento é um orçamento e
+          não garante reserva ou bloqueio de lugares.</p>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- Expanded Image Lightbox Modal -->
+@if (expandedImage()) {
+<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8 animate-fade-in"
+  (click)="closeExpandedImage()">
+  <button (click)="closeExpandedImage()"
+    class="absolute top-6 right-6 text-white hover:text-slate-300 transition-colors p-2 bg-black/50 rounded-full">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+  <img [src]="expandedImage()" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+    (click)="$event.stopPropagation()">
+</div>
+}
+
+<!-- Price Update Toast Notification -->
+@if (isValueHighlighting()) {
+<div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] animate-fade-in pointer-events-none">
+  <div class="bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-emerald-500/50">
+    <div class="bg-white/20 p-1.5 rounded-full">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20"></path>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+    </div>
+    <div>
+      <p class="font-bold text-sm leading-tight text-white">Valor da Proposta Atualizado</p>
+      <p class="text-[11px] font-medium text-emerald-100 opacity-90">{{ totalValue() }}</p>
+    </div>
+  </div>
+</div>
+}
+
+}

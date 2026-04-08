@@ -50,3 +50,4 @@ Thumbs.db
 .env.*
 .agent
 .vercel
+/docs

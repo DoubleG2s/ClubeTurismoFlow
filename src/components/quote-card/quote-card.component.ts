@@ -45,6 +45,11 @@ export class QuoteCardComponent {
     this.showViewModal.set(true);
   }
 
+  onShowProposal(event: Event) {
+    event.stopPropagation();
+    window.open(window.location.origin + '?proposal=' + this.quote.id, '_blank');
+  }
+
   confirmDelete() {
     this.remove.emit(this.quote.id);
     this.showDeleteModal.set(false);

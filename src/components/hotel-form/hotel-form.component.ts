@@ -15,6 +15,7 @@ export class HotelFormComponent implements OnInit {
 
     @Input() hotelToEdit: Hotel | null = null;
     @Input() isLoading: boolean = false;
+    @Input() prefillName?: string = '';
 
     @Output() save = new EventEmitter<{
         hotelData: any,
@@ -55,6 +56,10 @@ export class HotelFormComponent implements OnInit {
     toastMessage = signal<{text: string, type: 'success' | 'error'} | null>(null);
 
     ngOnInit() {
+        if (this.prefillName && !this.hotelToEdit) {
+            this.name.set(this.prefillName);
+        }
+
         if (this.hotelToEdit) {
             this.id.set(this.hotelToEdit.id);
             this.name.set(this.hotelToEdit.name);
