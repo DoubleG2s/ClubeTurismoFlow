@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { Quote } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
+import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 
 @Component({
   selector: 'app-quote-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent],
   templateUrl: './quote-form.component.html',
 })
 export class QuoteFormComponent implements OnInit, OnChanges {
@@ -281,7 +282,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         // O reset é chamado pelo componente pai (AppComponent) após sucesso
       }
     } else {
-      console.log('Formulário Inválido', this.quoteForm.errors);
+
       this.quoteForm.markAllAsTouched();
       alert('Por favor, preencha todos os campos obrigatórios.');
     }

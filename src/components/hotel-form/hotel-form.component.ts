@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Hotel, HotelEmail, HotelPhone, HotelImage, HotelType, HotelEmailType } from '../../models/hotel';
 import { HotelService } from '../../services/hotel.service';
+import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
+import { BrasilCity } from '../../services/brasil-api.service';
 
 @Component({
     selector: 'app-hotel-form',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, CityAutocompleteComponent],
     templateUrl: './hotel-form.component.html'
 })
 export class HotelFormComponent implements OnInit {
@@ -54,6 +56,12 @@ export class HotelFormComponent implements OnInit {
 
     uniqueId = Math.random().toString(36).substring(2, 9);
     toastMessage = signal<{text: string, type: 'success' | 'error'} | null>(null);
+
+    onCitySelected(city: BrasilCity) {
+        this.city.set(city.nome);
+        this.state.set(city.estado);
+        this.country.set('Brasil');
+    }
 
     ngOnInit() {
         if (this.prefillName && !this.hotelToEdit) {

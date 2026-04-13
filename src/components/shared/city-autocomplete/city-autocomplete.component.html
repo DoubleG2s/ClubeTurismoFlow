@@ -1,0 +1,94 @@
+<div class="relative">
+  <div class="relative">
+    <input
+      type="text"
+      [value]="value"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      (keydown)="onKeydown($event)"
+      [placeholder]="placeholder"
+      [class]="cssClass"
+      autocomplete="off"
+      spellcheck="false"
+    >
+
+    <!-- Loading spinner inside input -->
+    @if (isLoading()) {
+    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+      <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+    </div>
+    }
+  </div>
+
+  <!-- Suggestions dropdown -->
+  @if (isOpen()) {
+  <div class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden city-ac-enter">
+
+    @if (isLoading()) {
+    <!-- Skeleton Loading -->
+    <div class="p-3 space-y-2.5">
+      <div class="flex items-center gap-3">
+        <div class="h-3 bg-slate-100 rounded-full animate-pulse w-10"></div>
+        <div class="h-3 bg-slate-100 rounded-full animate-pulse flex-1"></div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="h-3 bg-slate-100 rounded-full animate-pulse w-10"></div>
+        <div class="h-3 bg-slate-100 rounded-full animate-pulse w-3/4"></div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="h-3 bg-slate-100 rounded-full animate-pulse w-10"></div>
+        <div class="h-3 bg-slate-100 rounded-full animate-pulse w-1/2"></div>
+      </div>
+    </div>
+
+    } @else if (errorMessage()) {
+    <!-- Error State -->
+    <div class="p-4 text-center">
+      <svg class="w-6 h-6 text-slate-300 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p class="text-xs text-slate-400 font-medium">{{ errorMessage() }}</p>
+    </div>
+
+    } @else if (suggestions().length === 0) {
+    <!-- Empty State -->
+    <div class="p-4 text-center">
+      <svg class="w-6 h-6 text-slate-300 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+      <p class="text-xs text-slate-400 font-medium">Nenhuma cidade encontrada</p>
+    </div>
+
+    } @else {
+    <!-- Results list -->
+    <div class="max-h-60 overflow-y-auto divide-y divide-slate-50">
+      @for (city of suggestions(); track city.id; let i = $index) {
+      <div
+        (mousedown)="selectCity(city)"
+        class="px-4 py-2.5 cursor-pointer flex items-center justify-between transition-colors"
+        [class.bg-blue-50]="activeIndex() === i"
+        [class.hover:bg-slate-50]="activeIndex() !== i"
+      >
+        <span class="text-sm text-slate-700" [innerHTML]="highlightMatch(city.nome)"></span>
+        <span
+          class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full ml-2 shrink-0 select-none">
+          {{ city.estado }}
+        </span>
+      </div>
+      }
+    </div>
+    }
+
+  </div>
+  }
+</div>

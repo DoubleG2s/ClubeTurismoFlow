@@ -2,11 +2,12 @@ import { Component, EventEmitter, Output, Input, OnInit, SimpleChanges, OnChange
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Reservation } from '../../models/reservation';
+import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent],
   templateUrl: './reservation-form.component.html',
 })
 export class ReservationFormComponent implements OnInit, OnChanges {
