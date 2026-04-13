@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Quote } from '../../models/quote';
+import { Quote, HotelOption } from '../../models/quote';
 import { QuoteService } from '../../services/quote.service';
 
 @Component({
@@ -20,6 +20,7 @@ export class QuoteProposalComponent implements OnInit {
   selectedHotelIndex = signal(0);
   activeImageIndexPerHotel = signal<{ [key: number]: number }>({});
   expandedImage = signal<string | null>(null);
+  expandedConnections = signal<{ outbound: boolean, inbound: boolean }>({ outbound: false, inbound: false });
 
   // Calculados
   durationDays = computed(() => {
@@ -122,6 +123,17 @@ export class QuoteProposalComponent implements OnInit {
 
   closeExpandedImage() {
     this.expandedImage.set(null);
+  }
+
+  toggleConnection(segment: 'outbound' | 'inbound') {
+    this.expandedConnections.update(state => ({
+      ...state,
+      [segment]: !state[segment]
+    }));
+  }
+
+  getHotelTotalValue(hotel: HotelOption): string {
+    return this.formatCurrencyValue(hotel.amount, hotel.currency);
   }
 
   private parseDate(dateStr: string): number {
