@@ -55,7 +55,7 @@ interface EmailData {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                 </svg>
-                <span>Copiar HTML</span>
+                <span>Copiar texto</span>
               }
             </button>
           </div>
@@ -239,7 +239,7 @@ interface EmailData {
   `
 })
 export class HotelEmailGeneratorComponent {
-  
+
   private sanitizer = inject(DomSanitizer);
 
   data: EmailData = {
@@ -309,7 +309,7 @@ export class HotelEmailGeneratorComponent {
       const loc = apt.locator ? apt.locator.toUpperCase() : '[Localizador]';
       const desc = apt.description || '[Quarto]';
       const pen = apt.pension || '[Regime]';
-      
+
       let pxl = [];
       if (apt.adults > 0) pxl.push(`${apt.adults} ADT`);
       if (apt.children > 0) pxl.push(`${apt.children} CHD`);
@@ -318,12 +318,12 @@ export class HotelEmailGeneratorComponent {
       txt += `🛏️ ${aptName}\n`;
       txt += `Localizador: ${loc}\n`;
       txt += `Descrição: ${desc} + ${pen} – ${peoples}\n\n`;
-      
+
       txt += `Hóspedes:\n`;
       apt.guests.forEach(g => {
         txt += `- ${g.name || '[Hóspede]'}\n`;
       });
-      txt += `\n`; 
+      txt += `\n`;
     });
 
     return txt.trim();
@@ -363,7 +363,7 @@ export class HotelEmailGeneratorComponent {
       const loc = apt.locator ? apt.locator.toUpperCase() : '[Localizador]';
       const desc = apt.description || '[Quarto]';
       const pen = apt.pension || '[Regime]';
-      
+
       let pxl = [];
       if (apt.adults > 0) pxl.push(`${apt.adults} ADT`);
       if (apt.children > 0) pxl.push(`${apt.children} CHD`);
@@ -394,7 +394,7 @@ export class HotelEmailGeneratorComponent {
                         <div style="color: #64748b; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Hóspedes 👤</div>
                         <ul style="margin: 0; padding: 0 0 0 20px; color: #334155;">
 `;
-      
+
       apt.guests.forEach(g => {
         html += `                         <li style="margin-bottom: 4px;">${g.name || '[Hóspede]'}</li>\n`;
       });
@@ -429,7 +429,7 @@ export class HotelEmailGeneratorComponent {
   async copyHtml() {
     const htmlText = this.getGeneratedHtml();
     const plainText = this.getGeneratedText();
-    
+
     try {
       if (navigator.clipboard && window.ClipboardItem) {
         const typeHtml = 'text/html';
