@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 interface Guest {
   name: string;
@@ -31,8 +32,8 @@ interface EmailData {
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in relative items-start">
       
       <!-- Right Side: Live Preview (Placed first in flex/grid order for mobile, sticky on desktop) -->
-      <div class="lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:sticky lg:top-6 order-first lg:order-last">
-        <div class="bg-slate-50 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+      <div class="lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:sticky lg:top-6 order-first lg:order-last flex flex-col gap-5">
+        <div class="bg-slate-50 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
           <!-- Preview Header -->
           <div class="bg-white px-5 py-4 border-b border-slate-200 flex justify-between items-center">
             <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -42,7 +43,7 @@ interface EmailData {
               </svg>
               Prévia do E-mail
             </h3>
-            <button (click)="copyText()" 
+            <button (click)="copyHtml()" 
                     class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
                     [ngClass]="copySuccess() ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'">
               @if (copySuccess()) {
@@ -54,13 +55,37 @@ interface EmailData {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                 </svg>
-                <span>Copiar Texto</span>
+                <span>Copiar HTML</span>
               }
             </button>
           </div>
           
-          <!-- Text Body -->
-          <div class="px-5 py-6 font-mono text-sm text-slate-700 whitespace-pre-wrap flex-1 bg-white" style="line-height: 1.6;">{{ getGeneratedText() }}</div>
+          <!-- Web Content Body -->
+          <div class="px-0 py-0 flex-1 bg-slate-100 overflow-x-auto min-h-[300px]">
+             <div class="bg-white w-full" [innerHTML]="getSafeHtml()"></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col gap-3">
+          <div>
+            <button type="button"
+                    class="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              Enviar e-mail
+            </button>
+            <p class="text-[11px] text-center text-slate-500 mt-2 font-medium">A funcionalidade de envio de e-mail ainda não foi implementada.</p>
+          </div>
+          
+          <button type="button" (click)="resetForm()"
+                  class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Limpar
+          </button>
         </div>
       </div>
 
@@ -215,6 +240,8 @@ interface EmailData {
 })
 export class HotelEmailGeneratorComponent {
   
+  private sanitizer = inject(DomSanitizer);
+
   data: EmailData = {
     checkIn: '',
     checkOut: '',
@@ -283,7 +310,6 @@ export class HotelEmailGeneratorComponent {
       const desc = apt.description || '[Quarto]';
       const pen = apt.pension || '[Regime]';
       
-      // Monta quantidade de pessoas ex: 2 ADT / 1 CHD
       let pxl = [];
       if (apt.adults > 0) pxl.push(`${apt.adults} ADT`);
       if (apt.children > 0) pxl.push(`${apt.children} CHD`);
@@ -297,20 +323,147 @@ export class HotelEmailGeneratorComponent {
       apt.guests.forEach(g => {
         txt += `- ${g.name || '[Hóspede]'}\n`;
       });
-      txt += `\n`; // extra space between apts
+      txt += `\n`; 
     });
 
     return txt.trim();
   }
 
-  async copyText() {
-    const text = this.getGeneratedText();
+  getGeneratedHtml(): string {
+    const fIn = this.formatDate(this.data.checkIn);
+    const fOut = this.formatDate(this.data.checkOut);
+    const hotel = this.data.hotelName || '[Nome do Hotel]';
+
+    let html = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; font-family: Arial, sans-serif;">
+  <tr>
+    <td align="center" style="padding: 30px 10px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; max-width: 600px; margin: 0 auto;">
+        <tr>
+          <td style="padding: 30px; text-align: center; border-bottom: 3px solid #e11d48; background-color: #ffffff;">
+            <img src="/assets/logo-clube-turismo.png" alt="Clube Turismo" style="max-height: 48px; display: block; margin: 0 auto; border: 0; max-width: 100%;">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 40px 30px; color: #334155; font-size: 15px; line-height: 1.6;">
+            <p style="margin: 0 0 15px 0; font-size: 16px; color: #0f172a;">Olá, tudo bem? 🙂</p>
+            <p style="margin: 0 0 15px 0;">Temos as reservas abaixo que se hospedarão do dia <strong>${fIn}</strong> a <strong>${fOut}</strong>.</p>
+            <p style="margin: 0 0 25px 0;">Enviamos em anexo uma carta de boas-vindas.<br>
+            Pedimos, por gentileza, uma atenção especial aos hóspedes abaixo.</p>
+            
+            <div style="background-color: #f8fafc; border-left: 4px solid #e11d48; padding: 15px 20px; margin-bottom: 25px; border-radius: 0 6px 6px 0;">
+              <h2 style="margin: 0; color: #0f172a; font-size: 18px;">
+                <span style="margin-right: 8px;">🏨</span> ${hotel}
+              </h2>
+            </div>
+`;
+
+    this.data.apartments.forEach((apt) => {
+      const aptName = apt.name || '[Nome do Apto]';
+      const loc = apt.locator ? apt.locator.toUpperCase() : '[Localizador]';
+      const desc = apt.description || '[Quarto]';
+      const pen = apt.pension || '[Regime]';
+      
+      let pxl = [];
+      if (apt.adults > 0) pxl.push(`${apt.adults} ADT`);
+      if (apt.children > 0) pxl.push(`${apt.children} CHD`);
+      const peoples = pxl.length > 0 ? pxl.join(' / ') : '[Qtd de Pessoas]';
+
+      html += `
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 25px; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+              <tr>
+                <td style="background-color: #f1f5f9; padding: 12px 20px; border-bottom: 1px solid #e2e8f0;">
+                  <h3 style="margin: 0; color: #334155; font-size: 15px;">
+                    <span style="margin-right: 8px;">🛏️</span> <strong>${aptName}</strong>
+                  </h3>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size: 14px;">
+                    <tr>
+                      <td width="30%" style="padding-bottom: 8px; color: #64748b;">Localizador:</td>
+                      <td width="70%" style="padding-bottom: 8px; font-weight: bold; color: #0f172a;">${loc}</td>
+                    </tr>
+                    <tr>
+                      <td width="30%" style="padding-bottom: 12px; color: #64748b;">Descrição:</td>
+                      <td width="70%" style="padding-bottom: 12px; color: #334155;">${desc} + ${pen} &ndash; ${peoples}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="padding-top: 12px; border-top: 1px dashed #e2e8f0;">
+                        <div style="color: #64748b; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">Hóspedes 👤</div>
+                        <ul style="margin: 0; padding: 0 0 0 20px; color: #334155;">
+`;
+      
+      apt.guests.forEach(g => {
+        html += `                         <li style="margin-bottom: 4px;">${g.name || '[Hóspede]'}</li>\n`;
+      });
+
+      html += `
+                        </ul>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+`;
+    });
+
+    html += `
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+`;
+
+    return html.trim();
+  }
+
+  getSafeHtml(): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(this.getGeneratedHtml());
+  }
+
+  async copyHtml() {
+    const htmlText = this.getGeneratedHtml();
+    const plainText = this.getGeneratedText();
+    
     try {
-      await navigator.clipboard.writeText(text);
+      if (navigator.clipboard && window.ClipboardItem) {
+        const typeHtml = 'text/html';
+        const typeText = 'text/plain';
+        const blobHtml = new Blob([htmlText], { type: typeHtml });
+        const blobText = new Blob([plainText], { type: typeText });
+        const data = [new ClipboardItem({
+          [typeHtml]: blobHtml,
+          [typeText]: blobText
+        })];
+        await navigator.clipboard.write(data);
+      } else {
+        await navigator.clipboard.writeText(htmlText);
+      }
       this.copySuccess.set(true);
       setTimeout(() => this.copySuccess.set(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error('Failed to copy HTML: ', err);
+      try {
+        await navigator.clipboard.writeText(plainText);
+        this.copySuccess.set(true);
+        setTimeout(() => this.copySuccess.set(false), 2000);
+      } catch (fallbackErr) {
+        console.error('Fallback failed: ', fallbackErr);
+      }
     }
+  }
+
+  resetForm() {
+    this.data = {
+      checkIn: '',
+      checkOut: '',
+      hotelName: '',
+      apartments: [this.createNewApartment('APTO 1')]
+    };
   }
 }
