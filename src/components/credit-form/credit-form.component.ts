@@ -136,6 +136,15 @@ export class CreditFormComponent {
     }
   }
   
+  @Input() set prefillData(data: Partial<Credit> | null) {
+    if (data && !this.isEditMode()) {
+      this.formData = { ...this.formData, ...data };
+      if (data.value) {
+        this.displayValue = data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }
+  }
+  
   @Input() isLoading = false;
   
   @Output() save = new EventEmitter<Omit<Credit, 'id' | 'created_at' | 'expiration_date'>>();

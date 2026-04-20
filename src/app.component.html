@@ -218,7 +218,7 @@
             Novo Agendamento
           </h2>
         </div>
-        <app-flight-form (save)="onAddFlight($event)"></app-flight-form>
+        <app-flight-form (save)="onAddFlight($event)" [prefillData]="prefilledFlightData()"></app-flight-form>
       </section>
 
       <!-- Flights Grid -->
@@ -498,7 +498,7 @@
               Novo Crédito
             </h2>
           </div>
-          <app-credit-form (save)="onAddCredit($event)" [isLoading]="isSavingCredit()"></app-credit-form>
+          <app-credit-form (save)="onAddCredit($event)" [isLoading]="isSavingCredit()" [prefillData]="prefilledCreditData()"></app-credit-form>
         </section>
 
         <!-- Credits Grid -->
@@ -934,7 +934,9 @@
   }
 
   <!-- AI Chat Global Component -->
-  <app-ai-chat #aiChat (onAiAction)="handleAiAction($event)"></app-ai-chat>
+  @if (!isLockedOut()) {
+    <app-ai-chat #aiChat (onAiAction)="handleAiAction($event)"></app-ai-chat>
+  }
 
   }
 </div>

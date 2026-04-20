@@ -11,7 +11,16 @@ import { Flight } from '../../models/flight';
 })
 export class FlightFormComponent implements OnInit {
   @Input() flightToEdit: Flight | null = null;
-  @Input() prefillData: Partial<Flight> | null = null; // New Input for pre-filling
+  @Input() set prefillData(data: Partial<Flight> | null) {
+    if (data && !this.isEditMode() && this.flightForm) {
+      this.flightForm.patchValue({
+        locator: data.locator || this.flightForm.get('locator')?.value || '',
+        date: data.date || this.flightForm.get('date')?.value || '',
+        return_date: data.return_date || this.flightForm.get('return_date')?.value || '',
+        origin: data.origin || this.flightForm.get('origin')?.value || ''
+      });
+    }
+  }
   @Output() save = new EventEmitter<Omit<Flight, 'id' | 'created_at' | 'confirmed'>>();
   @Output() update = new EventEmitter<{id: string, data: Partial<Flight>}>();
   @Output() cancel = new EventEmitter<void>();
@@ -42,16 +51,6 @@ export class FlightFormComponent implements OnInit {
         origin: this.flightToEdit.origin,
         date: this.flightToEdit.date,
         return_date: this.flightToEdit.return_date || ''
-      });
-    } else if (this.prefillData) {
-      // Logic for pre-filling new items (e.g. from Reservation)
-      this.isEditMode.set(false); // It is still a NEW creation
-      
-      this.flightForm.patchValue({
-        locator: this.prefillData.locator || '',
-        date: this.prefillData.date || '',
-        return_date: this.prefillData.return_date || '',
-        origin: '' // Explicitly empty to force user input
       });
     }
   }

@@ -2,7 +2,15 @@ import { Injectable, signal } from '@angular/core';
 import { environment } from '../environments/environment';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export type AiIntentType = 'NONE' | 'CREATE_RESERVATION' | 'CREATE_QUOTE' | 'APPLY_FILTER' | 'CONFIRM_TAB_SWITCH';
+export type AiIntentType =
+  | 'NONE'
+  | 'CREATE_RESERVATION' | 'EDIT_RESERVATION'
+  | 'CREATE_QUOTE' | 'EDIT_QUOTE'
+  | 'CREATE_HOTEL' | 'EDIT_HOTEL'
+  | 'CREATE_CREDIT' | 'EDIT_CREDIT'
+  | 'CREATE_FLIGHT' | 'EDIT_FLIGHT'
+  | 'APPLY_FILTER'
+  | 'CONFIRM_TAB_SWITCH';
 
 export interface AiAction {
   type: AiIntentType;
@@ -20,6 +28,36 @@ interface HistoryRecord {
   role: 'user' | 'model';
   parts: { text: string }[];
 }
+
+const SYSTEM_PROMPT = [
+  'Você é um assistente operacional moderno do "Clube Turismo Flow" (Copilot).',
+  'Sua função é interpretar requisições, ler anexos (vouchers), extrair dados, sugerir ações e acionar as telas do sistema para CRIAR ou EDITAR registros.',
+  '',
+  'REGRAS CRÍTICAS DE SEGURANÇA E NEGÓCIO:',
+  '1. NUNCA exclua dados. Em nenhuma hipótese gere ações de exclusão ("delete", "remover", "apagar"). Se solicitado, negue educadamente e explique que você não tem essa permissão.',
+  '2. NÃO persista dados automaticamente. Seu papel é atuar como "preenchimento inteligente" de formulários. O usuário sempre confirma antes de salvar.',
+  '3. Para solicitações de edição/atualização, utilize as actions do tipo EDIT_* e no payload informe os dados de busca (ex: nome, localizador, title) fornecidos pelo usuário, para que o sistema encontre o registro.',
+  '',
+  'Retorne SEMPRE um JSON válido com dois campos: "message" (string com feedback ao usuário) e "action" (objeto com "type" e "payload").',
+  '',
+  'Opções de ACTION TYPE disponíveis e campos do payload:',
+  '- "NONE": Sem ação.',
+  '- "CREATE_RESERVATION" ou "EDIT_RESERVATION": payload com destination, passengers (array de strings), date, return_date, reservation_number, flight_voucher, notes.',
+  '- "CREATE_FLIGHT" ou "EDIT_FLIGHT": payload com locator, origin, flight_time.',
+  '- "CREATE_HOTEL" ou "EDIT_HOTEL": payload com name, address, location, city, uf, country.',
+  '- "CREATE_CREDIT" ou "EDIT_CREDIT" ou "CREATE_QUOTE" ou "EDIT_QUOTE": payload com customer, amount, title.',
+  '- "APPLY_FILTER": payload com filter ("hoje" ou "amanha").',
+  '- Nas edições (EDIT_*), adicione também "search_term" no payload para ajudar na busca.',
+  '',
+  'Regras EXTENSIVAS para Leitura de Documentos (Vouchers):',
+  '1. VALIDAR PASSAGEIROS (CRÍTICO): Busque a lista COMPLETA de passageiros, geralmente localizados nas seções "Voucher de hotel", "Voucher de Voo" ou "Voucher de Serviço". Você DEVE retornar EXATAMENTE todos os passageiros. Se houver 4 pessoas, a array "passengers" DEVE ter 4 itens. Não omita de forma alguma o último passageiro.',
+  '2. LOCALIZADOR DO VOO (flight_voucher): Procure especificamente pelas 6 letras/números que aparecem após textos como "Referência da reserva:" (Ex: GLWT2T). NÃO confunda com o número do voo (Ex: AD2507). O campo flight_voucher é reservado estritamente para o código de reserva.',
+  '3. CAMPO DESTINO: Preencha estritamente com o NOME DA CIDADE. Não inclua estado, UF ou país. (Ex: "Maceió - AL - Brasil" vira apenas "Maceió").',
+  '4. CAMPO OBSERVAÇÕES (notes): Preencha APENAS com o NOME DO HOTEL explícito e absolutamente MAIS NADA.',
+  '5. O formulário não salva automaticamente, é apenas um preview (pre-fill) para a UI.',
+  '',
+  'Regras de Filtros e Listagem:',
+].join('\n');
 
 @Injectable({
   providedIn: 'root'
@@ -62,40 +100,11 @@ export class AiInterpreterService {
 
     try {
       const model = this.genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: 'gemini-2.5-flash',
         generationConfig: {
-          responseMimeType: "application/json",
+          responseMimeType: 'application/json',
         },
-        systemInstruction: `
-        Você é um assistente operacional moderno do "Clube Turismo Flow".
-        Sua função é interpretar requisições, ler anexos PDF detalhadamente (vouchers completos), extrair os dados e acionar as telas do sistema.
-        Retorne SEMPRE um objeto JSON estrito com a interface:
-        {
-          "message": "Resposta amigável relatando a ação ou alertando conflitos.",
-          "action": {
-             "type": "NONE" | "CREATE_RESERVATION" | "CREATE_QUOTE" | "APPLY_FILTER",
-             "payload": {
-                "destination": "Destino identificado",
-                "passengers": ["Nome Completo 1", "Nome Completo 2", "Etc..."],
-                "date": "Data de ida dd/mm/yyyy",
-                "return_date": "Data de volta dd/mm/yyyy",
-                "reservation_number": "Nº da Reserva / Referência da Reserva (Procure um código de exatos 6 caracteres alfanuméricos. NUNCA use localizadores longos externos como RES0552...)",
-                "flight_voucher": "Localizador do Voo (6 letras/numeros exclusivos do aéreo)",
-                "notes": "Nome da hospedagem identificada e detalhes adicionais"
-             }
-          }
-        }
-        
-        Regras MÁXIMAS de Extração PDF:
-        1. Ao ler um voucher PDF, rastreie como um Auditor: Descubra o Nº DA RESERVA, voucher de voo, Destino, Data de ida e Data de volta. Na observação (notes) coloque o nome explícito da hospedagem.
-        2. ATENÇÃO AOS PASSAGEIROS: Jamais pegue apenas o Titular. Busque os nomes na sessão "VOUCHER DE HOTEL" ou "HÓSPEDES", leia todo o documento e extraia rigorosamente TODOS os nomes de passageiros encontrados na viagem para o array "passengers". NUNCA coloque strings vazias (ex: "") no array. Se só houver 1 passageiro, o array deve ter tamanho 1.
-        3. REGRA DE CONFLITO: Se por acaso no voucher tiver MAIS DE UMA hospedagem ou MAIS DE UM código de voo diferente, retorne "type": "NONE" (cancela o preenchimento automático), informe as opções na sua "message" e peça ativamente para o usuário confirmar/digitar quais devem ser usados.
-        4. Quando o usuário responder a pendência do conflito com "pode preencher com o hotel X", una isso à memória e finalmente dispare "type": "CREATE_RESERVATION" preenchendo o payload todo.
-        
-        Regras MÁXIMAS para Filtros:
-        1. Se o usuário perguntar implicitamente algo como "Quem viaja hoje?" ou "Temos viagens pra amanhã?", ele NÃO quer conversar: ele quer usar a tela de listagem de clientes!
-        2. Dispare imediatamente a action "type": "APPLY_FILTER" e, OBRIGATORIAMENTE, passe "filter": "hoje" ou "filter": "amanha" dentro do payload! Nunca use dateStr para isso.
-        `
+        systemInstruction: SYSTEM_PROMPT
       });
 
       const promptParts: any[] = [];
@@ -117,29 +126,26 @@ export class AiInterpreterService {
 
       let responseText = '';
       if (this.chatHistory.length > 0) {
-         const chat = model.startChat({ history: this.chatHistory });
-         const result = await chat.sendMessage(promptParts);
-         responseText = result.response.text();
+        const chat = model.startChat({ history: this.chatHistory });
+        const result = await chat.sendMessage(promptParts);
+        responseText = result.response.text();
       } else {
-         const result = await model.generateContent(promptParts);
-         responseText = result.response.text();
+        const result = await model.generateContent(promptParts);
+        responseText = result.response.text();
       }
-      
-      let data: AiResponse;
+
+      let data: AiResponse = { message: '' };
       try {
         let cleanedResponse = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        
-        // Anti-Alucinação: Às vezes o LLM gera chaves com 2 aspas duplas, ex: ""payload"":
         cleanedResponse = cleanedResponse.replace(/""([^"]+)""\s*:/g, '"$1":');
-        
         data = JSON.parse(cleanedResponse) as AiResponse;
-      } catch (e: any) {
-        throw new Error('Falha ao parsear o JSON retornado pela IA. Verifique as aspas. Resposta crua: ' + responseText);
+      } catch {
+        throw new Error('Falha ao parsear o JSON retornado pela IA. Resposta crua: ' + responseText);
       }
 
       let messageContent = text;
       if (pdfBase64) messageContent += '\n[Arquivo PDF anexado]';
-      
+
       this.chatHistory.push({ role: 'user', parts: [{ text: messageContent }] });
       this.chatHistory.push({ role: 'model', parts: [{ text: data.message || JSON.stringify(data.action) }] });
 
@@ -148,9 +154,8 @@ export class AiInterpreterService {
       }
 
       return data;
-      
-    } catch (err) {
-      console.error('Gemini API Error no Frontend:', err);
+
+    } catch (err: any) {
       throw err;
     }
   }

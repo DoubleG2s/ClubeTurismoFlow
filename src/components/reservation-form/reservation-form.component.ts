@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, OnInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Reservation } from '../../models/reservation';
@@ -10,9 +10,33 @@ import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-auto
   imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent],
   templateUrl: './reservation-form.component.html',
 })
-export class ReservationFormComponent implements OnInit, OnChanges {
+export class ReservationFormComponent implements OnInit {
   @Input() reservationToEdit: Reservation | null = null;
-  @Input() prefillData: Partial<Reservation> | null = null;
+  @Input() set prefillData(data: Partial<Reservation> | null) {
+    if (data && !this.isEditMode() && this.reservationForm) {
+       this.reservationForm.patchValue({
+         destination: data.destination || '',
+         date: data.date || '',
+         return_date: (data as any).return_date || '',
+         flight_voucher: (data as any).flight_voucher || '',
+         reservation_number: (data as any).reservation_number || '',
+         notes: (data as any).notes || ''
+       });
+       
+       const px = (data as any).passengers;
+       if (px && Array.isArray(px) && px.length > 0) {
+         const validPassengers = px.filter(p => typeof p === 'string' && p.trim().length > 0);
+         if (validPassengers.length > 0) {
+           this.passengers.clear();
+           validPassengers.forEach((p: string) => {
+             this.passengers.push(this.fb.control(p.trim(), Validators.required));
+           });
+         }
+       }
+       
+       this.cdr.markForCheck(); // Ensure reactive updates to UI
+    }
+  }
   @Output() save = new EventEmitter<Omit<Reservation, 'id' | 'created_at'>>();
   @Output() update = new EventEmitter<{ id: string, data: Partial<Reservation> }>();
   @Output() cancel = new EventEmitter<void>();
@@ -40,31 +64,7 @@ export class ReservationFormComponent implements OnInit, OnChanges {
       notes: ['']
     });
   }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['prefillData'] && this.prefillData && !this.isEditMode()) {
-       this.reservationForm.patchValue({
-         destination: this.prefillData.destination || '',
-         date: this.prefillData.date || '',
-         return_date: (this.prefillData as any).return_date || '',
-         flight_voucher: (this.prefillData as any).flight_voucher || '',
-         reservation_number: (this.prefillData as any).reservation_number || '',
-         notes: (this.prefillData as any).notes || ''
-       });
-       
-       const px = (this.prefillData as any).passengers;
-       if (px && Array.isArray(px) && px.length > 0) {
-         const validPassengers = px.filter(p => typeof p === 'string' && p.trim().length > 0);
-         if (validPassengers.length > 0) {
-           this.passengers.clear();
-           validPassengers.forEach((p: string) => {
-             this.passengers.push(this.fb.control(p.trim(), Validators.required));
-           });
-         }
-       }
-    }
-  }
-
+  // Removing ngOnChanges as we're utilizing setter for prefill data now
   ngOnInit() {
     if (this.reservationToEdit) {
       this.isEditMode.set(true);

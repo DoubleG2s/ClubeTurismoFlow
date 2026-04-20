@@ -119,6 +119,7 @@ export class AppComponent implements OnInit {
   editingCredit = signal<Credit | null>(null);
   showCreditEditModal = signal(false);
   isSavingCredit = signal(false);
+  prefilledCreditData = signal<Partial<Credit> | null>(null);
 
   // Shared Modal State
   showConfirmDeleteModal = signal(false);
@@ -605,14 +606,17 @@ export class AppComponent implements OnInit {
   @ViewChild('aiChat') aiChatComp!: AiChatComponent;
 
   isTabChanging(action: AiAction): boolean {
-    if (action.type === 'CREATE_RESERVATION') return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas');
-    if (action.type === 'CREATE_QUOTE') return !(this.activeTab() === 'cotacoes' && this.activeCotacaoTab() === 'cadastro');
-    if (action.type === 'APPLY_FILTER') return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas');
+    const t = action.type;
+    if (t.includes('RESERVATION')) return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas');
+    if (t.includes('QUOTE')) return !(this.activeTab() === 'cotacoes' && this.activeCotacaoTab() === 'cadastro');
+    if (t.includes('HOTEL')) return !(this.activeTab() === 'hotel' && this.activeHotelTab() === 'hoteis');
+    if (t.includes('CREDIT')) return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'creditos');
+    if (t.includes('FLIGHT')) return !(this.activeTab() === 'voos');
+    if (t === 'APPLY_FILTER') return !(this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas');
     return false;
   }
 
   handleAiAction(action: AiAction) {
-    // Só aciona o alerta se a ação for forçar o usuário a mudar de aba/layout perdendo dados atuais
     if (action.type !== 'CONFIRM_TAB_SWITCH' && this.isTabChanging(action) && this.isAnyFormDirty()) {
       const response = this.aiChatComp['aiInterpreter'].blockForTabConfirmation(action);
       this.aiChatComp.addBotMessage(response.message);
@@ -623,11 +627,32 @@ export class AppComponent implements OnInit {
       action = action.payload; // Extract the original action
     }
 
-    if (action.type === 'CREATE_RESERVATION') {
+    const p = action.payload || {};
+
+    // Searches for EDIT intents
+    const searchTerm = (p.search_term || p.reservation_number || p.locator || p.title || p.name || p.origin || p.destination || '').toString().toLowerCase();
+
+    // Flight Handlers
+    if (action.type === 'CREATE_FLIGHT') {
+      this.activeTab.set('voos');
+      this.prefilledFlightData.set({
+        locator: p.locator || '',
+        origin: p.origin || '',
+        date: p.date || p.flight_time || '',
+        destination: p.destination || ''
+      } as any);
+      // Wait for tab switch
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
+    } else if (action.type === 'EDIT_FLIGHT') {
+      this.activeTab.set('voos');
+      const flight = this.flights().find(f => f.locator?.toLowerCase().includes(searchTerm));
+      if (flight) this.startEdit(flight.id);
+    }
+    
+    // Reservation Handlers
+    else if (action.type === 'CREATE_RESERVATION') {
       this.activeTab.set('reservas');
       this.activeReservaTab.set('reservas');
-      
-      const p = action.payload || {};
       this.prefilledReservationData.set({
         destination: p.destination || '',
         passengers: Array.isArray(p.passengers) ? p.passengers : (p.passenger ? [p.passenger] : []),
@@ -637,29 +662,76 @@ export class AppComponent implements OnInit {
         flight_voucher: p.flight_voucher || '',
         notes: p.notes || ''
       } as any);
-      
-    } else if (action.type === 'CREATE_QUOTE') {
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
+    } else if (action.type === 'EDIT_RESERVATION') {
+      this.activeTab.set('reservas');
+      this.activeReservaTab.set('reservas');
+      const res = this.reservations().find(r => r.reservation_number.toLowerCase().includes(searchTerm) || r.passengers.some(pa => pa.toLowerCase().includes(searchTerm)));
+      if (res) this.startEditReservation(res.id);
+    }
+    
+    // Quote Handlers
+    else if (action.type === 'CREATE_QUOTE') {
       this.activeTab.set('cotacoes');
       this.activeCotacaoTab.set('cadastro');
       this.prefilledQuoteData.set({
-        title: action.payload?.destination ? `Cotação para ${action.payload.destination}` : '',
-        adults: action.payload?.adults || 2,
-        children: action.payload?.children || 0
+        title: p.title || (p.destination ? `Cotação para ${p.destination}` : ''),
+        adults: p.adults || 2,
+        children: p.children || 0
       } as any);
-    } else if (action.type === 'APPLY_FILTER') {
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
+    } else if (action.type === 'EDIT_QUOTE') {
+      this.activeTab.set('cotacoes');
+      this.activeCotacaoTab.set('cadastro');
+      const quote = this.quotes().find(q => q.title.toLowerCase().includes(searchTerm));
+      if (quote) this.startEditQuote(quote.id);
+    }
+    
+    // Hotel Handlers
+    else if (action.type === 'CREATE_HOTEL') {
+      this.activeTab.set('hotel');
+      this.activeHotelTab.set('hoteis');
+      this.prefilledHotelName.set(p.name || '');
+      // Extra data can't directly map yet if no simple prefill is set.
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
+    } else if (action.type === 'EDIT_HOTEL') {
+      this.activeTab.set('hotel');
+      this.activeHotelTab.set('hoteis');
+      const hotel = this.hotels().find(h => h.name.toLowerCase().includes(searchTerm));
+      if (hotel) this.startEditHotel(hotel.id);
+    }
+    
+    // Credit Handlers
+    else if (action.type === 'CREATE_CREDIT') {
+      this.activeTab.set('reservas');
+      this.activeReservaTab.set('creditos');
+      this.prefilledCreditData.set({
+        client_name: p.customer || p.client_name || '',
+        reservation_number: p.reservation_number || '',
+        value: p.amount || p.value || 0,
+        observations: p.notes || ''
+      } as any);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
+    } else if (action.type === 'EDIT_CREDIT') {
+      this.activeTab.set('reservas');
+      this.activeReservaTab.set('creditos');
+      const credit = this.credits().find(c => c.client_name?.toLowerCase().includes(searchTerm));
+      if (credit) this.startEditCredit(credit.id);
+    }
+    
+    // Filter Handlers
+    else if (action.type === 'APPLY_FILTER') {
       this.activeTab.set('reservas');
       this.activeReservaTab.set('reservas');
-      if (action.payload?.filter === 'hoje' || action.payload?.filter === 'amanha') {
-        this.activeQuickFilter.set(action.payload.filter);
+      if (p.filter === 'hoje' || p.filter === 'amanha') {
+        this.activeQuickFilter.set(p.filter);
+      } else if (searchTerm) {
+        this.searchTerm.set(searchTerm);
       }
     }
   }
 
   isAnyFormDirty(): boolean {
-    // Simple mock logic: if the user is on the main add screen, we mock a dirty form state
-    // In a real app we would check `this.reservationForm.dirty`
-    if (this.activeTab() === 'reservas' && this.activeReservaTab() === 'reservas') return true;
-    if (this.activeTab() === 'cotacoes' && this.activeCotacaoTab() === 'cadastro') return true;
     return false;
   }
 
