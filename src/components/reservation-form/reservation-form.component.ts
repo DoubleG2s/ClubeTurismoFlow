@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Reservation } from '../../models/reservation';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
+import { AiVoucherService } from '../../services/ai-voucher.service';
 
 @Component({
   selector: 'app-reservation-form',
@@ -27,9 +28,16 @@ export class ReservationFormComponent implements OnInit {
        if (px && Array.isArray(px) && px.length > 0) {
          const validPassengers = px.filter(p => typeof p === 'string' && p.trim().length > 0);
          if (validPassengers.length > 0) {
-           this.passengers.clear();
-           validPassengers.forEach((p: string) => {
-             this.passengers.push(this.fb.control(p.trim(), Validators.required));
+           while (this.passengers.length > validPassengers.length) {
+             this.passengers.removeAt(this.passengers.length - 1);
+           }
+           validPassengers.forEach((p: string, index: number) => {
+             if (index < this.passengers.length) {
+               this.passengers.at(index).setValue(p.trim());
+             } else {
+               this.addPassenger();
+               this.passengers.at(index).setValue(p.trim());
+             }
            });
          }
        }
@@ -43,9 +51,12 @@ export class ReservationFormComponent implements OnInit {
 
   reservationForm!: FormGroup; // Definite assignment assertion
   isEditMode = signal(false);
+  isExtracting = signal(false);
+  extractionWarning = signal<string | null>(null);
 
   // Inject ChangeDetectorRef for Zoneless updates
   private cdr = inject(ChangeDetectorRef);
+  private aiVoucherService = inject(AiVoucherService);
 
   constructor(private fb: FormBuilder) {
     this.initForm();
@@ -79,13 +90,22 @@ export class ReservationFormComponent implements OnInit {
       });
 
       // Handle Passengers FormArray
-      this.passengers.clear();
       if (this.reservationToEdit.passengers && this.reservationToEdit.passengers.length > 0) {
-        this.reservationToEdit.passengers.forEach(p => {
-          this.passengers.push(this.fb.control(p, Validators.required));
+        while (this.passengers.length > this.reservationToEdit.passengers.length) {
+          this.passengers.removeAt(this.passengers.length - 1);
+        }
+        this.reservationToEdit.passengers.forEach((p, index) => {
+          if (index < this.passengers.length) {
+            this.passengers.at(index).setValue(p);
+          } else {
+            this.addPassenger();
+            this.passengers.at(index).setValue(p);
+          }
         });
       } else {
-        this.addPassenger();
+        if (this.passengers.length === 0) {
+          this.addPassenger();
+        }
       }
     }
   }
@@ -130,6 +150,65 @@ export class ReservationFormComponent implements OnInit {
 
     input.value = value;
     this.reservationForm.get('flight_voucher')?.setValue(value);
+  }
+
+  async onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    
+    const file = input.files[0];
+    if (file.type !== 'application/pdf') {
+      alert('Por favor, selecione um arquivo PDF.');
+      return;
+    }
+
+    this.isExtracting.set(true);
+    this.extractionWarning.set(null);
+    this.cdr.markForCheck();
+
+    try {
+      const extracted = await this.aiVoucherService.processVoucher(file);
+      
+      let warnings = [];
+      if (!extracted.destino) warnings.push('Destino não encontrado.');
+      if (extracted.passageiros.length === 0) warnings.push('Nenhum passageiro encontrado.');
+      if (!extracted.data_ida) warnings.push('Data de ida não encontrada.');
+      if (extracted.voo_voucher && extracted.voo_voucher.length !== 6) warnings.push('Localizador de voo fora do padrão.');
+      
+      if (warnings.length > 0) {
+        this.extractionWarning.set('Atenção: ' + warnings.join(' '));
+      }
+
+      this.reservationForm.patchValue({
+        destination: extracted.destino || this.reservationForm.get('destination')?.value,
+        date: extracted.data_ida || this.reservationForm.get('date')?.value,
+        return_date: extracted.data_volta || this.reservationForm.get('return_date')?.value,
+        flight_voucher: extracted.voo_voucher || this.reservationForm.get('flight_voucher')?.value,
+        reservation_number: extracted.reserva_voucher || this.reservationForm.get('reservation_number')?.value,
+        notes: extracted.notes_prefill || this.reservationForm.get('notes')?.value
+      });
+
+      if (extracted.passageiros.length > 0) {
+        while (this.passengers.length > extracted.passageiros.length) {
+          this.passengers.removeAt(this.passengers.length - 1);
+        }
+        extracted.passageiros.forEach((p: string, index: number) => {
+          if (index < this.passengers.length) {
+            this.passengers.at(index).setValue(p);
+          } else {
+            this.addPassenger();
+            this.passengers.at(index).setValue(p);
+          }
+        });
+      }
+
+    } catch (err: any) {
+      alert(err.message || 'Erro ao processar o voucher.');
+    } finally {
+      this.isExtracting.set(false);
+      input.value = '';
+      this.cdr.markForCheck();
+    }
   }
 
   onSubmit() {
