@@ -205,6 +205,12 @@ export class AppComponent implements OnInit {
     const year = this.activeYear();
 
     result = result.filter(res => {
+      const qFilter = this.activeQuickFilter();
+      if (qFilter === 'em_viagem') {
+         // O filtro 'em_viagem' vai varrer reservas ativas independentemente do mês de ida
+         return true;
+      }
+
       if (!res.date || res.date.length < 10) return false;
       const parts = res.date.split('/');
       if (parts.length !== 3) return false;
@@ -474,8 +480,8 @@ export class AppComponent implements OnInit {
     } else {
       this.activeQuickFilter.set(filter);
       
-      // Sincronizar controle mensal para o filtro Hoje ou Amanhã
-      if (filter === 'hoje' || filter === 'amanha') {
+      // Sincronizar controle mensal para os filtros Rápidos
+      if (filter === 'hoje' || filter === 'amanha' || filter === 'em_viagem') {
         const targetDate = new Date();
         if (filter === 'amanha') {
            targetDate.setDate(targetDate.getDate() + 1);
