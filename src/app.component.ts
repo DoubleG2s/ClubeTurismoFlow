@@ -139,8 +139,55 @@ export class AppComponent implements OnInit {
   activeDateEnd = signal('');
   activeReturnStart = signal('');
   activeReturnEnd = signal('');
+
+  // Novos Sinais de Filtro
+  draftMissingHotelEmail = signal(false);
+  draftMissingPostTrip = signal(false);
+  activeMissingHotelEmail = signal(false);
+  activeMissingPostTrip = signal(false);
+
   sortField = signal<'date' | 'return_date'>('date');
   sortDirection = signal<'asc' | 'desc'>('desc');
+
+  // --- List Animation State ---
+  listAnimationClass = signal<string>('');
+
+  triggerListAnimation() {
+    this.listAnimationClass.set('');
+    // Força reflow para reiniciar a animação
+    setTimeout(() => this.listAnimationClass.set('animate-fade-in'), 10);
+  }
+
+  // --- Month Navigation State ---
+  activeMonth = signal<number>(new Date().getMonth());
+  activeYear = signal<number>(new Date().getFullYear());
+  
+  monthName = computed(() => {
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return `${months[this.activeMonth()]} ${this.activeYear()}`;
+  });
+
+  prevMonth() {
+    this.activeMonth.update(m => {
+      if (m === 0) {
+        this.activeYear.update(y => y - 1);
+        return 11;
+      }
+      return m - 1;
+    });
+    this.triggerListAnimation();
+  }
+
+  nextMonth() {
+    this.activeMonth.update(m => {
+      if (m === 11) {
+        this.activeYear.update(y => y + 1);
+        return 0;
+      }
+      return m + 1;
+    });
+    this.triggerListAnimation();
+  }
 
   // Derived state
   flights = this.flightService.flights;
@@ -149,9 +196,23 @@ export class AppComponent implements OnInit {
   hotels = this.hotelService.hotels;
   credits = this.creditService.credits;
 
-  // Computed filtered reservations (mantido igual)
+  // Computed filtered reservations
   filteredReservations = computed(() => {
     let result = this.reservations();
+
+    // 1. Month Filter (Ida)
+    const month = this.activeMonth();
+    const year = this.activeYear();
+
+    result = result.filter(res => {
+      if (!res.date || res.date.length < 10) return false;
+      const parts = res.date.split('/');
+      if (parts.length !== 3) return false;
+      const resMonth = +parts[1] - 1;
+      const resYear = +parts[2];
+      return resMonth === month && resYear === year;
+    });
+
     const term = this.searchTerm().toLowerCase().trim();
 
     if (term) {
@@ -178,9 +239,9 @@ export class AppComponent implements OnInit {
         const resReturn = res.return_date ? this.parseDate(res.return_date) : 0;
 
         if (qFilter === 'hoje') {
-          return resDate === todayTime || resReturn === todayTime;
+          return resDate === todayTime; // Somente ida
         } else if (qFilter === 'amanha') {
-          return resDate === tomorrowTime || resReturn === tomorrowTime;
+          return resDate === tomorrowTime; // Somente ida
         } else if (qFilter === 'em_viagem') {
           if (!resReturn) return false;
           return todayTime >= resDate && todayTime <= resReturn;
@@ -213,6 +274,31 @@ export class AppComponent implements OnInit {
       });
     }
 
+    const mHotel = this.activeMissingHotelEmail();
+    const mPost = this.activeMissingPostTrip();
+    
+    if (mHotel || mPost) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTime = today.getTime();
+
+      result = result.filter(res => {
+        let matchHotel = true;
+        let matchPost = true;
+
+        if (mHotel) {
+           matchHotel = !res.checklist?.hotel_email;
+        }
+
+        if (mPost) {
+           const resReturn = res.return_date ? this.parseDate(res.return_date) : 0;
+           matchPost = resReturn > 0 && resReturn < todayTime && !res.checklist?.post_trip;
+        }
+
+        return matchHotel && matchPost;
+      });
+    }
+
     const field = this.sortField();
     const direction = this.sortDirection() === 'asc' ? 1 : -1;
 
@@ -233,7 +319,9 @@ export class AppComponent implements OnInit {
       this.activeDateEnd() ||
       this.activeReturnStart() ||
       this.activeReturnEnd() ||
-      this.activeQuickFilter() !== null
+      this.activeQuickFilter() !== null ||
+      this.activeMissingHotelEmail() ||
+      this.activeMissingPostTrip()
     );
   });
 
@@ -242,7 +330,9 @@ export class AppComponent implements OnInit {
       this.draftDateStart() ||
       this.draftDateEnd() ||
       this.draftReturnStart() ||
-      this.draftReturnEnd()
+      this.draftReturnEnd() ||
+      this.draftMissingHotelEmail() ||
+      this.draftMissingPostTrip()
     );
   });
 
@@ -351,6 +441,10 @@ export class AppComponent implements OnInit {
     this.activeDateEnd.set(this.draftDateEnd());
     this.activeReturnStart.set(this.draftReturnStart());
     this.activeReturnEnd.set(this.draftReturnEnd());
+    this.activeMissingHotelEmail.set(this.draftMissingHotelEmail());
+    this.activeMissingPostTrip.set(this.draftMissingPostTrip());
+    
+    this.triggerListAnimation();
   }
 
   clearFilters() {
@@ -360,12 +454,18 @@ export class AppComponent implements OnInit {
     this.draftDateEnd.set('');
     this.draftReturnStart.set('');
     this.draftReturnEnd.set('');
+    this.draftMissingHotelEmail.set(false);
+    this.draftMissingPostTrip.set(false);
     this.activeDateStart.set('');
     this.activeDateEnd.set('');
     this.activeReturnStart.set('');
     this.activeReturnEnd.set('');
+    this.activeMissingHotelEmail.set(false);
+    this.activeMissingPostTrip.set(false);
     this.sortField.set('date');
     this.sortDirection.set('desc');
+    
+    this.triggerListAnimation();
   }
 
   toggleQuickFilter(filter: 'hoje' | 'amanha' | 'em_viagem') {
@@ -373,7 +473,25 @@ export class AppComponent implements OnInit {
       this.activeQuickFilter.set(null);
     } else {
       this.activeQuickFilter.set(filter);
+      
+      // Sincronizar controle mensal para o filtro Hoje ou Amanhã
+      if (filter === 'hoje' || filter === 'amanha') {
+        const targetDate = new Date();
+        if (filter === 'amanha') {
+           targetDate.setDate(targetDate.getDate() + 1);
+        }
+        this.activeMonth.set(targetDate.getMonth());
+        this.activeYear.set(targetDate.getFullYear());
+      }
     }
+    this.triggerListAnimation();
+  }
+
+  formatForDatePicker(dateStr: string): string {
+    if (!dateStr || dateStr.length !== 10) return '';
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return '';
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
   }
 
   onDateInput(event: Event, signalSetter: any) {
@@ -387,6 +505,17 @@ export class AppComponent implements OnInit {
     }
     input.value = value;
     signalSetter.set(value);
+  }
+
+  onNativeDateChange(event: Event, signalSetter: any) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value; // yyyy-mm-dd
+    if (val && val.length === 10) {
+      const parts = val.split('-');
+      signalSetter.set(`${parts[2]}/${parts[1]}/${parts[0]}`);
+    } else {
+      signalSetter.set('');
+    }
   }
 
   onExchangeRateInput(event: Event) {
