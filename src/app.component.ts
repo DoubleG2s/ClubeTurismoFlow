@@ -115,6 +115,11 @@ export class AppComponent implements OnInit {
   selectedHotelDetails = signal<Hotel | null>(null);
   showHotelDetailsModal = signal(false);
 
+  // Hotel Search State
+  hotelSearchInputValue = signal('');
+  hotelSearchTerm = signal('');
+  private hotelSearchTimeout: any;
+
   // Credit State
   editingCredit = signal<Credit | null>(null);
   showCreditEditModal = signal(false);
@@ -195,6 +200,18 @@ export class AppComponent implements OnInit {
   quotes = this.quoteService.quotes;
   hotels = this.hotelService.hotels;
   credits = this.creditService.credits;
+
+  // Computed filtered hotels
+  filteredHotels = computed(() => {
+    let result = this.hotels();
+    const term = this.hotelSearchTerm().toLowerCase().trim();
+
+    if (term) {
+      result = result.filter(h => h.name.toLowerCase().includes(term));
+    }
+    
+    return result;
+  });
 
   // Computed filtered reservations
   filteredReservations = computed(() => {
@@ -426,6 +443,26 @@ export class AppComponent implements OnInit {
   }
 
   // --- Helper Methods ---
+  onHotelSearchInput(event: Event) {
+    const term = (event.target as HTMLInputElement).value;
+    this.hotelSearchInputValue.set(term);
+    
+    if (this.hotelSearchTimeout) {
+      clearTimeout(this.hotelSearchTimeout);
+    }
+    this.hotelSearchTimeout = setTimeout(() => {
+      this.hotelSearchTerm.set(term);
+    }, 300);
+  }
+
+  clearHotelSearch() {
+    this.hotelSearchInputValue.set('');
+    this.hotelSearchTerm.set('');
+    if (this.hotelSearchTimeout) {
+      clearTimeout(this.hotelSearchTimeout);
+    }
+  }
+
   private parseDate(dateStr: string): number {
     if (!dateStr || dateStr.length < 10) return 0;
     const parts = dateStr.split('/');
