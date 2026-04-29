@@ -52,3 +52,4 @@ Thumbs.db
 .vercel
 /docs
 .cursor
+.angular/
