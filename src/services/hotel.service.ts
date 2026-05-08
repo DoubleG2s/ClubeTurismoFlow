@@ -1,6 +1,7 @@
 import { Injectable, signal, inject, effect } from '@angular/core';
 import { supabase } from './supabase';
 import { Hotel, HotelEmail, HotelPhone, HotelImage } from '../models/hotel';
+import { Reservation } from '../models/reservation';
 import { TenantService } from './tenant.service';
 
 @Injectable({
@@ -9,10 +10,16 @@ import { TenantService } from './tenant.service';
 export class HotelService {
     private _hotels = signal<Hotel[]>([]);
     private _isLoading = signal(false);
+    private _prefillHotelEmailData = signal<Reservation | null>(null);
 
     readonly hotels = this._hotels.asReadonly();
     readonly isLoading = this._isLoading.asReadonly();
+    readonly prefillHotelEmailData = this._prefillHotelEmailData.asReadonly();
     private tenantService = inject(TenantService);
+
+    setPrefillHotelEmailData(data: Reservation | null) {
+        this._prefillHotelEmailData.set(data);
+    }
 
     constructor() {
         effect(() => {

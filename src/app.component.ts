@@ -665,6 +665,13 @@ export class AppComponent implements OnInit {
     }
   }
 
+  onPrepareHotelEmail(reservation: Reservation) {
+    this.hotelService.setPrefillHotelEmailData(reservation);
+    this.switchTab('hotel');
+    this.switchHotelTab('email');
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+  }
+
   // --- Quote Actions ---
   async onAddQuote(data: Omit<Quote, 'id' | 'created_at'>) {
     this.isSavingQuote.set(true);

@@ -16,6 +16,7 @@ export class ReservationCardComponent {
   @Output() remove = new EventEmitter<string>();
   @Output() edit = new EventEmitter<string>();
   @Output() addToFlights = new EventEmitter<Reservation>();
+  @Output() prepareHotelEmail = new EventEmitter<Reservation>();
 
   // UI State for collapse
   isPreVendaExpanded = true;

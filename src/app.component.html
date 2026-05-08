@@ -485,7 +485,8 @@
           @for (res of filteredReservations(); track res.id) {
           <app-reservation-card [reservation]="res" (update)="onUpdateReservation($event)"
             (edit)="startEditReservation($event)" (remove)="onRemoveReservation($event)"
-            (addToFlights)="onCopyReservationToFlight($event)"></app-reservation-card>
+            (addToFlights)="onCopyReservationToFlight($event)"
+            (prepareHotelEmail)="onPrepareHotelEmail($event)"></app-reservation-card>
           }
         </div>
         } @else {

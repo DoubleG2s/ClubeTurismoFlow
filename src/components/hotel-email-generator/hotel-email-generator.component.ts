@@ -1,7 +1,9 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { HotelService } from '../../services/hotel.service';
+import { Reservation } from '../../models/reservation';
 
 interface Guest {
   name: string;
@@ -101,6 +103,15 @@ interface EmailData {
           </div>
           <h3 class="text-base font-bold text-slate-800 tracking-tight">Gerador de Hospedagem</h3>
         </div>
+
+        @if (showSuccessFeedback()) {
+          <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center gap-3 animate-fade-in">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-sm font-bold">Dados da reserva carregados com sucesso</span>
+          </div>
+        }
 
         <form class="space-y-6">
           
@@ -241,6 +252,7 @@ interface EmailData {
 export class HotelEmailGeneratorComponent {
 
   private sanitizer = inject(DomSanitizer);
+  private hotelService = inject(HotelService);
 
   data: EmailData = {
     checkIn: '',
@@ -250,6 +262,40 @@ export class HotelEmailGeneratorComponent {
   };
 
   copySuccess = signal(false);
+  showSuccessFeedback = signal(false);
+
+  constructor() {
+    effect(() => {
+      const reservation = this.hotelService.prefillHotelEmailData();
+      if (reservation) {
+        this.fillFromReservation(reservation);
+        // Limpar o sinal no serviço para não pré-preencher novamente sem intenção
+        this.hotelService.setPrefillHotelEmailData(null);
+      }
+    });
+  }
+
+  fillFromReservation(res: Reservation) {
+    this.data.checkIn = this.formatDateForInput(res.date);
+    this.data.checkOut = this.formatDateForInput(res.return_date || '');
+    this.data.apartments = [this.createNewApartment('APTO 1')];
+    
+    // Fill guests
+    if (res.passengers && res.passengers.length > 0) {
+      this.data.apartments[0].guests = res.passengers.map(p => ({ name: p }));
+      this.data.apartments[0].adults = res.passengers.length;
+    }
+
+    this.showSuccessFeedback.set(true);
+    setTimeout(() => this.showSuccessFeedback.set(false), 5000);
+  }
+
+  formatDateForInput(dateStr: string): string {
+    if (!dateStr || dateStr.length !== 10) return '';
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return '';
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
 
   createNewApartment(defaultName: string = ''): Apartment {
     return {
