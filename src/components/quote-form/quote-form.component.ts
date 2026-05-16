@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Quote } from '../../models/quote';
+import { Quote, QuoteOption } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
@@ -21,79 +21,44 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   @Output() update = new EventEmitter<{ id: string, data: Partial<Quote> }>();
   @Output() cancel = new EventEmitter<void>();
 
-  quoteForm!: FormGroup; // Definite assignment
+  quoteForm!: FormGroup;
   isEditMode = signal(false);
 
-  // States do Autocomplete
+  // States
   hotelService = inject(HotelService);
-  activeHotelDropdownIndex = signal<number | null>(null);
+  activeHotelDropdownIndex = signal<{ optionIndex: number, hotelIndex: number } | null>(null);
+  activeOptionIndex = signal<number>(0);
 
-  // Injeção do ChangeDetectorRef para garantir atualização da UI após recriar o form
   private cdr = inject(ChangeDetectorRef);
 
   constructor(private fb: FormBuilder) {
     this.initForm();
   }
 
-  // Método para criar/recriar a estrutura limpa do formulário
   private initForm() {
     this.quoteForm = this.fb.group({
-      // Campos principais
       title: ['', Validators.required],
       subtitle: [''],
       supplier: ['', Validators.required],
-
-      // Datas e Pax
-      check_in: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
-      check_out: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
-      adults: [2, [Validators.required, Validators.min(1)]],
-      children: [0, [Validators.required, Validators.min(0)]],
-
-      // Detalhes Gerais
-      tour_details: [''], // Passeio (opcional)
-      has_transfer: [false], // Traslado chegada e saída
-
-      // Voos (Nested Group)
-      flight_details: this.fb.group({
-        outbound: this.fb.group({
-          origin_city: ['', Validators.required],
-          destination_city: ['', Validators.required],
-          departure_time: ['', Validators.required],
-          arrival_time: ['', Validators.required],
-          has_connection: [false],
-          connection_city: [''],
-          connection_time: ['']
-        }),
-        inbound: this.fb.group({
-          origin_city: ['', Validators.required],
-          destination_city: ['', Validators.required],
-          departure_time: ['', Validators.required],
-          arrival_time: ['', Validators.required],
-          has_connection: [false],
-          connection_city: [''],
-          connection_time: ['']
-        })
-      }),
-
-      // Hotéis (Form Array)
-      hotel_options: this.fb.array([])
+      options: this.fb.array([])
     });
-
-    // Adiciona uma opção de hotel vazia por padrão
-    this.addHotelOption();
   }
 
-  get hotelOptions() {
-    return this.quoteForm.get('hotel_options') as FormArray;
+  get quoteOptions() {
+    return this.quoteForm.get('options') as FormArray;
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['prefillData'] && this.prefillData && !this.isEditMode()) {
        this.quoteForm.patchValue({
          title: this.prefillData.title || '',
-         adults: this.prefillData.adults || 2,
-         children: this.prefillData.children || 0
        });
+       if (this.quoteOptions.length > 0) {
+         this.quoteOptions.at(0).patchValue({
+           adults: this.prefillData.adults || 2,
+           children: this.prefillData.children || 0
+         });
+       }
     }
   }
 
@@ -101,34 +66,108 @@ export class QuoteFormComponent implements OnInit, OnChanges {
     if (this.quoteToEdit) {
       this.isEditMode.set(true);
 
-      // Patch simple fields
       this.quoteForm.patchValue({
         title: this.quoteToEdit.title,
         subtitle: this.quoteToEdit.subtitle,
         supplier: this.quoteToEdit.supplier,
-        check_in: this.quoteToEdit.check_in,
-        check_out: this.quoteToEdit.check_out,
-        adults: this.quoteToEdit.adults,
-        children: this.quoteToEdit.children,
-        tour_details: this.quoteToEdit.tour_details,
-        has_transfer: this.quoteToEdit.has_transfer || false,
-        flight_details: this.quoteToEdit.flight_details
       });
 
-      // Handle Hotel Options Array - Limpa o default criado pelo initForm
-      this.hotelOptions.clear();
+      this.quoteOptions.clear();
 
-      if (this.quoteToEdit.hotel_options && this.quoteToEdit.hotel_options.length > 0) {
-        this.quoteToEdit.hotel_options.forEach(hotel => {
-          // Converte o valor numérico do banco para string formatada
-          const formattedAmount = this.formatNumberToString(hotel.amount);
-          this.addHotelOption({ ...hotel, amount: formattedAmount });
+      // Check if it's the new format with options
+      if (this.quoteToEdit.options && this.quoteToEdit.options.length > 0) {
+        this.quoteToEdit.options.forEach(opt => {
+          this.addQuoteOption(opt);
         });
       } else {
-        this.addHotelOption();
+        // Legacy format mapping
+        this.addQuoteOption({
+          check_in: this.quoteToEdit.check_in,
+          check_out: this.quoteToEdit.check_out,
+          adults: this.quoteToEdit.adults,
+          children: this.quoteToEdit.children,
+          tour_details: this.quoteToEdit.tour_details,
+          has_transfer: this.quoteToEdit.has_transfer,
+          flight_details: this.quoteToEdit.flight_details,
+          hotel_options: this.quoteToEdit.hotel_options
+        });
+      }
+    } else {
+      // New quote
+      this.addQuoteOption();
+    }
+  }
+
+  createQuoteOptionGroup(data?: any): FormGroup {
+    const group = this.fb.group({
+      title: [data?.title || ''],
+      check_in: [data?.check_in || '', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
+      check_out: [data?.check_out || '', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
+      adults: [data?.adults || 2, [Validators.required, Validators.min(1)]],
+      children: [data?.children || 0, [Validators.required, Validators.min(0)]],
+      tour_details: [data?.tour_details || ''],
+      has_transfer: [data?.has_transfer || false],
+      flight_details: this.fb.group({
+        outbound: this.fb.group({
+          origin_city: [data?.flight_details?.outbound?.origin_city || '', Validators.required],
+          destination_city: [data?.flight_details?.outbound?.destination_city || '', Validators.required],
+          departure_time: [data?.flight_details?.outbound?.departure_time || '', Validators.required],
+          arrival_time: [data?.flight_details?.outbound?.arrival_time || '', Validators.required],
+          has_connection: [data?.flight_details?.outbound?.has_connection || false],
+          connection_city: [data?.flight_details?.outbound?.connection_city || ''],
+          connection_time: [data?.flight_details?.outbound?.connection_time || '']
+        }),
+        inbound: this.fb.group({
+          origin_city: [data?.flight_details?.inbound?.origin_city || '', Validators.required],
+          destination_city: [data?.flight_details?.inbound?.destination_city || '', Validators.required],
+          departure_time: [data?.flight_details?.inbound?.departure_time || '', Validators.required],
+          arrival_time: [data?.flight_details?.inbound?.arrival_time || '', Validators.required],
+          has_connection: [data?.flight_details?.inbound?.has_connection || false],
+          connection_city: [data?.flight_details?.inbound?.connection_city || ''],
+          connection_time: [data?.flight_details?.inbound?.connection_time || '']
+        })
+      }),
+      hotel_options: this.fb.array([])
+    });
+
+    const hotelOptionsArray = group.get('hotel_options') as FormArray;
+    if (data?.hotel_options && data.hotel_options.length > 0) {
+      data.hotel_options.forEach((h: any) => {
+        hotelOptionsArray.push(this.createHotelOptionGroup({ ...h, amount: this.formatNumberToString(h.amount) }));
+      });
+    } else {
+      hotelOptionsArray.push(this.createHotelOptionGroup());
+    }
+
+    return group;
+  }
+
+  addQuoteOption(data?: any) {
+    this.quoteOptions.push(this.createQuoteOptionGroup(data));
+    this.activeOptionIndex.set(this.quoteOptions.length - 1);
+  }
+
+  duplicateOption(index: number) {
+    // Realiza deep clone para garantir que arrays (como hotel_images) não compartilhem referência
+    const currentData = JSON.parse(JSON.stringify(this.quoteOptions.at(index).value));
+    
+    // Gera um novo ID único para isolar completamente a opção no proposal
+    currentData.id = crypto.randomUUID();
+    
+    this.addQuoteOption(currentData);
+  }
+
+  removeQuoteOption(index: number) {
+    if (this.quoteOptions.length > 1) {
+      this.quoteOptions.removeAt(index);
+      if (this.activeOptionIndex() >= this.quoteOptions.length) {
+        this.activeOptionIndex.set(this.quoteOptions.length - 1);
       }
     }
-    // Se não for edição, o initForm já configurou o estado inicial corretamente
+  }
+
+  getHotelOptions(optionIndex: number): FormArray {
+    return this.quoteOptions.at(optionIndex).get('hotel_options') as FormArray;
   }
 
   createHotelOptionGroup(data?: any): FormGroup {
@@ -138,35 +177,35 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       hotel_name: [data?.hotel_name || '', Validators.required],
       regime: [data?.regime || '', Validators.required],
       accommodation: [data?.accommodation || '', Validators.required],
-      // Amount inicia como string para suportar mascara
       amount: [data?.amount || '', Validators.required],
       currency: [data?.currency || 'BRL', Validators.required],
       link: [data?.link || '']
     });
   }
 
-  addHotelOption(data?: any) {
-    this.hotelOptions.push(this.createHotelOptionGroup(data));
+  addHotelOption(optionIndex: number, data?: any) {
+    this.getHotelOptions(optionIndex).push(this.createHotelOptionGroup(data));
   }
 
-  removeHotelOption(index: number) {
-    if (this.hotelOptions.length > 1) {
-      this.hotelOptions.removeAt(index);
+  removeHotelOption(optionIndex: number, hotelIndex: number) {
+    const arr = this.getHotelOptions(optionIndex);
+    if (arr.length > 1) {
+      arr.removeAt(hotelIndex);
     }
   }
 
   // --- AUTOCOMPLETE HOTÉIS ---
 
-  getFilteredHotels(index: number): Hotel[] {
-    const term = this.hotelOptions.at(index).get('hotel_name')?.value?.toLowerCase() || '';
+  getFilteredHotels(optionIndex: number, hotelIndex: number): Hotel[] {
+    const term = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_name')?.value?.toLowerCase() || '';
     const allHotels = this.hotelService.hotels();
     if (!term) return allHotels;
     return allHotels.filter(h => h.name.toLowerCase().includes(term));
   }
 
-  selectHotelFromSearch(index: number, hotel: Hotel) {
+  selectHotelFromSearch(optionIndex: number, hotelIndex: number, hotel: Hotel) {
     const images = hotel.hotel_images ? hotel.hotel_images.map(img => img.image_url) : [];
-    this.hotelOptions.at(index).patchValue({
+    this.getHotelOptions(optionIndex).at(hotelIndex).patchValue({
       hotel_id: hotel.id,
       hotel_name: hotel.name,
       hotel_images: images
@@ -175,51 +214,83 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   }
 
   onHotelBlur() {
-    // Delay pequeno para permitir o clique na lista
     setTimeout(() => this.activeHotelDropdownIndex.set(null), 200);
   }
 
-  openHotelCreation(index: number) {
-     const term = this.hotelOptions.at(index).get('hotel_name')?.value || '';
-     // O app usa estado na querystring sem Angular router
+  openHotelCreation(optionIndex: number, hotelIndex: number) {
+     const term = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_name')?.value || '';
      window.open(`/?tab=hotel&new=${encodeURIComponent(term)}`, '_blank');
+  }
+
+  // --- IMAGENS PASTE/UPLOAD ---
+
+  async handleImagePaste(event: ClipboardEvent, optionIndex: number, hotelIndex: number) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          await this.uploadAndSetImage(file, optionIndex, hotelIndex);
+        }
+      }
+    }
+  }
+
+  async handleImageFileSelect(event: Event, optionIndex: number, hotelIndex: number) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      await this.uploadAndSetImage(file, optionIndex, hotelIndex);
+      input.value = ''; // Reset
+    }
+  }
+
+  private async uploadAndSetImage(file: File, optionIndex: number, hotelIndex: number) {
+    const publicUrl = await this.hotelService.uploadImage(file);
+    if (publicUrl) {
+      const control = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_images');
+      const currentImages = control?.value || [];
+      control?.setValue([...currentImages, publicUrl]);
+    }
+  }
+
+  removeHotelImage(optionIndex: number, hotelIndex: number, imageIndex: number) {
+    const control = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_images');
+    const currentImages = control?.value || [];
+    currentImages.splice(imageIndex, 1);
+    control?.setValue([...currentImages]);
   }
 
   // --- MÁSCARA MONETÁRIA ---
 
-  // Converte número 1234.56 -> "1.234,56"
   private formatNumberToString(value: number): string {
     if (value === undefined || value === null) return '';
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // Evento de input para aplicar máscara em tempo real
-  onCurrencyInput(event: Event, index: number) {
+  onCurrencyInput(event: Event, optionIndex: number, hotelIndex: number) {
     const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    let value = input.value.replace(/\D/g, ''); 
 
     if (!value) {
-      this.hotelOptions.at(index).get('amount')?.setValue('');
+      this.getHotelOptions(optionIndex).at(hotelIndex).get('amount')?.setValue('');
       return;
     }
 
-    // Divide por 100 para considerar os centavos
     const floatValue = parseFloat(value) / 100;
-
-    // Formata para pt-BR
     const formatted = floatValue.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
 
     input.value = formatted;
-    this.hotelOptions.at(index).get('amount')?.setValue(formatted);
+    this.getHotelOptions(optionIndex).at(hotelIndex).get('amount')?.setValue(formatted);
   }
 
-  // Converte string "1.234,56" -> number 1234.56 para salvar
   private parseCurrencyString(value: string): number {
     if (!value) return 0;
-    // Remove pontos de milhar e substitui vírgula por ponto
     const cleanValue = value.toString().replace(/\./g, '').replace(',', '.');
     return parseFloat(cleanValue);
   }
@@ -228,11 +299,12 @@ export class QuoteFormComponent implements OnInit, OnChanges {
 
   resetForm() {
     this.isEditMode.set(false);
-    this.initForm(); // Destrói e recria os controles para limpar flags de validação
-    this.cdr.markForCheck(); // Garante que a UI atualize o estado disabled do botão
+    this.initForm();
+    this.addQuoteOption();
+    this.cdr.markForCheck();
   }
 
-  onDateInput(event: Event, controlName: string) {
+  onDateInput(event: Event, optionIndex: number, controlName: string) {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
     if (value.length > 8) value = value.slice(0, 8);
@@ -242,10 +314,10 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       value = value.slice(0, 2) + '/' + value.slice(2);
     }
     input.value = value;
-    this.quoteForm.get(controlName)?.setValue(value);
+    this.quoteOptions.at(optionIndex).get(controlName)?.setValue(value);
   }
 
-  onTimeInput(event: Event, groupName: string, controlName: string) {
+  onTimeInput(event: Event, optionIndex: number, groupName: string, controlName: string) {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
     if (value.length > 4) value = value.slice(0, 4);
@@ -254,22 +326,29 @@ export class QuoteFormComponent implements OnInit, OnChanges {
     }
     input.value = value;
 
-    this.quoteForm.get('flight_details')?.get(groupName)?.get(controlName)?.setValue(value);
+    this.quoteOptions.at(optionIndex).get('flight_details')?.get(groupName)?.get(controlName)?.setValue(value);
   }
 
   onSubmit() {
     if (this.quoteForm.valid) {
       const formValue = this.quoteForm.value;
 
-      // PREPARAÇÃO DOS DADOS: Converter amounts de string para number
-      const processedHotels = formValue.hotel_options.map((hotel: any) => ({
-        ...hotel,
-        amount: typeof hotel.amount === 'string' ? this.parseCurrencyString(hotel.amount) : hotel.amount
-      }));
+      const processedOptions = formValue.options.map((opt: any) => {
+        const processedHotels = opt.hotel_options.map((hotel: any) => ({
+          ...hotel,
+          amount: typeof hotel.amount === 'string' ? this.parseCurrencyString(hotel.amount) : hotel.amount
+        }));
+        return {
+          ...opt,
+          hotel_options: processedHotels
+        };
+      });
 
       const finalPayload = {
-        ...formValue,
-        hotel_options: processedHotels
+        title: formValue.title,
+        subtitle: formValue.subtitle,
+        supplier: formValue.supplier,
+        options: processedOptions
       };
 
       if (this.isEditMode() && this.quoteToEdit) {
@@ -279,10 +358,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         });
       } else {
         this.save.emit(finalPayload);
-        // O reset é chamado pelo componente pai (AppComponent) após sucesso
       }
     } else {
-
       this.quoteForm.markAllAsTouched();
       alert('Por favor, preencha todos os campos obrigatórios.');
     }

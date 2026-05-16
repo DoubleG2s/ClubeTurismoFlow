@@ -54,7 +54,8 @@ export class QuoteService {
           flight_details: q.flight_details || {
             outbound: { origin_city: '', destination_city: '', departure_time: '', arrival_time: '' },
             inbound: { origin_city: '', destination_city: '', departure_time: '', arrival_time: '' }
-          }
+          },
+          options: q.options || []
         }));
         this.quotesSignal.set(mappedData as Quote[]);
       }
@@ -93,7 +94,8 @@ export class QuoteService {
         const newQuote = {
           ...data,
           hotel_options: data.hotel_options || [],
-          flight_details: data.flight_details || {}
+          flight_details: data.flight_details || {},
+          options: data.options || []
         } as Quote;
         this.quotesSignal.update(current => [newQuote, ...current]);
         alert('Cotação criada com sucesso!');
@@ -259,7 +261,8 @@ export class QuoteService {
         return {
           ...data,
           hotel_options: data.hotel_options || [],
-          flight_details: data.flight_details || {}
+          flight_details: data.flight_details || {},
+          options: data.options || []
         } as Quote;
       }
 

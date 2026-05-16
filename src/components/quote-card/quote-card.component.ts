@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, computed, signal, HostListener, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, HostListener, ChangeDetectionStrategy, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Quote } from '../../models/quote';
 import { QuoteService } from '../../services/quote.service';
@@ -10,7 +10,7 @@ import { QuoteService } from '../../services/quote.service';
   templateUrl: './quote-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QuoteCardComponent {
+export class QuoteCardComponent implements OnChanges {
   @Input({ required: true }) quote!: Quote;
   @Input({ required: true }) exchangeRate!: number;
   @Output() edit = new EventEmitter<string>();
@@ -22,13 +22,68 @@ export class QuoteCardComponent {
   showViewModal = signal(false);
   generatedText = signal('');
   isGeneratingLink = signal(false);
+  
+  // Sinal interno para reatividade do computed
+  quoteSignal = signal<Quote | null>(null);
 
-  // Helpers para exibição rápida no card
-  mainHotel = computed(() => this.quote.hotel_options?.[0]);
-  totalOptions = computed(() => this.quote.hotel_options?.length || 0);
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['quote']) {
+      this.quoteSignal.set(this.quote);
+    }
+  }
+
+  // --- SUMMARY LAYER: Normalização e Cálculos Inteligentes ---
+
+  // Normaliza o fallback de cotações antigas vs novas (assim como no proposal)
+  normalizedOptions = computed(() => {
+    const q = this.quoteSignal();
+    if (!q) return [];
+    
+    if (q.options && q.options.length > 0) {
+      return q.options;
+    }
+    // Fallback para cotação antiga
+    return [{
+      title: q.title || 'Opção Única',
+      check_in: q.check_in,
+      check_out: q.check_out,
+      adults: q.adults,
+      children: q.children,
+      tour_details: q.tour_details || '',
+      has_transfer: q.has_transfer || false,
+      flight_details: q.flight_details,
+      hotel_options: q.hotel_options || []
+    }];
+  });
+
+  totalOptions = computed(() => this.normalizedOptions().length);
+  mainOption = computed(() => this.normalizedOptions()[0]);
+  mainHotel = computed(() => this.mainOption()?.hotel_options?.[0]);
+
+  // Faixa de preço (menor valor entre todas as opções)
+  lowestPrice = computed(() => {
+    let minPrice = Infinity;
+    this.normalizedOptions().forEach(opt => {
+      opt.hotel_options?.forEach(hotel => {
+        if (hotel.amount < minPrice) minPrice = hotel.amount;
+      });
+    });
+    return minPrice === Infinity ? null : minPrice;
+  });
+
+  // Resumo de hotéis (pega até os 3 primeiros nomes distintos)
+  uniqueHotelNames = computed(() => {
+    const names = new Set<string>();
+    this.normalizedOptions().forEach(opt => {
+      opt.hotel_options?.forEach(hotel => {
+        if (hotel.hotel_name) names.add(hotel.hotel_name);
+      });
+    });
+    return Array.from(names).slice(0, 3);
+  });
 
   // Helpers de formatação segura para garantir 9.999,99 independente do locale global
-  formatCurrencyValue(value: number, currency: string): string {
+  formatCurrencyValue(value: number, currency: string = 'BRL'): string {
     if (value === undefined || value === null) return '';
     return value.toLocaleString('pt-BR', {
       style: 'currency',
@@ -114,59 +169,79 @@ export class QuoteCardComponent {
   // Lógica principal de geração do texto
   private generateQuoteText(): string {
     const q = this.quote;
+    const options = this.normalizedOptions();
 
-    // Cálculo de dias/noites
-    const diffTime = Math.abs(this.parseDate(q.check_out) - this.parseDate(q.check_in));
-    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const nights = days > 0 ? days - 1 : 0;
-    const durationText = `${days} dias e ${nights} noites`;
+    let text = `*${q.title.toUpperCase()}*\n`;
+    if (q.subtitle) text += `${q.subtitle}\n`;
+    
+    text += `\n# Informações Gerais:\n`;
+    
+    if (options.length === 1) {
+      // Single Option Format (Legacy-like)
+      const opt = options[0];
+      const diffTime = Math.abs(this.parseDate(opt.check_out) - this.parseDate(opt.check_in));
+      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const nights = days > 0 ? days - 1 : 0;
+      const durationText = `${days} dias e ${nights} noites`;
 
-    // Texto de Passageiros
-    const paxText = `${q.adults} adulto${q.adults > 1 ? 's' : ''}` +
-      (q.children > 0 ? ` e ${q.children} criança${q.children > 1 ? 's' : ''}` : '');
+      const paxText = `${opt.adults} adulto${opt.adults > 1 ? 's' : ''}` +
+        (opt.children > 0 ? ` e ${opt.children} criança${opt.children > 1 ? 's' : ''}` : '');
 
-    // Passeio (condicional)
-    const tourBlock = q.tour_details ? `🌴 ${q.tour_details}\n` : '';
+      const tourBlock = opt.tour_details ? `🌴 ${opt.tour_details}\n` : '';
 
-    // Opções de Hospedagem (Dinâmico)
-    const hotelsBlock = q.hotel_options.map(h => {
-      const valor = h.amount.toLocaleString('pt-BR', { style: 'currency', currency: h.currency });
+      text += `✈️ Voo saindo de ${opt.flight_details?.outbound?.origin_city || 'a definir'}\n`;
+      text += `🚍 Transporte ida e volta\n`;
+      text += `${tourBlock}🚑 Seguro Viagem\n`;
+      text += `🧳 Bagagem de mão + 01 mochila/bolsa por passageiro\n\n`;
+      
+      text += `🗓️ ${opt.check_in} - ${opt.check_out} - ${durationText}\n\n`;
 
-      return `🏨 **${h.hotel_name} + ${h.regime}** - (${h.accommodation})
-Total = **${valor}** – ${paxText}
-Fotos: ${h.link || 'Consulte-nos'}`;
-    }).join('\n\n');
+      if (opt.flight_details?.outbound?.departure_time) {
+        text += `✈️ Ida: ${opt.flight_details.outbound.origin_city} ${opt.flight_details.outbound.departure_time} → ${opt.flight_details.outbound.destination_city} ${opt.flight_details.outbound.arrival_time}\n`;
+        text += `✈️ Volta: ${opt.flight_details.inbound.origin_city} ${opt.flight_details.inbound.departure_time} → ${opt.flight_details.inbound.destination_city} ${opt.flight_details.inbound.arrival_time}\n\n`;
+      }
 
-    // Template Final
-    return `*${q.title.toUpperCase()}*
-${q.subtitle ? q.subtitle + '\n' : ''}
-# Incluso:
-✈️ Voo saindo de ${q.flight_details.outbound.origin_city}
-🏨 Hospedagem ${q.hotel_options[0]?.regime || 'Variado'}
-🚍 Transporte de ida e volta do aeroporto até o hotel
-${tourBlock}🚑 Seguro Viagem
-🧳 Bagagem de mão + 01 mochila/bolsa por passageiro
+      text += `Opções de hospedagem:\n\n`;
 
-🗓️ ${q.check_in} - ${q.check_out} - ${durationText}
+      const hotelsBlock = opt.hotel_options?.map(h => {
+        const valor = this.formatCurrencyValue(h.amount, h.currency);
+        return `🏨 **${h.hotel_name} + ${h.regime}** - (${h.accommodation})\nTotal = **${valor}** – ${paxText}\nFotos: ${h.link || 'Consulte-nos'}`;
+      }).join('\n\n') || 'Sem hotéis definidos.';
 
-Voo direto na ida e na volta, voando ${q.supplier}
+      text += `${hotelsBlock}\n`;
 
-✈️ Ida: ${q.flight_details.outbound.origin_city} ${q.flight_details.outbound.departure_time} → ${q.flight_details.outbound.destination_city} ${q.flight_details.outbound.arrival_time}
-✈️ Volta: ${q.flight_details.inbound.origin_city} ${q.flight_details.inbound.departure_time} → ${q.flight_details.inbound.destination_city} ${q.flight_details.inbound.arrival_time}
+    } else {
+      // Multi-Option Format
+      text += `Temos ${options.length} opções incríveis desenhadas para você!\n\n`;
+      
+      options.forEach((opt, index) => {
+        const diffTime = Math.abs(this.parseDate(opt.check_out) - this.parseDate(opt.check_in));
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const nights = days > 0 ? days - 1 : 0;
+        
+        const paxText = `${opt.adults} adulto${opt.adults > 1 ? 's' : ''}` +
+        (opt.children > 0 ? ` e ${opt.children} criança${opt.children > 1 ? 's' : ''}` : '');
 
-Opções de hospedagem:
+        text += `🟢 **OPÇÃO ${index + 1}: ${opt.title || 'Pacote'}**\n`;
+        text += `🗓️ ${opt.check_in} - ${opt.check_out} (${days} dias e ${nights} noites)\n`;
+        text += `✈️ Voo: ${opt.flight_details?.outbound?.origin_city} → ${opt.flight_details?.outbound?.destination_city}\n`;
+        if (opt.tour_details) text += `🌴 ${opt.tour_details}\n`;
 
-${hotelsBlock}
-_______________________________________________________
+        opt.hotel_options?.forEach(h => {
+          const valor = this.formatCurrencyValue(h.amount, h.currency);
+          text += `🏨 Hotel: **${h.hotel_name} + ${h.regime}**\nTotal: **${valor}** (${paxText})\n`;
+        });
+        text += `\n`;
+      });
+    }
 
-# Formas de pagamento:
-💳 Até 10x sem juros no cartão de crédito (podendo utilizar mais de um cartão)
-
-OU
-
-Entrada mínima de 10% (podendo parcelar a entrada no cartão) e saldo restante em até 12x no boleto sem juros, mediante aprovação bancária do CPF.
-
-⚠️ Valores sujeitos a alteração sem aviso prévio.`;
+    text += `_______________________________________________________\n\n`;
+    text += `# Formas de pagamento:\n`;
+    text += `💳 Até 10x sem juros no cartão de crédito (podendo utilizar mais de um cartão)\n\nOU\n\n`;
+    text += `Entrada mínima de 10% (podendo parcelar a entrada no cartão) e saldo restante em até 12x no boleto sem juros, mediante aprovação bancária do CPF.\n\n`;
+    text += `⚠️ Valores sujeitos a alteração sem aviso prévio.`;
+    
+    return text;
   }
 
   private parseDate(dateStr: string): number {

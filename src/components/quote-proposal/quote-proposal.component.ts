@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Quote, HotelOption } from '../../models/quote';
+import { Quote, HotelOption, QuoteOption } from '../../models/quote';
 import { QuoteService } from '../../services/quote.service';
 
 @Component({
@@ -17,16 +17,44 @@ export class QuoteProposalComponent implements OnInit {
   
   quote = signal<Quote | null>(null);
   isLoading = signal(true);
+  
+  // States
+  activeOptionIndex = signal(0);
   selectedHotelIndex = signal(0);
   activeImageIndexPerHotel = signal<{ [key: number]: number }>({});
   expandedImage = signal<string | null>(null);
   expandedConnections = signal<{ outbound: boolean, inbound: boolean }>({ outbound: false, inbound: false });
 
+  // Normalização de Opções
+  normalizedOptions = computed<QuoteOption[]>(() => {
+    const q = this.quote();
+    if (!q) return [];
+    if (q.options && q.options.length > 0) return q.options;
+    // Fallback para cotações antigas
+    return [{
+      title: 'Opção Única',
+      check_in: q.check_in,
+      check_out: q.check_out,
+      adults: q.adults,
+      children: q.children,
+      flight_details: q.flight_details,
+      hotel_options: q.hotel_options,
+      tour_details: q.tour_details,
+      has_transfer: q.has_transfer
+    }];
+  });
+
+  currentOption = computed(() => {
+    const opts = this.normalizedOptions();
+    if (!opts.length) return null;
+    return opts[this.activeOptionIndex()] || opts[0];
+  });
+
   // Calculados
   durationDays = computed(() => {
-    const q = this.quote();
-    if (!q) return 0;
-    const diff = Math.abs(this.parseDate(q.check_out) - this.parseDate(q.check_in));
+    const opt = this.currentOption();
+    if (!opt || !opt.check_in || !opt.check_out) return 0;
+    const diff = Math.abs(this.parseDate(opt.check_out) - this.parseDate(opt.check_in));
     return Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1; // + 1 para contar o próprio dia inicial
   });
 
@@ -36,10 +64,10 @@ export class QuoteProposalComponent implements OnInit {
   });
 
   mainHotel = computed(() => {
-    const q = this.quote();
-    if (!q || !q.hotel_options?.length) return null;
+    const opt = this.currentOption();
+    if (!opt || !opt.hotel_options?.length) return null;
     const index = this.selectedHotelIndex();
-    return q.hotel_options[index] || q.hotel_options[0];
+    return opt.hotel_options[index] || opt.hotel_options[0];
   });
 
   totalValue = computed(() => {
@@ -88,7 +116,27 @@ export class QuoteProposalComponent implements OnInit {
   }
 
   isValueHighlighting = signal(false);
+  isSwitchingOption = signal(false);
   private highlightTimeout: any;
+
+  selectOption(index: number) {
+    if (this.activeOptionIndex() === index) return;
+    
+    // 1. Inicia o fade-out suave do conteúdo
+    this.isSwitchingOption.set(true);
+    
+    setTimeout(() => {
+      // 2. Troca o estado da opção
+      this.activeOptionIndex.set(index);
+      this.selectedHotelIndex.set(0);
+      this.activeImageIndexPerHotel.set({}); // Reset image indices for the new option
+      
+      // 3. Remove o fade-out e inicia o fade-in do novo conteúdo
+      setTimeout(() => {
+        this.isSwitchingOption.set(false);
+      }, 50);
+    }, 250); // 250ms de fade-out
+  }
 
   selectHotel(index: number) {
     if (this.selectedHotelIndex() === index) return;

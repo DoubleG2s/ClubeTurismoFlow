@@ -24,6 +24,28 @@ export interface QuoteFlightDetails {
   inbound: FlightSegment;
 }
 
+export interface QuoteOption {
+  // Opcional ID or title to distinguish options
+  id?: string;
+  title?: string; // e.g. "Opção 1"
+
+  // Datas e Pax
+  check_in?: string; // dd/mm/aaaa
+  check_out?: string; // dd/mm/aaaa
+  adults?: number;
+  children?: number;
+
+  // Detalhes do Voo
+  flight_details?: QuoteFlightDetails;
+
+  // Hospedagem (Pode ser array, mas geralmente a opção terá 1 ou mais hotéis alternativos para essa logística)
+  hotel_options?: HotelOption[];
+
+  // Detalhes Gerais
+  tour_details?: string; // Opcional {passeio}
+  has_transfer?: boolean; // Traslado chegada e saída
+}
+
 export interface Quote {
   id: string;
   created_at?: string;
@@ -35,23 +57,28 @@ export interface Quote {
   subtitle?: string; // Opcional
   supplier: string;
 
+  // Novas Múltiplas Opções
+  options?: QuoteOption[];
+
+  // ----------------------------------------------------
+  // CAMPOS LEGADOS (MANTIDOS PARA RETROCOMPATIBILIDADE)
+  // ----------------------------------------------------
   // Datas e Pax
-  check_in: string; // dd/mm/aaaa
-  check_out: string; // dd/mm/aaaa
-  adults: number;
-  children: number;
+  check_in?: string; // dd/mm/aaaa
+  check_out?: string; // dd/mm/aaaa
+  adults?: number;
+  children?: number;
 
   // Detalhes do Voo
-  flight_details: QuoteFlightDetails;
+  flight_details?: QuoteFlightDetails;
 
   // Detalhes Gerais
   tour_details?: string; // Opcional {passeio}
   has_transfer?: boolean; // Traslado chegada e saída
 
   // Lista de Hotéis (Dinâmica)
-  hotel_options: HotelOption[];
+  hotel_options?: HotelOption[];
 
-  // Campos Legados (Mantidos para compatibilidade, mas podem ser ignorados na UI nova se vazios)
   city?: string;
   notes?: string;
 

@@ -14,16 +14,23 @@
 
     <div class="text-right whitespace-nowrap">
       <!-- Main Amount (Display first option or range) -->
-      @if (mainHotel(); as hotel) {
-      <div class="font-bold text-xl text-purple-700 font-mono tracking-tight">
-        {{ formatCurrencyValue(hotel.amount, hotel.currency) }}
-      </div>
       @if (totalOptions() > 1) {
-      <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wide mt-0.5">+ {{ totalOptions() - 1 }}
-        Opções</div>
-      }
+        @if (lowestPrice() !== null) {
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">A partir de</div>
+          <div class="font-bold text-xl text-purple-700 font-mono tracking-tight">
+            {{ formatCurrencyValue(lowestPrice()!) }}
+          </div>
+        } @else {
+          <div class="text-sm text-slate-400 font-bold">Sem valor</div>
+        }
       } @else {
-      <div class="text-sm text-slate-400 font-bold">Sem valor</div>
+        @if (mainHotel(); as hotel) {
+          <div class="font-bold text-xl text-purple-700 font-mono tracking-tight">
+            {{ formatCurrencyValue(hotel.amount, hotel.currency) }}
+          </div>
+        } @else {
+          <div class="text-sm text-slate-400 font-bold">Sem valor</div>
+        }
       }
     </div>
   </div>
@@ -31,41 +38,86 @@
   <!-- Body -->
   <div class="p-5 space-y-4 flex-grow">
 
-    <!-- Dates -->
-    <div class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-      <span class="font-semibold">{{ quote.check_in }}</span>
-      <span class="text-slate-400">-></span>
-      <span class="font-semibold">{{ quote.check_out }}</span>
-    </div>
+    @if (totalOptions() > 1) {
+      <!-- MULTI OPTIONS SUMMARY -->
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-black rounded-md uppercase tracking-wider">
+          {{ totalOptions() }} Opções Disponíveis
+        </span>
+      </div>
 
-    <!-- Hotel & Location Info (Based on first option) -->
-    @if (mainHotel(); as hotel) {
-    <div class="flex items-start gap-3">
-      <div class="p-2 bg-purple-50 text-purple-600 rounded-lg shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
-          <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
-          <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
-          <path d="M10 6h4" />
-          <path d="M10 10h4" />
-          <path d="M10 14h4" />
-          <path d="M10 18h4" />
+      <!-- General Dates (Based on first option) -->
+      <div class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
         </svg>
+        <span class="font-semibold">{{ mainOption().check_in }}</span>
+        <span class="text-slate-400">-></span>
+        <span class="font-semibold">{{ mainOption().check_out }}</span>
       </div>
-      <div class="min-w-0">
-        <h4 class="font-bold text-slate-800 text-sm truncate" title="{{ hotel.hotel_name }}">{{ hotel.hotel_name }}</h4>
-        <p class="text-xs text-slate-500 font-medium truncate">{{ hotel.regime }}</p>
-        <p class="text-xs text-slate-500 mt-1 italic truncate">{{ hotel.accommodation }}</p>
+
+      <!-- Hotels Summary -->
+      <div class="text-sm text-slate-600 mt-3">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Inclui opções como:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+          @for (name of uniqueHotelNames(); track name) {
+            <li class="font-medium text-slate-700 truncate" title="{{ name }}">{{ name }}</li>
+          }
+          @if (uniqueHotelNames().length === 0) {
+            <li class="text-slate-400 italic">Hotéis a definir</li>
+          }
+        </ul>
       </div>
-    </div>
+
+    } @else {
+      <!-- SINGLE OPTION (Legacy/Simple) -->
+      
+      <!-- Dates -->
+      <div class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        <span class="font-semibold">{{ mainOption().check_in }}</span>
+        <span class="text-slate-400">-></span>
+        <span class="font-semibold">{{ mainOption().check_out }}</span>
+      </div>
+
+      <!-- Hotel & Location Info -->
+      @if (mainHotel(); as hotel) {
+      <div class="flex items-start gap-3">
+        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
+            <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
+            <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
+            <path d="M10 6h4" />
+            <path d="M10 10h4" />
+            <path d="M10 14h4" />
+            <path d="M10 18h4" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <h4 class="font-bold text-slate-800 text-sm truncate" title="{{ hotel.hotel_name }}">{{ hotel.hotel_name }}</h4>
+          <p class="text-xs text-slate-500 font-medium truncate">{{ hotel.regime }}</p>
+          <p class="text-xs text-slate-500 mt-1 italic truncate">{{ hotel.accommodation }}</p>
+        </div>
+      </div>
+      } @else {
+        <div class="flex items-center gap-3 opacity-50">
+          <div class="p-2 bg-slate-100 text-slate-400 rounded-lg shrink-0">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </div>
+          <div class="text-xs font-medium text-slate-400 italic">Sem hotel definido</div>
+        </div>
+      }
     }
 
     <!-- Pax Info -->
@@ -77,7 +129,7 @@
         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
-      {{ quote.adults }} Adultos, {{ quote.children }} Crianças
+      {{ mainOption().adults }} Adultos, {{ mainOption().children }} Crianças
     </div>
 
   </div>

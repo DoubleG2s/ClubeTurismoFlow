@@ -48,11 +48,46 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- DESTINO PRINCIPAL                       -->
     <!-- ═══════════════════════════════════════ -->
-    @if (quote(); as q) {
+    @if (currentOption(); as q) {
+
+    <!-- TABS DE OPÇÕES -->
+    @if (normalizedOptions().length > 1) {
+    <div class="flex justify-center mb-2 px-2">
+      <div class="bg-slate-200/50 p-1 rounded-xl flex flex-wrap gap-1 max-w-full overflow-x-auto">
+        @for (opt of normalizedOptions(); track $index) {
+        <button (click)="selectOption($index)"
+          class="px-4 sm:px-5 py-2 sm:py-2.5 text-sm font-bold rounded-lg transition-all duration-300 transform active:scale-95 focus:outline-none whitespace-nowrap relative overflow-hidden"
+          [class.bg-white]="activeOptionIndex() === $index"
+          [class.text-blue-600]="activeOptionIndex() === $index"
+          [class.shadow-md]="activeOptionIndex() === $index"
+          [class.ring-1]="activeOptionIndex() === $index"
+          [class.ring-blue-100]="activeOptionIndex() === $index"
+          [class.scale-[1.02]]="activeOptionIndex() === $index"
+          [class.z-10]="activeOptionIndex() === $index"
+          [class.bg-transparent]="activeOptionIndex() !== $index"
+          [class.text-slate-500]="activeOptionIndex() !== $index"
+          [class.hover:bg-slate-300/40]="activeOptionIndex() !== $index"
+          [class.hover:text-slate-700]="activeOptionIndex() !== $index">
+          {{ quote()?.options?.[$index]?.title || opt.title || 'Opção ' + ($index + 1) }}
+        </button>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- CONTEÚDO ANIMADO DA OPÇÃO -->
+    <div class="transition-all duration-300 ease-in-out transform origin-top"
+         [class.opacity-0]="isSwitchingOption()"
+         [class.translate-y-4]="isSwitchingOption()"
+         [class.blur-sm]="isSwitchingOption()"
+         [class.opacity-100]="!isSwitchingOption()"
+         [class.translate-y-0]="!isSwitchingOption()"
+         [class.blur-0]="!isSwitchingOption()">
+
     <section id="destino" class="text-center pt-6 sm:pt-8 pb-4 qp-slide-up">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">{{ q.title }}</h1>
-      @if (q.subtitle) {
-      <p class="text-lg sm:text-xl text-slate-500 mt-2 font-medium">{{ q.subtitle }}</p>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">{{ quote()?.title }}</h1>
+      @if (quote()?.subtitle) {
+      <p class="text-lg sm:text-xl text-slate-500 mt-2 font-medium">{{ quote()?.subtitle }}</p>
       }
       <div class="mt-5 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-slate-600">
         <div class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
@@ -105,7 +140,7 @@
         Logística de Voos
         <span
           class="text-xs sm:text-sm font-semibold text-slate-400 ml-auto bg-white px-3 py-1 rounded-full border border-slate-200">Operado
-          por {{ q.supplier }}</span>
+          por {{ quote()?.supplier }}</span>
       </h2>
 
       <div
@@ -530,6 +565,21 @@
               </div>
             </div>
 
+            <!-- Link Externo -->
+            @if (hotel.link) {
+            <div class="mt-4">
+              <a [href]="hotel.link" target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                Ver Mais Fotos e Detalhes
+              </a>
+            </div>
+            }
+
             <!-- Valor do Hotel (inline em cada card) -->
             <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-100">
               <div class="flex items-center justify-between">
@@ -636,6 +686,9 @@
           não garante reserva ou bloqueio de lugares.</p>
       </div>
     </footer>
+
+    </div> <!-- FIM DO CONTEÚDO ANIMADO -->
+
     }
   </main>
 </div>
