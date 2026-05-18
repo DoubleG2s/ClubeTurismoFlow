@@ -28,6 +28,10 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   hotelService = inject(HotelService);
   activeHotelDropdownIndex = signal<{ optionIndex: number, hotelIndex: number } | null>(null);
   activeOptionIndex = signal<number>(0);
+  
+  // Image Upload Feedbacks
+  uploadingStates = signal<Record<string, boolean>>({});
+  uploadSuccessStates = signal<Record<string, boolean>>({});
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -247,12 +251,34 @@ export class QuoteFormComponent implements OnInit, OnChanges {
     }
   }
 
+  isUploadingImage(optionIndex: number, hotelIndex: number): boolean {
+    return this.uploadingStates()[`${optionIndex}-${hotelIndex}`] || false;
+  }
+
+  isUploadSuccess(optionIndex: number, hotelIndex: number): boolean {
+    return this.uploadSuccessStates()[`${optionIndex}-${hotelIndex}`] || false;
+  }
+
   private async uploadAndSetImage(file: File, optionIndex: number, hotelIndex: number) {
-    const publicUrl = await this.hotelService.uploadImage(file);
-    if (publicUrl) {
-      const control = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_images');
-      const currentImages = control?.value || [];
-      control?.setValue([...currentImages, publicUrl]);
+    const key = `${optionIndex}-${hotelIndex}`;
+    this.uploadingStates.update(state => ({ ...state, [key]: true }));
+    this.uploadSuccessStates.update(state => ({ ...state, [key]: false }));
+
+    try {
+      const publicUrl = await this.hotelService.uploadImage(file);
+      if (publicUrl) {
+        const control = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_images');
+        const currentImages = control?.value || [];
+        control?.setValue([...currentImages, publicUrl]);
+        
+        // Show success feedback
+        this.uploadSuccessStates.update(state => ({ ...state, [key]: true }));
+        setTimeout(() => {
+          this.uploadSuccessStates.update(state => ({ ...state, [key]: false }));
+        }, 3000);
+      }
+    } finally {
+      this.uploadingStates.update(state => ({ ...state, [key]: false }));
     }
   }
 
@@ -315,6 +341,18 @@ export class QuoteFormComponent implements OnInit, OnChanges {
     }
     input.value = value;
     this.quoteOptions.at(optionIndex).get(controlName)?.setValue(value);
+  }
+
+  onNativeDateSelect(event: Event, optionIndex: number, controlName: string) {
+    const input = event.target as HTMLInputElement;
+    if (!input.value) return;
+    
+    // input.value from type="date" is always YYYY-MM-DD
+    const [year, month, day] = input.value.split('-');
+    if (year && month && day) {
+      const formattedDate = `${day}/${month}/${year}`;
+      this.quoteOptions.at(optionIndex).get(controlName)?.setValue(formattedDate);
+    }
   }
 
   onTimeInput(event: Event, optionIndex: number, groupName: string, controlName: string) {
