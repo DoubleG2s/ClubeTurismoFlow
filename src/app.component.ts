@@ -410,6 +410,22 @@ export class AppComponent implements OnInit {
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
       }
     }
+    
+    this.fetchExchangeRate();
+  }
+
+  async fetchExchangeRate() {
+    try {
+      const response = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');
+      const data = await response.json();
+      if (data && data.USDBRL && data.USDBRL.ask) {
+        const parsedRate = parseFloat(data.USDBRL.ask);
+        // Round to 2 decimal places to satisfy "duas casas decimais após a vírgula"
+        this.usdExchangeRate.set(parseFloat(parsedRate.toFixed(2)));
+      }
+    } catch (e) {
+      console.error('Falha ao buscar cotação do dólar', e);
+    }
   }
 
   async checkSubscriptionStatus() {
