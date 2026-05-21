@@ -117,6 +117,7 @@ export class QuoteProposalComponent implements OnInit {
 
   isValueHighlighting = signal(false);
   isSwitchingOption = signal(false);
+  isMobileMenuOpen = signal(false);
   private highlightTimeout: any;
 
   selectOption(index: number) {
@@ -171,6 +172,14 @@ export class QuoteProposalComponent implements OnInit {
 
   closeExpandedImage() {
     this.expandedImage.set(null);
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen.set(false);
   }
 
   toggleConnection(segment: 'outbound' | 'inbound') {
