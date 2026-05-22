@@ -583,11 +583,26 @@
             }
             @if (hotel.hotel_images && hotel.hotel_images.length > 0) {
             <img [src]="getHotelImage(hotelIdx, hotel.hotel_images)" alt="{{ hotel.hotel_name }}"
-              (click)="openExpandedImage($event, getHotelImage(hotelIdx, hotel.hotel_images))"
+              (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03] cursor-pointer">
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none">
             </div>
+
+            @if (hotel.hotel_images.length > 1) {
+            <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, -1)"
+              class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, 1)"
+              class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            }
 
             <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white pointer-events-none">
               <p class="font-bold text-base sm:text-lg leading-tight truncate drop-shadow-md">{{ hotel.hotel_name }}</p>
@@ -603,7 +618,7 @@
                 [class.border-white/20]="(activeImageIndexPerHotel()[hotelIdx] || 0) !== imgIndex">
               }
               @if (hotel.hotel_images.length > 4) {
-              <div (click)="openExpandedImage($event, getHotelImage(hotelIdx, hotel.hotel_images))"
+              <div (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
                 class="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center text-xs font-bold text-white bg-black/70 cursor-pointer hover:bg-black/80 rounded-md border border-white/10 transition-colors">
                 +{{ hotel.hotel_images.length - 4 }}
               </div>
@@ -820,14 +835,32 @@
 
 <!-- Expanded Image Lightbox Modal -->
 @if (expandedImage()) {
+@let imgCtx = expandedImageContext();
 <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8 qp-fade-in"
   (click)="closeExpandedImage()">
   <button (click)="closeExpandedImage()"
-    class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-slate-300 transition-colors p-2 bg-black/50 rounded-full">
+    class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-slate-300 transition-colors p-2 bg-black/50 rounded-full z-10">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
     </svg>
   </button>
+  @if (imgCtx && imgCtx.images.length > 1) {
+  <button (click)="navigateExpandedImage($event, -1)"
+    class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-white hover:text-slate-300 transition-all p-2.5 sm:p-3 bg-black/50 hover:bg-black/75 rounded-full z-10 shadow-lg opacity-80 hover:opacity-100">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+  <button (click)="navigateExpandedImage($event, 1)"
+    class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-white hover:text-slate-300 transition-all p-2.5 sm:p-3 bg-black/50 hover:bg-black/75 rounded-full z-10 shadow-lg opacity-80 hover:opacity-100">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+  <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium bg-black/40 px-3 py-1 rounded-full z-10">
+    {{ imgCtx.currentIndex + 1 }} / {{ imgCtx.images.length }}
+  </div>
+  }
   <img [src]="expandedImage()" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
     (click)="$event.stopPropagation()">
 </div>
