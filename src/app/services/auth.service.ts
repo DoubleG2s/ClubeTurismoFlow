@@ -158,7 +158,7 @@ export class AuthService {
   }
 
   // Admin Action: Create a new user
-  async createAgent(email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> {
+  async createAgent(email: string, password: string, name: string, company_id?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.isAdmin()) {
       return { success: false, error: 'Acesso negado.' };
     }
@@ -179,9 +179,12 @@ export class AuthService {
 
     if (data.user) {
       setTimeout(async () => {
+        const payload: any = { name: name };
+        if (company_id) payload.company_id = company_id;
+
         await supabase
           .from('profiles')
-          .update({ name: name })
+          .update(payload)
           .eq('id', data.user!.id);
       }, 1000); 
     }
@@ -194,7 +197,7 @@ export class AuthService {
     
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, companies(name)')
       .order('created_at', { ascending: false });
       
     return data as UserProfile[] || [];

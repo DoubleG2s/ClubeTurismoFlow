@@ -24,6 +24,7 @@ export class QuoteProposalComponent implements OnInit {
   selectedHotelIndex = signal(0);
   activeImageIndexPerHotel = signal<{ [key: number]: number }>({});
   expandedImage = signal<string | null>(null);
+  expandedImageContext = signal<{ hotelIndex: number; images: string[]; currentIndex: number } | null>(null);
   expandedConnections = signal<{ outbound: boolean, inbound: boolean }>({ outbound: false, inbound: false });
 
   // Normalização de Opções
@@ -118,6 +119,7 @@ export class QuoteProposalComponent implements OnInit {
 
   isValueHighlighting = signal(false);
   isSwitchingOption = signal(false);
+  isMobileMenuOpen = signal(false);
   private highlightTimeout: any;
 
   selectOption(index: number) {
@@ -165,13 +167,41 @@ export class QuoteProposalComponent implements OnInit {
     }));
   }
 
-  openExpandedImage(event: Event, url: string) {
+  navigateHotelImage(event: Event, hotelIndex: number, images: string[], direction: number) {
     event.stopPropagation();
-    this.expandedImage.set(url);
+    const current = this.activeImageIndexPerHotel()[hotelIndex] || 0;
+    const next = (current + direction + images.length) % images.length;
+    this.activeImageIndexPerHotel.update(state => ({ ...state, [hotelIndex]: next }));
+  }
+
+  openExpandedImage(event: Event, hotelIndex: number, images: string[]) {
+    event.stopPropagation();
+    const currentIndex = this.activeImageIndexPerHotel()[hotelIndex] || 0;
+    this.expandedImageContext.set({ hotelIndex, images, currentIndex });
+    this.expandedImage.set(images[currentIndex] || images[0]);
   }
 
   closeExpandedImage() {
     this.expandedImage.set(null);
+    this.expandedImageContext.set(null);
+  }
+
+  navigateExpandedImage(event: Event, direction: number) {
+    event.stopPropagation();
+    const ctx = this.expandedImageContext();
+    if (!ctx) return;
+    const next = (ctx.currentIndex + direction + ctx.images.length) % ctx.images.length;
+    this.expandedImageContext.update(c => c ? { ...c, currentIndex: next } : c);
+    this.expandedImage.set(ctx.images[next]);
+    this.activeImageIndexPerHotel.update(state => ({ ...state, [ctx.hotelIndex]: next }));
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen.set(false);
   }
 
   toggleConnection(segment: 'outbound' | 'inbound') {

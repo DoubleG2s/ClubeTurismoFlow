@@ -16,31 +16,156 @@
   <nav class="bg-white border-b border-slate-100 sticky top-0 z-50 print:hidden shadow-sm">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-14 sm:h-16 items-center">
+
         <div class="flex items-center gap-4 sm:gap-8">
           <img src="assets/logo-clube-turismo.png" alt="Clube Turismo" class="h-8 sm:h-10 w-auto select-none" />
-          <div class="flex space-x-3 sm:space-x-6 text-xs sm:text-sm font-semibold text-slate-500 overflow-x-auto">
-            <a href="#destino" class="hover:text-blue-600 transition-colors whitespace-nowrap">Início</a>
-            <a href="#voo" class="hover:text-blue-600 transition-colors whitespace-nowrap">Voo</a>
-            <a href="#servicos" class="hover:text-blue-600 transition-colors whitespace-nowrap">Serviços</a>
-            <a href="#hotel" class="hover:text-blue-600 transition-colors whitespace-nowrap">Hotel</a>
-            <a href="#valores" class="hover:text-blue-600 transition-colors whitespace-nowrap">Valores</a>
+          <!-- Links de navegação — apenas desktop -->
+          <div class="hidden sm:flex space-x-6 text-sm font-semibold text-slate-500">
+            <a href="#destino" class="hover:text-blue-600 transition-colors">Início</a>
+            <a href="#voo" class="hover:text-blue-600 transition-colors">Voo</a>
+            <a href="#servicos" class="hover:text-blue-600 transition-colors">Serviços</a>
+            <a href="#hotel" class="hover:text-blue-600 transition-colors">Hotel</a>
+            <a href="#valores" class="hover:text-blue-600 transition-colors">Valores</a>
           </div>
         </div>
-        <div>
+
+        <div class="flex items-center gap-2">
+          <!-- Botão Imprimir — apenas desktop -->
           <button (click)="printProposal()"
-            class="text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center gap-2">
+            class="hidden sm:flex text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] px-4 py-2 rounded-lg transition-all items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 6 2 18 2 18 9"></polyline>
               <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
               <rect x="6" y="14" width="12" height="8"></rect>
             </svg>
-            <span class="hidden sm:inline">Imprimir</span>
+            Imprimir
+          </button>
+
+          <!-- Botão Hamburguer — apenas mobile -->
+          <button (click)="toggleMobileMenu()"
+            class="sm:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-xl hover:bg-slate-100 active:bg-slate-200 transition-colors"
+            aria-label="Abrir menu de navegação">
+            <span class="block w-5 h-0.5 bg-slate-700 rounded-full transition-all duration-300"
+              [style.transform]="isMobileMenuOpen() ? 'translateY(7px) rotate(45deg)' : ''"></span>
+            <span class="block w-5 h-0.5 bg-slate-700 rounded-full transition-all duration-300"
+              [style.opacity]="isMobileMenuOpen() ? '0' : '1'"></span>
+            <span class="block w-5 h-0.5 bg-slate-700 rounded-full transition-all duration-300"
+              [style.transform]="isMobileMenuOpen() ? 'translateY(-7px) rotate(-45deg)' : ''"></span>
           </button>
         </div>
+
       </div>
     </div>
   </nav>
+
+  <!-- SIDEBAR MOBILE -->
+  <div class="fixed inset-0 z-[60] sm:hidden transition-all duration-300"
+    [style.opacity]="isMobileMenuOpen() ? '1' : '0'"
+    [style.pointer-events]="isMobileMenuOpen() ? 'auto' : 'none'">
+
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeMobileMenu()"></div>
+
+    <!-- Painel lateral -->
+    <div class="absolute top-0 left-0 h-full w-72 bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out"
+      [style.transform]="isMobileMenuOpen() ? 'translateX(0)' : 'translateX(-100%)'">
+
+      <!-- Cabeçalho com gradiente -->
+      <div class="bg-gradient-to-br from-blue-600 to-blue-800 px-5 pt-8 pb-6 flex items-center justify-between shrink-0">
+        <div>
+          <img src="assets/logo-clube-turismo.png" alt="Clube Turismo" class="h-8 w-auto brightness-0 invert mb-1">
+          <p class="text-blue-200 text-[11px] font-semibold tracking-wide">Sua proposta de viagem</p>
+        </div>
+        <button (click)="closeMobileMenu()"
+          class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 active:bg-white/40 flex items-center justify-center transition-colors shrink-0"
+          aria-label="Fechar menu">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Rótulo de seção -->
+      <div class="px-5 pt-5 pb-2 shrink-0">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Navegar para</p>
+      </div>
+
+      <!-- Links de navegação -->
+      <nav class="flex-1 px-3 pb-3 space-y-0.5 overflow-y-auto">
+
+        <a href="#destino" (click)="closeMobileMenu()"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
+          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </span>
+          <span>Início</span>
+        </a>
+
+        <a href="#voo" (click)="closeMobileMenu()"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
+          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z"></path>
+            </svg>
+          </span>
+          <span>Voo</span>
+        </a>
+
+        <a href="#servicos" (click)="closeMobileMenu()"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
+          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </span>
+          <span>Serviços</span>
+        </a>
+
+        <a href="#hotel" (click)="closeMobileMenu()"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
+          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"></path>
+              <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"></path>
+              <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"></path>
+              <path d="M10 6h4"></path><path d="M10 10h4"></path>
+              <path d="M10 14h4"></path><path d="M10 18h4"></path>
+            </svg>
+          </span>
+          <span>Hotel</span>
+        </a>
+
+        <a href="#valores" (click)="closeMobileMenu()"
+          class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
+          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+              <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+          </span>
+          <span>Valores</span>
+        </a>
+
+      </nav>
+
+      <!-- Rodapé da sidebar -->
+      <div class="px-5 py-4 border-t border-slate-100 shrink-0">
+        <p class="text-[11px] text-slate-400 text-center font-medium tracking-wide">Clube Turismo · Jardinópolis</p>
+      </div>
+
+    </div>
+  </div>
 
   <!-- CONTAINER CENTRAL -->
   <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8 space-y-6 sm:space-y-8">
@@ -76,7 +201,7 @@
     }
 
     <!-- CONTEÚDO ANIMADO DA OPÇÃO -->
-    <div class="transition-all duration-300 ease-in-out transform origin-top"
+    <div class="transition-all duration-300 ease-in-out transform origin-top space-y-10 sm:space-y-14"
          [class.opacity-0]="isSwitchingOption()"
          [class.translate-y-4]="isSwitchingOption()"
          [class.blur-sm]="isSwitchingOption()"
@@ -122,7 +247,7 @@
     </section>
 
     <!-- DIVISOR -->
-    <hr class="border-slate-200/60" />
+    <hr class="border-slate-200/60 !my-0" />
 
     <!-- ═══════════════════════════════════════ -->
     <!-- 1. VOO                                  -->
@@ -458,11 +583,26 @@
             }
             @if (hotel.hotel_images && hotel.hotel_images.length > 0) {
             <img [src]="getHotelImage(hotelIdx, hotel.hotel_images)" alt="{{ hotel.hotel_name }}"
-              (click)="openExpandedImage($event, getHotelImage(hotelIdx, hotel.hotel_images))"
+              (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03] cursor-pointer">
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none">
             </div>
+
+            @if (hotel.hotel_images.length > 1) {
+            <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, -1)"
+              class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, 1)"
+              class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            }
 
             <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white pointer-events-none">
               <p class="font-bold text-base sm:text-lg leading-tight truncate drop-shadow-md">{{ hotel.hotel_name }}</p>
@@ -478,7 +618,7 @@
                 [class.border-white/20]="(activeImageIndexPerHotel()[hotelIdx] || 0) !== imgIndex">
               }
               @if (hotel.hotel_images.length > 4) {
-              <div (click)="openExpandedImage($event, getHotelImage(hotelIdx, hotel.hotel_images))"
+              <div (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
                 class="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center text-xs font-bold text-white bg-black/70 cursor-pointer hover:bg-black/80 rounded-md border border-white/10 transition-colors">
                 +{{ hotel.hotel_images.length - 4 }}
               </div>
@@ -599,7 +739,7 @@
     }
 
     <!-- DIVISOR -->
-    <hr class="border-slate-200/60 my-2 sm:my-4" />
+    <hr class="border-slate-200/60 !my-0" />
 
     <!-- ═══════════════════════════════════════ -->
     <!-- 4. VALORES E FORMAS DE PAGAMENTO        -->
@@ -695,14 +835,32 @@
 
 <!-- Expanded Image Lightbox Modal -->
 @if (expandedImage()) {
+@let imgCtx = expandedImageContext();
 <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8 qp-fade-in"
   (click)="closeExpandedImage()">
   <button (click)="closeExpandedImage()"
-    class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-slate-300 transition-colors p-2 bg-black/50 rounded-full">
+    class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-slate-300 transition-colors p-2 bg-black/50 rounded-full z-10">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
     </svg>
   </button>
+  @if (imgCtx && imgCtx.images.length > 1) {
+  <button (click)="navigateExpandedImage($event, -1)"
+    class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-white hover:text-slate-300 transition-all p-2.5 sm:p-3 bg-black/50 hover:bg-black/75 rounded-full z-10 shadow-lg opacity-80 hover:opacity-100">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+  <button (click)="navigateExpandedImage($event, 1)"
+    class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-white hover:text-slate-300 transition-all p-2.5 sm:p-3 bg-black/50 hover:bg-black/75 rounded-full z-10 shadow-lg opacity-80 hover:opacity-100">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+  <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium bg-black/40 px-3 py-1 rounded-full z-10">
+    {{ imgCtx.currentIndex + 1 }} / {{ imgCtx.images.length }}
+  </div>
+  }
   <img [src]="expandedImage()" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
     (click)="$event.stopPropagation()">
 </div>

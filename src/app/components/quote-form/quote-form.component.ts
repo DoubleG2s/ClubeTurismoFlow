@@ -5,11 +5,12 @@ import { Quote, QuoteOption } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
+import { LucideAngularModule, PlaneTakeoff } from 'lucide-angular';
 
 @Component({
   selector: 'app-quote-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent],
+  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent, LucideAngularModule],
   templateUrl: './quote-form.component.html',
 })
 export class QuoteFormComponent implements OnInit, OnChanges {
@@ -23,6 +24,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
 
   quoteForm!: FormGroup;
   isEditMode = signal(false);
+  readonly PlaneTakeoff = PlaneTakeoff;
 
   // States
   hotelService = inject(HotelService);
