@@ -1,0 +1,521 @@
+﻿<div class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-100 selection:text-brand-700">
+
+  @if (isFullscreenProposal()) {
+    <app-quote-proposal [quoteId]="proposalQuoteId()" [publicToken]="publicQuoteToken()"></app-quote-proposal>
+  } @else if (authService.isLoading()) {
+  <div class="flex-grow flex items-center justify-center">
+    <svg class="animate-spin h-8 w-8 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+      </path>
+    </svg>
+  </div>
+  } @else if (!authService.session()) {
+  <app-login></app-login>
+  } @else if (isCheckingSubscriptionAccess()) {
+  <div class="flex-grow flex items-center justify-center px-6 py-12 bg-slate-50">
+    <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/60">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-lg shadow-amber-500/30">
+        <svg class="h-7 w-7 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+          <path class="opacity-90" fill="currentColor" d="M12 2a10 10 0 0 1 10 10h-3a7 7 0 0 0-7-7V2z"></path>
+        </svg>
+      </div>
+
+      <h2 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Verificando seu acesso</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-500">
+        Estamos carregando os dados da sua empresa e conferindo o status da assinatura antes de abrir a plataforma.
+      </p>
+
+      <div class="mt-6 overflow-hidden rounded-full bg-slate-100">
+        <div class="h-2 w-full animate-pulse bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600"></div>
+      </div>
+    </div>
+  </div>
+  } @else {
+  <!-- Authenticated App Content -->
+
+  <!-- Header (Branding only) -->
+  <header class="bg-white border-b border-slate-200 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col gap-3 py-3 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:py-0 md:h-20">
+
+        <!-- Logo Area with Notebook Icon -->
+        <div class="flex items-center justify-center gap-3 group cursor-default sm:justify-start">
+          <div
+            class="relative w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              <line x1="9" y1="8" x2="17" y2="8" />
+              <line x1="9" y1="13" x2="13" y2="13" />
+            </svg>
+            <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+            </span>
+          </div>
+          <div class="text-center sm:text-left">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-none">Clube Turismo Flow</h1>
+            <p class="text-[11px] sm:text-xs text-slate-500 font-medium tracking-wide mt-0.5">Gestão Inteligente</p>
+          </div>
+        </div>
+
+        <!-- User Profile & Actions -->
+        <div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end sm:gap-4">
+          <div class="min-w-0 hidden md:flex flex-col text-right">
+            <span class="text-sm font-bold text-slate-700">{{ authService.profile()?.name }}</span>
+            <span class="text-xs text-slate-500 uppercase font-semibold">{{ authService.profile()?.role }}</span>
+          </div>
+
+          <div class="flex w-full items-center justify-end gap-1 overflow-x-auto border-t border-slate-200 pt-3 sm:ml-2 sm:w-auto sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+            <!-- Admin Master & Users Buttons -->
+            @if (authService.isAdmin()) {
+            <button (click)="switchTab('admin')" [class.text-slate-900]="activeTab() === 'admin'"
+              [class.bg-slate-100]="activeTab() === 'admin'"
+              class="shrink-0 p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
+              title="Admin Master">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </button>
+            <button (click)="switchTab('usuarios')" [class.text-brand-600]="activeTab() === 'usuarios'"
+              [class.bg-brand-50]="activeTab() === 'usuarios'"
+              class="shrink-0 p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all cursor-pointer"
+              title="Gerenciar Usuarios">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="8.5" cy="7" r="4" />
+                <line x1="20" y1="8" x2="20" y2="14" />
+                <line x1="23" y1="11" x2="17" y2="11" />
+              </svg>
+            </button>
+            }
+
+            <!-- Assinatura/SaaS Button -->
+            <button (click)="switchTab('assinatura')" [class.text-amber-600]="activeTab() === 'assinatura'"
+              [class.bg-amber-50]="activeTab() === 'assinatura'"
+              class="shrink-0 p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all cursor-pointer"
+              title="Minha Assinatura / SaaS">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+            </button>
+
+            <!-- Logout Button -->
+            <button (click)="onLogout()"
+              class="relative z-50 shrink-0 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+              title="Sair">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Bar (Tabs) -->
+  @if (!isLockedOut()) {
+  <div class="bg-white/50 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex space-x-4 sm:space-x-6 -mb-px overflow-x-auto" aria-label="Tabs">
+
+        <!-- Tab Voos -->
+        <button (click)="switchTab('voos')" [class.border-brand-500]="activeTab() === 'voos'"
+          [class.text-brand-600]="activeTab() === 'voos'" [class.border-transparent]="activeTab() !== 'voos'"
+          [class.text-slate-500]="activeTab() !== 'voos'"
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-brand-600 focus:outline-none whitespace-nowrap">
+          <div [ngClass]="{
+                'bg-brand-50': activeTab() === 'voos',
+                'group-hover:bg-brand-50': activeTab() !== 'voos'
+              }" class="p-1.5 rounded-lg mr-2 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform duration-300"
+              [ngClass]="{'-rotate-45': activeTab() === 'voos'}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z" />
+            </svg>
+          </div>
+          <span class="tracking-wide">Voos</span>
+        </button>
+
+        <!-- Tab Gestão de Reservas -->
+        <button (click)="switchTab('reservas')" [class.border-emerald-500]="activeTab() === 'reservas'"
+          [class.text-emerald-600]="activeTab() === 'reservas'" [class.border-transparent]="activeTab() !== 'reservas'"
+          [class.text-slate-500]="activeTab() !== 'reservas'"
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-emerald-600 focus:outline-none whitespace-nowrap">
+          <div [ngClass]="{
+                'bg-emerald-50': activeTab() === 'reservas',
+                'group-hover:bg-emerald-50': activeTab() !== 'reservas'
+              }" class="p-1.5 rounded-lg mr-2 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              <path d="M9 14h.01" />
+              <path d="M9 17h.01" />
+              <path d="M12 14h.01" />
+              <path d="M12 17h.01" />
+              <path d="M15 14h.01" />
+              <path d="M15 17h.01" />
+            </svg>
+          </div>
+          <span class="tracking-wide">Gestão de Reservas</span>
+        </button>
+
+        <!-- Tab Cotações (New) -->
+        <button (click)="switchTab('cotacoes')" [class.border-purple-500]="activeTab() === 'cotacoes'"
+          [class.text-purple-600]="activeTab() === 'cotacoes'" [class.border-transparent]="activeTab() !== 'cotacoes'"
+          [class.text-slate-500]="activeTab() !== 'cotacoes'"
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-purple-600 focus:outline-none whitespace-nowrap">
+          <div [ngClass]="{
+                'bg-purple-50': activeTab() === 'cotacoes',
+                'group-hover:bg-purple-50': activeTab() !== 'cotacoes'
+              }" class="p-1.5 rounded-lg mr-2 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </div>
+          <span class="tracking-wide">Cotações</span>
+        </button>
+
+        <!-- Tab Hotel -->
+        <button (click)="switchTab('hotel')" [class.border-red-500]="activeTab() === 'hotel'"
+          [class.text-red-600]="activeTab() === 'hotel'" [class.border-transparent]="activeTab() !== 'hotel'"
+          [class.text-slate-500]="activeTab() !== 'hotel'"
+          class="group inline-flex shrink-0 items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 hover:text-red-600 focus:outline-none whitespace-nowrap">
+          <div [ngClass]="{
+                'bg-red-50': activeTab() === 'hotel',
+                'group-hover:bg-red-50': activeTab() !== 'hotel'
+              }" class="p-1.5 rounded-lg mr-2 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
+              <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
+              <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
+              <path d="M10 6h4" />
+              <path d="M10 10h4" />
+              <path d="M10 14h4" />
+              <path d="M10 18h4" />
+            </svg>
+          </div>
+          <span class="tracking-wide">Hotel</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+  }
+
+  <!-- Main Content -->
+  <main
+    class="flex-grow w-full"
+    [ngClass]="isSubscriptionTabActive() ? 'py-0 px-0 max-w-none mx-0' : 'py-5 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'"
+  >
+
+    @if (activeTab() === 'assinatura') {
+    <div class="animate-fade-in transition-all">
+      <app-subscription></app-subscription>
+    </div>
+    }
+
+    @if (activeTab() === 'voos') {
+    <app-flights-page
+      [flights]="flights()"
+      [prefilledFlightData]="prefilledFlightData()"
+      (addFlight)="onAddFlight($event)"
+      (editFlight)="startEdit($event)"
+      (removeFlight)="onRemoveFlight($event)"
+      (toggleConfirm)="onToggleConfirm($event)"></app-flights-page>
+    }
+
+    <!-- Gestão de Reservas Content -->
+    @if (activeTab() === 'reservas') {
+    <app-reservations-page
+      [activeSubTab]="activeReservaTab()"
+      [prefilledReservationData]="prefilledReservationData()"
+      [filteredReservations]="filteredReservations()"
+      [listAnimationClass]="listAnimationClass()"
+      [monthName]="monthName()"
+      [activeQuickFilter]="activeQuickFilter()"
+      [searchTerm]="searchTerm()"
+      [showAdvancedFilters]="showAdvancedFilters()"
+      [hasActiveFilters]="hasActiveFilters()"
+      [hasDraftFilters]="hasDraftFilters()"
+      [draftDateStart]="draftDateStart()"
+      [draftDateEnd]="draftDateEnd()"
+      [draftReturnStart]="draftReturnStart()"
+      [draftReturnEnd]="draftReturnEnd()"
+      [draftMissingHotelEmail]="draftMissingHotelEmail()"
+      [draftMissingPostTrip]="draftMissingPostTrip()"
+      [sortField]="sortField()"
+      [sortDirection]="sortDirection()"
+      [credits]="credits()"
+      [isSavingCredit]="isSavingCredit()"
+      [prefilledCreditData]="prefilledCreditData()"
+      [rawReservations]="reservations()"
+      (activeSubTabChange)="switchReservaTab($event)"
+      (addReservation)="onAddReservation($event)"
+      (prevMonth)="prevMonth()"
+      (nextMonth)="nextMonth()"
+      (quickFilterToggle)="toggleQuickFilter($event)"
+      (searchTermChange)="searchTerm.set($event)"
+      (showAdvancedFiltersChange)="showAdvancedFilters.set($event)"
+      (draftDateStartChange)="draftDateStart.set($event)"
+      (draftDateEndChange)="draftDateEnd.set($event)"
+      (draftReturnStartChange)="draftReturnStart.set($event)"
+      (draftReturnEndChange)="draftReturnEnd.set($event)"
+      (draftMissingHotelEmailChange)="draftMissingHotelEmail.set($event)"
+      (draftMissingPostTripChange)="draftMissingPostTrip.set($event)"
+      (toggleSort)="toggleSort($event)"
+      (clearFilters)="clearFilters()"
+      (applyFilters)="applyAdvancedFilters()"
+      (updateReservation)="onUpdateReservation($event)"
+      (editReservation)="startEditReservation($event)"
+      (removeReservation)="onRemoveReservation($event)"
+      (addToFlights)="onCopyReservationToFlight($event)"
+      (prepareHotelEmail)="onPrepareHotelEmail($event)"
+      (addCredit)="onAddCredit($event)"
+      (editCredit)="startEditCredit($event)"
+      (removeCredit)="onRemoveCredit($event)"></app-reservations-page>
+    }
+
+     <!-- COTAÇÕES CONTENT (New Tab) -->
+    @if (activeTab() === 'cotacoes') {
+    <app-quotes-page
+      [activeSubTab]="activeCotacaoTab()"
+      [exchangeRate]="usdExchangeRate()"
+      [isSavingQuote]="isSavingQuote()"
+      [prefilledQuoteData]="prefilledQuoteData()"
+      [quotes]="quotes()"
+      (activeSubTabChange)="switchCotacaoTab($event)"
+      (exchangeRateChange)="onExchangeRateInput($event)"
+      (addQuote)="onAddQuote($event)"
+      (editQuote)="startEditQuote($event)"
+      (removeQuote)="onRemoveQuote($event)"></app-quotes-page>
+    }
+
+    @if (activeTab() === 'hotel') {
+    <app-hotels-page
+      [activeSubTab]="activeHotelTab()"
+      [isLoading]="hotelService.isLoading()"
+      [prefilledHotelName]="prefilledHotelName()"
+      [filteredHotels]="filteredHotels()"
+      [hotelSearchInputValue]="hotelSearchInputValue()"
+      [hotelSearchTerm]="hotelSearchTerm()"
+      (activeSubTabChange)="switchHotelTab($event)"
+      (saveHotel)="onSaveHotel($event)"
+      (hotelSearchInputChange)="onHotelSearchInput($event)"
+      (clearHotelSearch)="clearHotelSearch()"
+      (viewHotel)="openHotelDetails($event)"
+      (editHotel)="startEditHotel($event)"
+      (removeHotel)="promptDeleteHotel($event)"></app-hotels-page>
+    }
+
+    <!-- Admin Tab: User Management -->
+    @if (activeTab() === 'usuarios' && authService.isAdmin()) {
+    <app-user-list></app-user-list>
+    }
+
+    <!-- Admin Master -->
+    @if (activeTab() === 'admin' && authService.isAdmin()) {
+    <app-admin-master></app-admin-master>
+    }
+
+  </main>
+
+  <!-- Edit Modal Overlay (Credits - NEW) -->
+  @if (showCreditEditModal()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-credit" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeCreditEditModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-3xl sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-900">Editar Crédito</h3>
+            <button (click)="closeCreditEditModal()"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg></button>
+          </div>
+          @if (editingCredit()) {
+          <app-credit-form [creditToEdit]="editingCredit()" [isLoading]="isSavingCredit()" (update)="onUpdateCredit($event)" (cancel)="closeCreditEditModal()"></app-credit-form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Edit Modal Overlay (Flights) -->
+  @if (showEditModal()) {
+  <!-- Existing Flight Modal Code (omitted for brevity, assume unchanged logic)... -->
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeEditModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div
+        class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-2xl sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-900">Editar Voo</h3>
+            <button (click)="closeEditModal()"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg></button>
+          </div>
+          @if (editingFlight() || prefilledFlightData()) {
+          <app-flight-form [flightToEdit]="editingFlight()" [prefillData]="prefilledFlightData()"
+            (update)="onUpdateFlight($event)" (save)="onAddFlight($event)"
+            (cancel)="closeEditModal()"></app-flight-form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Edit Modal Overlay (Reservations) -->
+  @if (showReservationEditModal()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-reservation" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+        (click)="closeReservationEditModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div
+        class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-slate-900">Editar Reserva</h3>
+            <button (click)="closeReservationEditModal()"><svg xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg></button>
+          </div>
+          @if (editingReservation()) {
+          <app-reservation-form [reservationToEdit]="editingReservation()" (update)="onUpdateReservationForm($event)"
+            (cancel)="closeReservationEditModal()"></app-reservation-form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Edit Modal Overlay (Quotes - NEW) -->
+  @if (showQuoteEditModal()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-quote" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"
+        (click)="closeQuoteEditModal()"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div
+        class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-3xl sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl leading-6 font-bold text-slate-900" id="modal-quote">Editar Cotação</h3>
+              </div>
+            </div>
+            <button (click)="closeQuoteEditModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          @if (editingQuote()) {
+          <app-quote-form [quoteToEdit]="editingQuote()" (update)="onUpdateQuote($event)"
+            (cancel)="closeQuoteEditModal()"></app-quote-form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Edit Modal Overlay (Hotel - NEW) -->
+  @if (showHotelEditModal()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-hotel" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"
+        (click)="closeHotelEditModal()"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div
+        class="relative inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-4xl sm:w-full border border-slate-100">
+        <div class="bg-white px-6 pt-6 pb-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-red-50 rounded-lg text-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
+                  <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
+                  <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl leading-6 font-bold text-slate-900" id="modal-hotel">Editar Hotel</h3>
+              </div>
+            </div>
+            <button (click)="closeHotelEditModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          @if (editingHotel()) {
+          <app-hotel-form [hotelToEdit]="editingHotel()" [isLoading]="hotelService.isLoading()"
+            (save)="onSaveHotel($event)" (cancel)="closeHotelEditModal()"></app-hotel-form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- View Details Modal Overlay (Hotel - NEW) -->
+  @if (showHotelDetailsModal() && selectedHotelDetails()) {
+  <app-hotel-details [hotel]="selectedHotelDetails()!" (close)="closeHotelDetailsModal()"></app-hotel-details>
+  }
+
+  <!-- Global Confirm Delete Modal -->
+  @if (showConfirmDeleteModal()) {
+  <app-confirm-modal title="Excluir Hotel"
+    message="Tem certeza que deseja excluir esse hotel? Todos os dados vinculados (e-mails, imagens e telefones) tambÃ©m serÃ£o removidos permanentemente. Esta aÃ§Ã£o Ã© irreversÃ­vel."
+    confirmText="Sim, excluir" (confirm)="confirmDelete()" (cancel)="closeConfirmModal()">
+  </app-confirm-modal>
+  }
+
+  <!-- AI Chat Global Component -->
+  @if (!isLockedOut()) {
+    <app-ai-chat #aiChat (onAiAction)="handleAiAction($event)"></app-ai-chat>
+  }
+
+  }
+</div>

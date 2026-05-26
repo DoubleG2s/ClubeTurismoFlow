@@ -21,6 +21,34 @@ O **Clube Turismo Flow** e uma plataforma para operacao de agencias de turismo c
 
 ---
 
+## Estrutura do Projeto
+
+```text
+api/                  functions serverless da Vercel
+assets/               arquivos estaticos
+src/
+  app/
+    layout/           shell principal da aplicacao
+    features/         telas e fluxos maiores, como assinatura
+    components/       componentes reutilizaveis por modulo
+    services/         integracoes, regras de acesso e estado remoto
+    models/           contratos e tipos do dominio
+  environments/       variaveis injetadas por ambiente
+supabase/
+  migrations/         scripts SQL versionados
+```
+
+Aliases uteis no editor:
+
+- `@app/*`
+- `@components/*`
+- `@features/*`
+- `@services/*`
+- `@models/*`
+- `@env/*`
+
+---
+
 ## Como Executar Localmente
 
 ### Pre-requisitos

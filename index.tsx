@@ -3,7 +3,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { LOCALE_ID, provideZonelessChangeDetection } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { AppComponent } from './src/app.component';
+import { AppComponent } from './src/app/layout/app.component';
 
 registerLocaleData(localePt);
 

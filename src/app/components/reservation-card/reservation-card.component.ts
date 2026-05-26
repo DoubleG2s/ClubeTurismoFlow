@@ -1,0 +1,124 @@
+import { Component, Input, Output, EventEmitter, computed, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Reservation, ReservationChecklist } from '../../models/reservation';
+import { getDayDiffFromToday } from '../../shared/utils/date.utils';
+
+@Component({
+  selector: 'app-reservation-card',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './reservation-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ReservationCardComponent {
+  @Input({ required: true }) reservation!: Reservation;
+  @Output() update = new EventEmitter<{ id: string, data: Partial<Reservation> }>();
+  @Output() remove = new EventEmitter<string>();
+  @Output() edit = new EventEmitter<string>();
+  @Output() addToFlights = new EventEmitter<Reservation>();
+  @Output() prepareHotelEmail = new EventEmitter<Reservation>();
+
+  // UI State for collapse
+  isPreVendaExpanded = true;
+  isHotelExpanded = true;
+  isVooExpanded = true;
+  isPosViagemExpanded = true;
+
+  ngOnInit() {
+    this.checkInitialCollapse();
+  }
+
+  checkInitialCollapse() {
+    const c = this.reservation.checklist;
+
+    // Se todos de pré-venda concluidos
+    if (c.contract && c.contract_signed && c.payment && c.voucher_sent) {
+      this.isPreVendaExpanded = false;
+    }
+
+    if (c.hotel_email && c.hotel_confirmed) {
+      this.isHotelExpanded = false;
+    }
+
+    if (c.flight_registered && c.seats_assigned && c.seats_assigned_inbound && c.checkin_outbound && c.checkin_inbound) {
+      this.isVooExpanded = false;
+    }
+
+    if (c.post_trip) {
+      this.isPosViagemExpanded = false;
+    }
+  }
+
+  get isComplete(): boolean {
+    return Object.values(this.reservation.checklist).every(status => status === true);
+  }
+
+  // New Alert Logic with Priorities: Today > Critical (1 day) > Warning (2 days)
+  get alertStatus(): 'today' | 'critical' | 'warning' | null {
+    if (this.isComplete) return null;
+
+    const checkDateDiff = (dateStr?: string): number | null => {
+      return getDayDiffFromToday(dateStr);
+    };
+
+    // Collect diffs for both dates (Ida and Volta)
+    const diffs = [
+      checkDateDiff(this.reservation.date),
+      checkDateDiff(this.reservation.return_date)
+    ].filter(d => d !== null) as number[];
+
+    // Priority Logic
+    if (diffs.includes(0)) return 'today';     // Viajando hoje
+    if (diffs.includes(1)) return 'critical';  // 1 dia antes
+    if (diffs.includes(2)) return 'warning';   // 2 dias antes
+
+    return null;
+  }
+
+  onChecklistChange(key: keyof ReservationChecklist, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    const updatedChecklist = {
+      ...this.reservation.checklist,
+      [key]: checked
+    };
+
+    // Auto-collapse if the group just became complete
+    const c = updatedChecklist;
+    if (this.isPreVendaExpanded && c.contract && c.contract_signed && c.payment && c.voucher_sent) {
+      this.isPreVendaExpanded = false;
+    }
+    if (this.isHotelExpanded && c.hotel_email && c.hotel_confirmed) {
+      this.isHotelExpanded = false;
+    }
+    if (this.isVooExpanded && c.flight_registered && c.seats_assigned && c.seats_assigned_inbound && c.checkin_outbound && c.checkin_inbound) {
+      this.isVooExpanded = false;
+    }
+    if (this.isPosViagemExpanded && c.post_trip) {
+      this.isPosViagemExpanded = false;
+    }
+
+    this.update.emit({
+      id: this.reservation.id,
+      data: { checklist: updatedChecklist }
+    });
+  }
+
+  onNotesChange(event: Event) {
+    const value = (event.target as HTMLTextAreaElement).value;
+    if (value !== this.reservation.notes) {
+      this.update.emit({
+        id: this.reservation.id,
+        data: { notes: value }
+      });
+    }
+  }
+
+  onVoucherClick(event: Event) {
+    event.stopPropagation();
+    if (this.reservation.flight_voucher) {
+      this.addToFlights.emit(this.reservation);
+    }
+  }
+}
