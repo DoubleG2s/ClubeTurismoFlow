@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { Reservation } from '../../models/reservation';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 import { AiVoucherService } from '../../services/ai-voucher.service';
+import { HotelService } from '../../services/hotel.service';
 
 @Component({
   selector: 'app-reservation-form',
@@ -21,7 +22,11 @@ export class ReservationFormComponent implements OnInit {
          return_date: (data as any).return_date || '',
          flight_voucher: (data as any).flight_voucher || '',
          reservation_number: (data as any).reservation_number || '',
-         notes: (data as any).notes || ''
+         notes: (data as any).notes || '',
+         nome_hotel: (data as any).nome_hotel || '',
+         quarto: (data as any).quarto || '',
+         regime_alimentacao: (data as any).regime_alimentacao || '',
+         localizador_hotel: (data as any).localizador_hotel || ''
        });
        
        const px = (data as any).passengers;
@@ -57,6 +62,7 @@ export class ReservationFormComponent implements OnInit {
   // Inject ChangeDetectorRef for Zoneless updates
   private cdr = inject(ChangeDetectorRef);
   private aiVoucherService = inject(AiVoucherService);
+  public hotelService = inject(HotelService);
 
   constructor(private fb: FormBuilder) {
     this.initForm();
@@ -71,6 +77,10 @@ export class ReservationFormComponent implements OnInit {
       // return_date e flight_voucher agora são OBRIGATÓRIOS
       return_date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
       flight_voucher: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
+      nome_hotel: [''],
+      quarto: [''],
+      regime_alimentacao: [''],
+      localizador_hotel: [''],
       passengers: this.fb.array([this.createPassengerControl()]),
       notes: ['']
     });
@@ -86,6 +96,10 @@ export class ReservationFormComponent implements OnInit {
         date: this.reservationToEdit.date,
         return_date: this.reservationToEdit.return_date || '',
         flight_voucher: this.reservationToEdit.flight_voucher || '',
+        nome_hotel: this.reservationToEdit.nome_hotel || '',
+        quarto: this.reservationToEdit.quarto || '',
+        regime_alimentacao: this.reservationToEdit.regime_alimentacao || '',
+        localizador_hotel: this.reservationToEdit.localizador_hotel || '',
         notes: this.reservationToEdit.notes || ''
       });
 
@@ -227,6 +241,10 @@ export class ReservationFormComponent implements OnInit {
         date: formValue.date,
         return_date: formValue.return_date, // Agora obrigatório
         flight_voucher: formValue.flight_voucher, // Agora obrigatório
+        nome_hotel: formValue.nome_hotel || null,
+        quarto: formValue.quarto || null,
+        regime_alimentacao: formValue.regime_alimentacao || null,
+        localizador_hotel: formValue.localizador_hotel || null,
         passengers: formValue.passengers,
         notes: formValue.notes
       };

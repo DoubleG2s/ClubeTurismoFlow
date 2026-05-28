@@ -31,6 +31,7 @@ import { AdminMasterComponent } from './components/admin-master/admin-master.com
 import { SubscriptionComponent } from './app/pages/subscription/subscription'; // Importando a tela SaaS
 import { SubscriptionService } from './services/subscription.service';
 import { QuoteProposalComponent } from './components/quote-proposal/quote-proposal.component';
+import { CommissionCalculatorComponent } from './components/commission-calculator/commission-calculator.component';
 
 import { Flight } from './models/flight';
 import { Reservation } from './models/reservation';
@@ -63,7 +64,8 @@ import { Credit } from './models/credit';
     CalendarioEmbarquesComponent,
     AdminMasterComponent,
     SubscriptionComponent,
-    QuoteProposalComponent
+    QuoteProposalComponent,
+    CommissionCalculatorComponent
   ],
   templateUrl: './app.component.html',
 })

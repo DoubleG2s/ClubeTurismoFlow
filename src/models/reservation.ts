@@ -26,6 +26,10 @@ export interface Reservation {
   return_date?: string; // Data de Volta (dd/mm/yyyy) - Novo Campo
   destination?: string; // Destino - Novo Campo
   flight_voucher?: string; // Voucher de Voo (6 chars) - Novo Campo
+  nome_hotel?: string | null;
+  quarto?: string | null;
+  regime_alimentacao?: string | null;
+  localizador_hotel?: string | null;
   passengers: string[]; // Stored as JSONB in Supabase
   checklist: ReservationChecklist; // Stored as JSONB in Supabase
   notes?: string;
