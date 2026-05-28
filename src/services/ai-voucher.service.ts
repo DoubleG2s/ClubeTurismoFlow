@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { PdfExtractorService } from './pdf-extractor.service';
 import { environment } from '../environments/environment';
 import { GoogleGenerativeAI, SchemaType, FunctionCallingMode, FunctionDeclaration } from '@google/generative-ai';
+import { ProductType } from '../models/reservation';
 
 export interface VoucherExtractionResult {
   passageiros: string[];
@@ -13,6 +14,7 @@ export interface VoucherExtractionResult {
   hotel_nome: string;
   hotel_localizador: string;
   notes_prefill: string; // Hotel Nome | Localizador: LOCATOR
+  product_type: ProductType;
 }
 
 @Injectable({
@@ -129,6 +131,13 @@ export class AiVoucherService {
     } else if (hotel_localizador) {
       notes_prefill = `Localizador do Hotel: ${hotel_localizador}`;
     }
+    
+    let product_type = ProductType.PACOTE;
+    if (voo && !hotel_nome) {
+       product_type = ProductType.VOO;
+    } else if (hotel_nome && !voo) {
+       product_type = ProductType.HOSPEDAGEM;
+    }
 
     return {
       passageiros: px,
@@ -139,7 +148,8 @@ export class AiVoucherService {
       voo_voucher: voo,
       hotel_nome: hotel_nome,
       hotel_localizador: hotel_localizador,
-      notes_prefill: notes_prefill
+      notes_prefill: notes_prefill,
+      product_type: product_type
     };
   }
 }

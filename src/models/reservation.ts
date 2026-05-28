@@ -1,3 +1,9 @@
+export enum ProductType {
+  PACOTE = 'PACOTE',
+  VOO = 'VOO',
+  HOSPEDAGEM = 'HOSPEDAGEM',
+  CRUZEIRO = 'CRUZEIRO'
+}
 
 export interface ReservationChecklist {
   contract: boolean; // Agora visualizado como "Contrato enviado?"
@@ -30,6 +36,15 @@ export interface Reservation {
   quarto?: string | null;
   regime_alimentacao?: string | null;
   localizador_hotel?: string | null;
+  // Novos campos flat
+  product_type?: ProductType | string;
+  supplier?: string | null;
+  airline?: string | null;
+  origin?: string | null;
+  cruise_company?: string | null;
+  ship_name?: string | null;
+  cabin?: string | null;
+
   passengers: string[]; // Stored as JSONB in Supabase
   checklist: ReservationChecklist; // Stored as JSONB in Supabase
   notes?: string;

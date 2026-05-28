@@ -37,30 +37,46 @@
     </div>
   }
 
+  <div class="mb-6 animate-fade-in-list">
+    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 block">Tipo de Produto *</label>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      @for (type of productTypes; track type.value) {
+        <label class="relative flex cursor-pointer rounded-xl border p-4 shadow-sm focus:outline-none transition-all"
+               [ngClass]="{'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50/50': selectedProductType === type.value, 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300': selectedProductType !== type.value}">
+          <input type="radio" formControlName="product_type" [value]="type.value" class="sr-only">
+          <span class="flex flex-1">
+            <span class="flex flex-col">
+              <span class="block text-sm font-bold" [ngClass]="{'text-emerald-900': selectedProductType === type.value, 'text-slate-700': selectedProductType !== type.value}">{{ type.label }}</span>
+            </span>
+          </span>
+          <svg *ngIf="selectedProductType === type.value" class="h-5 w-5 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>
+        </label>
+      }
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
     <!-- Reservation Number -->
     <div class="flex flex-col group">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nº da Reserva *</label>
-      <input type="text" formControlName="reservation_number" placeholder="Ex: #RES-9988"
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        {{ selectedProductType === 'VOO' ? 'Localizador do voo *' : (selectedProductType === 'HOSPEDAGEM' ? 'Localizador do hotel *' : 'Nº da Reserva *') }}
+      </label>
+      <input type="text" formControlName="reservation_number" 
+        [placeholder]="selectedProductType === 'VOO' ? 'Ex: ABC123' : (selectedProductType === 'HOSPEDAGEM' ? 'Ex: RES-20261234' : 'Ex: #RES-9988')"
+        [attr.maxlength]="selectedProductType === 'VOO' ? 6 : null"
+        [class.uppercase]="selectedProductType === 'VOO'"
+        (input)="selectedProductType === 'VOO' ? onVoucherInput($event, 'reservation_number') : null"
         class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
       @if (reservationForm.get('reservation_number')?.touched && reservationForm.get('reservation_number')?.invalid) {
       <span class="text-xs text-red-500 mt-1">Obrigatório.</span>
       }
     </div>
 
-    <!-- Voucher Field (New) -->
-    <div class="flex flex-col group">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Voucher de Voo</label>
-      <input type="text" formControlName="flight_voucher" (input)="onVoucherInput($event)" placeholder="ABC123"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all uppercase">
-      @if (reservationForm.get('flight_voucher')?.value && reservationForm.get('flight_voucher')?.invalid) {
-      <span class="text-xs text-red-500 mt-1">Deve ter exatamente 6 caracteres.</span>
-      }
-    </div>
+    <!-- Voucher Field Removed (Moved to Product) -->
 
     <!-- Destination Field -->
-    <div class="flex flex-col group md:col-span-2">
+    <div class="flex flex-col group md:col-span-2" *ngIf="selectedProductType !== 'VOO'">
             <label class="text-[10px] font-bold text-slate-400 uppercase">Destino *</label>
             <app-city-autocomplete formControlName="destination" placeholder="Digite o destino..."
                 cssClass="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-red-500 placeholder-slate-400"></app-city-autocomplete>
@@ -149,43 +165,85 @@
     </div>
   </div>
 
-  <!-- Hotel Info Section -->
-  <div class="mb-6 pt-4 border-t border-slate-100">
-    <div class="flex items-center gap-2 mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22v-6.57"/><path d="M14 22v-6.57"/><path d="M14 10.15V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v18h20V12.5a2 2 0 0 0-2-2h-6"/><path d="M8 22H2"/><path d="M22 22h-6"/></svg>
-      <h4 class="text-sm font-bold text-slate-700">Informações do Hotel <span class="text-[10px] text-slate-400 font-normal ml-1">(Opcional)</span></h4>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="flex flex-col group">
-        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nome do Hotel</label>
-        <input type="text" formControlName="nome_hotel" placeholder="Ex: Salinas Maragogi" list="hotels-list"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
-        <datalist id="hotels-list">
-          @for (hotel of hotelService.hotels(); track hotel.id) {
-            <option [value]="hotel.name"></option>
-          }
-        </datalist>
-      </div>
+  <!-- Dynamic Fields based on Product Type -->
+  <div class="mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl animate-fade-in-list" *ngIf="selectedProductType === 'PACOTE' || selectedProductType === 'VOO' || selectedProductType === 'HOSPEDAGEM' || selectedProductType === 'CRUZEIRO'">
+     <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Detalhes do {{ selectedProductType === 'PACOTE' ? 'Pacote' : selectedProductType === 'VOO' ? 'Voo' : selectedProductType === 'HOSPEDAGEM' ? 'Hospedagem' : 'Cruzeiro' }}
+     </h4>
+     
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Campos comuns de Fornecedor -->
+        <div class="flex flex-col group md:col-span-2">
+           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Fornecedor (Operadora)</label>
+           <input type="text" formControlName="supplier" placeholder="Ex: CVC, Azul Viagens, Orinter..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
 
-      <div class="flex flex-col group">
-        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Quarto</label>
-        <input type="text" formControlName="quarto" placeholder="Ex: Luxo Superior"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
-      </div>
-      
-      <div class="flex flex-col group">
-        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Regime</label>
-        <input type="text" formControlName="regime_alimentacao" placeholder="Ex: Café da manhã"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
-      </div>
-      
-      <div class="flex flex-col group">
-        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Localizador</label>
-        <input type="text" formControlName="localizador_hotel" placeholder="Ex: H-12345"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
-      </div>
-    </div>
+        <!-- Bloco: VOO ou PACOTE -->
+        <ng-container *ngIf="selectedProductType === 'PACOTE' || selectedProductType === 'VOO'">
+           <div class="flex flex-col group" *ngIf="selectedProductType !== 'VOO'">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Localizador do Voo</label>
+              <input type="text" formControlName="flight_voucher" (input)="onVoucherInput($event)" placeholder="Ex: ABCD12" maxlength="6" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all uppercase">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Companhia Aérea</label>
+              <input type="text" formControlName="airline" placeholder="Ex: Azul, Latam, Gol..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Origem</label>
+              <input type="text" formControlName="origin" placeholder="Ex: GRU - São Paulo" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group" *ngIf="selectedProductType === 'VOO'">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Destino *</label>
+              <app-city-autocomplete formControlName="destination" placeholder="Ex: MCZ - Maceió"
+                  cssClass="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></app-city-autocomplete>
+           </div>
+        </ng-container>
+
+        <!-- Bloco: HOSPEDAGEM ou PACOTE -->
+        <ng-container *ngIf="selectedProductType === 'PACOTE' || selectedProductType === 'HOSPEDAGEM'">
+           <div class="flex flex-col group" [ngClass]="{'md:col-span-2': selectedProductType === 'HOSPEDAGEM'}">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome do Hotel/Pousada</label>
+              <input type="text" formControlName="nome_hotel" placeholder="Ex: Ibis Copacabana" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Localizador Hotel</label>
+              <input type="text" formControlName="localizador_hotel" placeholder="Opcional" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tipo de Quarto</label>
+              <input type="text" formControlName="quarto" placeholder="Ex: Duplo Standard" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Regime Alimentação</label>
+              <select formControlName="regime_alimentacao" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none">
+                 <option value="">Selecione...</option>
+                 <option value="Sem Pensão">Sem Pensão</option>
+                 <option value="Café da Manhã">Café da Manhã</option>
+                 <option value="Meia Pensão">Meia Pensão</option>
+                 <option value="Pensão Completa">Pensão Completa</option>
+                 <option value="All Inclusive">All Inclusive</option>
+              </select>
+           </div>
+        </ng-container>
+
+        <!-- Bloco: CRUZEIRO -->
+        <ng-container *ngIf="selectedProductType === 'CRUZEIRO'">
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cia. Marítima</label>
+              <input type="text" formControlName="cruise_company" placeholder="Ex: MSC, Costa, Royal Caribbean" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome do Navio</label>
+              <input type="text" formControlName="ship_name" placeholder="Ex: MSC Seaview" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nº da Cabine</label>
+              <input type="text" formControlName="cabin" placeholder="Ex: 11042" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+        </ng-container>
+
+     </div>
   </div>
 
   <!-- Notes Section -->

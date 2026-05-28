@@ -18,7 +18,7 @@
       <div class="flex items-center gap-2 mb-1 flex-wrap">
         <p class="text-[10px] uppercase tracking-widest font-bold"
           [ngClass]="isComplete ? 'text-emerald-600' : 'text-slate-500'">
-          Reserva
+          {{ reservation.product_type === 'VOO' ? 'Localizador do voo' : (reservation.product_type === 'HOSPEDAGEM' ? 'Localizador do hotel' : 'Reserva') }}
         </p>
 
         <!-- Status Badges -->
@@ -68,12 +68,12 @@
           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
           <circle cx="12" cy="10" r="3" />
         </svg>
-        {{ reservation.destination }}
+        {{ reservation.product_type === 'VOO' && reservation.origin ? reservation.origin + ' - ' + reservation.destination : reservation.destination }}
       </p>
       }
 
       <!-- Voucher Display with Click Action -->
-      @if (reservation.flight_voucher) {
+      @if (reservation.flight_voucher && reservation.product_type !== 'VOO' && reservation.product_type !== 'HOSPEDAGEM') {
       <button type="button" (click)="onVoucherClick($event)"
         class="relative z-50 mt-1 flex items-center gap-1.5 text-sm font-mono text-slate-700 cursor-pointer hover:bg-black/5 hover:text-brand-700 rounded px-2 py-1 transition-all border border-transparent hover:border-black/10 w-fit group/voucher"
         title="Clique para adicionar aos Voos">
@@ -260,6 +260,7 @@
       </div>
 
       <!-- Group 2: Hotel -->
+      @if (reservation.product_type !== 'VOO') {
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2 cursor-pointer group" (click)="isHotelExpanded = !isHotelExpanded">
           <h5
@@ -294,8 +295,10 @@
         </div>
         }
       </div>
+      }
 
       <!-- Group 3: Voo -->
+      @if (reservation.product_type !== 'HOSPEDAGEM') {
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2 cursor-pointer group" (click)="isVooExpanded = !isVooExpanded">
           <h5
@@ -357,6 +360,7 @@
         </div>
         }
       </div>
+      }
 
       <!-- Group 4: Pós-viagem (New) -->
       <div>
@@ -422,6 +426,7 @@
     }
 
     <div class="flex justify-end gap-2">
+      @if (reservation.product_type !== 'VOO') {
       <button (click)="prepareHotelEmail.emit(reservation)"
         class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5"
         title="Preparar e-mail ao hotel"
@@ -432,6 +437,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         E-mail
       </button>
+      }
 
       <button (click)="edit.emit(reservation.id)"
         class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5"
