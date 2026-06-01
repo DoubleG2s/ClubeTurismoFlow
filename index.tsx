@@ -1,11 +1,13 @@
 import '@angular/compiler';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppComponent } from './src/app.component';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideZonelessChangeDetection()
+    provideZonelessChangeDetection(),
+    provideAnimations()
   ]
 }).catch(err => console.error(err));
 

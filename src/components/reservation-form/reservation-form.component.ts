@@ -5,12 +5,14 @@ import { Reservation, ProductType } from '../../models/reservation';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 import { AiVoucherService } from '../../services/ai-voucher.service';
 import { HotelService } from '../../services/hotel.service';
+import { formReveal, alertSlide, fieldReveal, passengerItem } from '../../animations/reservation.animations';
 
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent],
   templateUrl: './reservation-form.component.html',
+  animations: [formReveal, alertSlide, fieldReveal, passengerItem],
 })
 export class ReservationFormComponent implements OnInit {
   @Input() reservationToEdit: Reservation | null = null;

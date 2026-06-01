@@ -1,5 +1,5 @@
 <div
-  class="rounded-2xl border shadow-sm hover:shadow-md transition-all duration-500 overflow-hidden flex flex-col h-full relative"
+  class="rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full relative group/card"
   [ngClass]="{
     'bg-emerald-50 border-emerald-200 shadow-emerald-100': isComplete,
     'bg-orange-50 border-orange-200': !isComplete && alertStatus === 'critical',
@@ -115,8 +115,8 @@
     <!-- Hotel Info Dropdown -->
     @if (hasHotelInfo) {
     <div>
-      <button (click)="toggleHotelInfo($event)" 
-        class="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors group">
+      <button (click)="toggleHotelInfo($event)"
+        class="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-all active:scale-[0.99] group">
         <div class="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 group-hover:text-emerald-600 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22v-6.57"/><path d="M14 22v-6.57"/><path d="M14 10.15V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v18h20V12.5a2 2 0 0 0-2-2h-6"/><path d="M8 22H2"/><path d="M22 22h-6"/></svg>
           <span class="text-xs font-bold text-slate-600 uppercase tracking-wider group-hover:text-emerald-700 transition-colors">Hotel</span>
@@ -428,7 +428,7 @@
     <div class="flex justify-end gap-2">
       @if (reservation.product_type !== 'VOO') {
       <button (click)="prepareHotelEmail.emit(reservation)"
-        class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5"
+        class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5 active:scale-95 hover:-translate-y-0.5"
         title="Preparar e-mail ao hotel"
         [ngClass]="{
           'bg-white/40 border-rose-200 text-rose-800 hover:bg-white/60': isComplete,
@@ -440,7 +440,7 @@
       }
 
       <button (click)="edit.emit(reservation.id)"
-        class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5"
+        class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5 active:scale-95 hover:-translate-y-0.5"
         [ngClass]="{
           'bg-white/40 border-emerald-200 text-emerald-800 hover:bg-white/60': isComplete,
           'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-600': !isComplete
@@ -454,7 +454,7 @@
       </button>
 
       <button (click)="remove.emit(reservation.id)"
-        class="py-2 px-3 rounded-lg text-xs font-semibold border flex items-center justify-center transition-colors"
+        class="py-2 px-3 rounded-lg text-xs font-semibold border flex items-center justify-center transition-all duration-200 active:scale-90 hover:rotate-6"
         [ngClass]="{
           'text-red-800 bg-red-50/50 border-red-100 hover:bg-red-100': isComplete,
           'text-red-400 border-transparent hover:text-red-600 hover:bg-red-50': !isComplete

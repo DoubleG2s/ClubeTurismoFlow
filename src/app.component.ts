@@ -26,6 +26,7 @@ import { HotelEmailGeneratorComponent } from './components/hotel-email-generator
 import { AiChatComponent } from './components/ai-chat/ai-chat.component';
 import { CalendarioEmbarquesComponent } from './components/calendario-embarques/calendario-embarques.component';
 import { AiAction } from './services/ai-interpreter.service';
+import { expandCollapse, listStagger } from './animations/reservation.animations';
 
 import { AdminMasterComponent } from './components/admin-master/admin-master.component';
 import { SubscriptionComponent } from './app/pages/subscription/subscription'; // Importando a tela SaaS
@@ -68,6 +69,7 @@ import { Credit } from './models/credit';
     CommissionCalculatorComponent
   ],
   templateUrl: './app.component.html',
+  animations: [expandCollapse, listStagger],
 })
 export class AppComponent implements OnInit {
   private flightService = inject(FlightService);
@@ -100,6 +102,7 @@ export class AppComponent implements OnInit {
   editingReservation = signal<Reservation | null>(null);
   showReservationEditModal = signal(false);
   prefilledReservationData = signal<Partial<Reservation> | null>(null);
+  isNovaReservaExpanded = signal(false);
 
   // Quote State
   editingQuote = signal<Quote | null>(null);

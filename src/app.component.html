@@ -301,13 +301,29 @@
 
       <!-- Add Reservation Form Section -->
       <section>
-        <div class="flex items-center gap-3 mb-5 pl-1">
+        <button
+          type="button"
+          (click)="isNovaReservaExpanded.set(!isNovaReservaExpanded())"
+          class="flex items-center gap-3 w-full text-left pl-1 mb-1 group focus:outline-none active:scale-[0.995] transition-transform duration-100">
           <h2 class="text-lg font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-            <span class="w-1.5 h-6 bg-emerald-500 rounded-full inline-block"></span>
-            Nova Reserva
+            <span class="w-1.5 h-6 bg-emerald-500 rounded-full inline-block transition-all duration-300 group-hover:h-7"></span>
+            Criar nova reserva
           </h2>
-        </div>
-        <app-reservation-form (save)="onAddReservation($event)" [prefillData]="prefilledReservationData()"></app-reservation-form>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-all duration-300"
+            [class.rotate-180]="isNovaReservaExpanded()"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        @if (isNovaReservaExpanded()) {
+          <div @expandCollapse class="mt-5">
+            <app-reservation-form (save)="onAddReservation($event)" [prefillData]="prefilledReservationData()"></app-reservation-form>
+          </div>
+        }
       </section>
 
       <!-- Reservations List Header & Controls -->
@@ -481,7 +497,10 @@
         </div>
 
         @if (filteredReservations().length > 0) {
-        <div id="reservation-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300" [ngClass]="listAnimationClass()">
+        <div id="reservation-list-container"
+             [@listStagger]="filteredReservations().length"
+             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+             [ngClass]="listAnimationClass()">
           @for (res of filteredReservations(); track res.id) {
           <app-reservation-card [reservation]="res" (update)="onUpdateReservation($event)"
             (edit)="startEditReservation($event)" (remove)="onRemoveReservation($event)"
