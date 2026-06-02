@@ -153,11 +153,23 @@
           <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-4" formGroupName="outbound">
             <div class="flex items-center justify-between mb-3">
               <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-md">Ida</span>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" formControlName="has_connection"
-                  class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer">
-                <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Possui conexão?</span>
-              </label>
+              <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="has_connection"
+                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Possui conexão?</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="seats_included"
+                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Assentos incluídos</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="checked_baggage"
+                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Bagagem despachada</span>
+                </label>
+              </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
@@ -204,11 +216,23 @@
           <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl" formGroupName="inbound">
             <div class="flex items-center justify-between mb-3">
               <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold uppercase rounded-md">Volta</span>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" formControlName="has_connection"
-                  class="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all cursor-pointer">
-                <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Possui conexão?</span>
-              </label>
+              <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="has_connection"
+                    class="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all cursor-pointer">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Possui conexão?</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="seats_included"
+                    class="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all cursor-pointer">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Assentos incluídos</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="checked_baggage"
+                    class="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all cursor-pointer">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase select-none">Bagagem despachada</span>
+                </label>
+              </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>

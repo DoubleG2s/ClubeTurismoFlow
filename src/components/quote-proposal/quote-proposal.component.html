@@ -255,12 +255,7 @@
     <section id="voo" class="scroll-mt-24 qp-slide-up-d1">
       <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
         <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z">
-            </path>
-          </svg>
+          <lucide-icon [img]="Plane" class="w-5 h-5" [strokeWidth]="2"></lucide-icon>
         </span>
         Logística de Voos
         <span
@@ -292,12 +287,7 @@
                 class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
               </div>
               <div class="bg-white z-10 px-3 sm:px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
-                <svg class="w-5 h-5 text-blue-500 rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z">
-                  </path>
-                </svg>
+                <lucide-icon [img]="PlaneTakeoff" class="w-5 h-5 text-blue-500" [strokeWidth]="2"></lucide-icon>
               </div>
 
               <!-- Connection Info (Interactive) -->
@@ -351,6 +341,22 @@
               <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.outbound.destination_city }}</p>
             </div>
           </div>
+          @if (q.flight_details.outbound.seats_included || q.flight_details.outbound.checked_baggage) {
+          <div class="flex items-center gap-2 mt-3 flex-wrap">
+            @if (q.flight_details.outbound.seats_included) {
+            <span class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/></svg>
+              Assentos incluídos
+            </span>
+            }
+            @if (q.flight_details.outbound.checked_baggage) {
+            <span class="text-[11px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 flex items-center gap-1">
+              <lucide-icon [img]="Luggage" class="w-3 h-3" [strokeWidth]="2"></lucide-icon>
+              Bagagem despachada
+            </span>
+            }
+          </div>
+          }
         </div>
 
         <hr class="my-5 sm:my-6 border-slate-100" />
@@ -376,12 +382,7 @@
                 class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
               </div>
               <div class="bg-white z-10 px-3 sm:px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
-                <svg class="w-5 h-5 text-orange-500 -rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z">
-                  </path>
-                </svg>
+                <lucide-icon [img]="PlaneLanding" class="w-5 h-5 text-orange-500" [strokeWidth]="2"></lucide-icon>
               </div>
 
               <!-- Connection Info (Interactive) -->
@@ -436,6 +437,22 @@
               </p>
             </div>
           </div>
+          @if (q.flight_details.inbound.seats_included || q.flight_details.inbound.checked_baggage) {
+          <div class="flex items-center gap-2 mt-3 flex-wrap">
+            @if (q.flight_details.inbound.seats_included) {
+            <span class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/></svg>
+              Assentos incluídos
+            </span>
+            }
+            @if (q.flight_details.inbound.checked_baggage) {
+            <span class="text-[11px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 flex items-center gap-1">
+              <lucide-icon [img]="Luggage" class="w-3 h-3" [strokeWidth]="2"></lucide-icon>
+              Bagagem despachada
+            </span>
+            }
+          </div>
+          }
         </div>
       </div>
     </section>
@@ -512,6 +529,38 @@
               de mão (até 10kg).</p>
           </div>
         </div>
+
+        <!-- Assentos Incluídos -->
+        @if (q.flight_details?.outbound?.seats_included || q.flight_details?.inbound?.seats_included) {
+        <div
+          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+          <div class="bg-emerald-50 text-emerald-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+            <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+              <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Assentos Incluídos</h4>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Seleção de assentos já inclusa no pacote, sem custo adicional.</p>
+          </div>
+        </div>
+        }
+
+        <!-- Bagagem Despachada -->
+        @if (q.flight_details?.outbound?.checked_baggage || q.flight_details?.inbound?.checked_baggage) {
+        <div
+          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+          <div class="bg-sky-50 text-sky-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+            <lucide-icon [img]="Luggage" class="w-5 sm:w-6 h-5 sm:h-6" [strokeWidth]="2"></lucide-icon>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Bagagem Despachada</h4>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Franquia de bagagem despachada inclusa no pacote.</p>
+          </div>
+        </div>
+        }
 
         <!-- Passeio Extra -->
         @if (q.tour_details) {
@@ -749,9 +798,9 @@
 
         <!-- VALOR CARD (DESTAQUE) -->
         <div
-          class="md:col-span-2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-2xl shadow-xl p-6 sm:p-8 text-white flex flex-col justify-center">
+          class="md:col-span-2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-2xl shadow-xl p-6 sm:p-8 text-white flex flex-col justify-center overflow-hidden min-w-0">
           <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-2">Investimento Total</p>
-          <p class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight drop-shadow-sm mb-3 sm:mb-4 transition-all duration-300"
+          <p class="whitespace-nowrap text-2xl sm:text-3xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tight drop-shadow-sm mb-3 sm:mb-4 transition-all duration-300"
             [class.scale-105]="isValueHighlighting()"
             [class.text-emerald-300]="isValueHighlighting()">{{ totalValue() }}</p>
           <div

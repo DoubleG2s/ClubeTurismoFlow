@@ -121,7 +121,9 @@ export class QuoteFormComponent implements OnInit, OnChanges {
           arrival_time: [data?.flight_details?.outbound?.arrival_time || '', Validators.required],
           has_connection: [data?.flight_details?.outbound?.has_connection || false],
           connection_city: [data?.flight_details?.outbound?.connection_city || ''],
-          connection_time: [data?.flight_details?.outbound?.connection_time || '']
+          connection_time: [data?.flight_details?.outbound?.connection_time || ''],
+          seats_included: [data?.flight_details?.outbound?.seats_included || false],
+          checked_baggage: [data?.flight_details?.outbound?.checked_baggage || false]
         }),
         inbound: this.fb.group({
           origin_city: [data?.flight_details?.inbound?.origin_city || '', Validators.required],
@@ -130,7 +132,9 @@ export class QuoteFormComponent implements OnInit, OnChanges {
           arrival_time: [data?.flight_details?.inbound?.arrival_time || '', Validators.required],
           has_connection: [data?.flight_details?.inbound?.has_connection || false],
           connection_city: [data?.flight_details?.inbound?.connection_city || ''],
-          connection_time: [data?.flight_details?.inbound?.connection_time || '']
+          connection_time: [data?.flight_details?.inbound?.connection_time || ''],
+          seats_included: [data?.flight_details?.inbound?.seats_included || false],
+          checked_baggage: [data?.flight_details?.inbound?.checked_baggage || false]
         })
       }),
       hotel_options: this.fb.array([])
