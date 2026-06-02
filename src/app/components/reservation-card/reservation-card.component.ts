@@ -24,6 +24,9 @@ export class ReservationCardComponent {
   isHotelExpanded = true;
   isVooExpanded = true;
   isPosViagemExpanded = true;
+  
+  // State for Hotel Info Dropdown
+  isHotelInfoExpanded = false;
 
   ngOnInit() {
     this.checkInitialCollapse();
@@ -120,5 +123,14 @@ export class ReservationCardComponent {
     if (this.reservation.flight_voucher) {
       this.addToFlights.emit(this.reservation);
     }
+  }
+
+  get hasHotelInfo(): boolean {
+    return !!(this.reservation.nome_hotel || this.reservation.quarto || this.reservation.regime_alimentacao || this.reservation.localizador_hotel);
+  }
+
+  toggleHotelInfo(event: Event) {
+    event.stopPropagation();
+    this.isHotelInfoExpanded = !this.isHotelInfoExpanded;
   }
 }

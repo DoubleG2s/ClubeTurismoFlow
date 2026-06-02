@@ -48,6 +48,7 @@ import { HotelService } from '@services/hotel.service';
 import { QuoteService } from '@services/quote.service';
 import { ReservationService } from '@services/reservation.service';
 import { SubscriptionService } from '@services/subscription.service';
+import { expandCollapse, listStagger } from '@app/animations/reservation.animations';
 
 @Component({
   selector: 'app-root',
@@ -74,6 +75,7 @@ import { SubscriptionService } from '@services/subscription.service';
     QuoteProposalComponent
   ],
   templateUrl: './app.component.html',
+  animations: [expandCollapse, listStagger],
 })
 export class AppComponent implements OnInit, OnDestroy {
   private flightService = inject(FlightService);
@@ -110,6 +112,7 @@ export class AppComponent implements OnInit, OnDestroy {
   editingReservation = signal<Reservation | null>(null);
   showReservationEditModal = signal(false);
   prefilledReservationData = signal<Partial<Reservation> | null>(null);
+  isNovaReservaExpanded = signal(false);
 
   // Quote State
   editingQuote = signal<Quote | null>(null);

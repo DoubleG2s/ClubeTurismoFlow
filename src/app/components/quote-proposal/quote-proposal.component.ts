@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Quote, HotelOption, QuoteOption } from '../../models/quote';
 import { QuoteService } from '../../services/quote.service';
 import { parsePtBrDate } from '../../shared/utils/date.utils';
+import { LucideAngularModule, Luggage, Plane, PlaneTakeoff, PlaneLanding } from 'lucide-angular';
 
 @Component({
   selector: 'app-quote-proposal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './quote-proposal.component.html'
 })
 export class QuoteProposalComponent implements OnInit {
@@ -26,6 +27,10 @@ export class QuoteProposalComponent implements OnInit {
   expandedImage = signal<string | null>(null);
   expandedImageContext = signal<{ hotelIndex: number; images: string[]; currentIndex: number } | null>(null);
   expandedConnections = signal<{ outbound: boolean, inbound: boolean }>({ outbound: false, inbound: false });
+  readonly Luggage = Luggage;
+  readonly Plane = Plane;
+  readonly PlaneTakeoff = PlaneTakeoff;
+  readonly PlaneLanding = PlaneLanding;
 
   // Normalização de Opções
   normalizedOptions = computed<QuoteOption[]>(() => {

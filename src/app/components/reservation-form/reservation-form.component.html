@@ -1,4 +1,4 @@
-<form [formGroup]="reservationForm" (ngSubmit)="onSubmit()"
+<form @formReveal [formGroup]="reservationForm" (ngSubmit)="onSubmit()"
   class="bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 mb-6 transition-all hover:shadow-xl hover:shadow-slate-200/60">
   
   <!-- AI Voucher Import Section -->
@@ -14,7 +14,7 @@
     <div>
       <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" class="hidden">
       <button type="button" (click)="fileInput.click()" [disabled]="isExtracting()"
-        class="px-4 py-2.5 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+        class="px-4 py-2.5 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:shadow-purple-200/60 active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
         @if (isExtracting()) {
           <svg class="animate-spin h-4 w-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
           Processando IA...
@@ -27,7 +27,7 @@
   </div>
 
   @if (extractionWarning()) {
-    <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800 text-sm">
+    <div @alertSlide class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800 text-sm">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 mt-0.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <div>
         <span class="font-bold block mb-1">Atenção na extração:</span>
@@ -37,30 +37,46 @@
     </div>
   }
 
+  <div class="mb-6 animate-fade-in-list">
+    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 block">Tipo de Produto *</label>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      @for (type of productTypes; track type.value) {
+        <label class="relative flex cursor-pointer rounded-xl border p-4 shadow-sm focus:outline-none transition-all duration-200 active:scale-[0.97] select-none"
+               [ngClass]="{'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50/50 shadow-emerald-100': selectedProductType === type.value, 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 hover:shadow-md hover:scale-[1.015]': selectedProductType !== type.value}">
+          <input type="radio" formControlName="product_type" [value]="type.value" class="sr-only">
+          <span class="flex flex-1">
+            <span class="flex flex-col">
+              <span class="block text-sm font-bold" [ngClass]="{'text-emerald-900': selectedProductType === type.value, 'text-slate-700': selectedProductType !== type.value}">{{ type.label }}</span>
+            </span>
+          </span>
+          <svg *ngIf="selectedProductType === type.value" class="h-5 w-5 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>
+        </label>
+      }
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
     <!-- Reservation Number -->
     <div class="flex flex-col group">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nº da Reserva *</label>
-      <input type="text" formControlName="reservation_number" placeholder="Ex: #RES-9988"
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        {{ selectedProductType === 'VOO' ? 'Localizador do voo *' : (selectedProductType === 'HOSPEDAGEM' ? 'Localizador do hotel *' : 'Nº da Reserva *') }}
+      </label>
+      <input type="text" formControlName="reservation_number" 
+        [placeholder]="selectedProductType === 'VOO' ? 'Ex: ABC123' : (selectedProductType === 'HOSPEDAGEM' ? 'Ex: RES-20261234' : 'Ex: #RES-9988')"
+        [attr.maxlength]="selectedProductType === 'VOO' ? 6 : null"
+        [class.uppercase]="selectedProductType === 'VOO'"
+        (input)="selectedProductType === 'VOO' ? onVoucherInput($event, 'reservation_number') : null"
         class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
       @if (reservationForm.get('reservation_number')?.touched && reservationForm.get('reservation_number')?.invalid) {
       <span class="text-xs text-red-500 mt-1">Obrigatório.</span>
       }
     </div>
 
-    <!-- Voucher Field (New) -->
-    <div class="flex flex-col group">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Voucher de Voo</label>
-      <input type="text" formControlName="flight_voucher" (input)="onVoucherInput($event)" placeholder="ABC123"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all uppercase">
-      @if (reservationForm.get('flight_voucher')?.value && reservationForm.get('flight_voucher')?.invalid) {
-      <span class="text-xs text-red-500 mt-1">Deve ter exatamente 6 caracteres.</span>
-      }
-    </div>
+    <!-- Voucher Field Removed (Moved to Product) -->
 
     <!-- Destination Field -->
-    <div class="flex flex-col group md:col-span-2">
+    <div class="flex flex-col group md:col-span-2" *ngIf="selectedProductType !== 'VOO'">
             <label class="text-[10px] font-bold text-slate-400 uppercase">Destino *</label>
             <app-city-autocomplete formControlName="destination" placeholder="Digite o destino..."
                 cssClass="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-red-500 placeholder-slate-400"></app-city-autocomplete>
@@ -119,7 +135,7 @@
     <div class="flex justify-between items-center mb-2">
       <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Passageiros *</label>
       <button type="button" (click)="addPassenger()"
-        class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors">
+        class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all active:scale-90 hover:gap-1.5">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -131,12 +147,12 @@
 
     <div formArrayName="passengers" class="space-y-3">
       @for (control of passengers.controls; track $index) {
-      <div class="flex gap-2">
+      <div @passengerItem class="flex gap-2">
         <input [formControlName]="$index" type="text" placeholder="Nome do passageiro"
           class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
         @if (passengers.controls.length > 1) {
         <button type="button" (click)="removePassenger($index)"
-          class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+          class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90 hover:rotate-90 duration-200">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -147,6 +163,87 @@
       </div>
       }
     </div>
+  </div>
+
+  <!-- Dynamic Fields based on Product Type -->
+  <div @fieldReveal class="mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl" *ngIf="selectedProductType === 'PACOTE' || selectedProductType === 'VOO' || selectedProductType === 'HOSPEDAGEM' || selectedProductType === 'CRUZEIRO'">
+     <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Detalhes do {{ selectedProductType === 'PACOTE' ? 'Pacote' : selectedProductType === 'VOO' ? 'Voo' : selectedProductType === 'HOSPEDAGEM' ? 'Hospedagem' : 'Cruzeiro' }}
+     </h4>
+     
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Campos comuns de Fornecedor -->
+        <div class="flex flex-col group md:col-span-2">
+           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Fornecedor (Operadora)</label>
+           <input type="text" formControlName="supplier" placeholder="Ex: CVC, Azul Viagens, Orinter..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+
+        <!-- Bloco: VOO ou PACOTE -->
+        <ng-container *ngIf="selectedProductType === 'PACOTE' || selectedProductType === 'VOO'">
+           <div class="flex flex-col group" *ngIf="selectedProductType !== 'VOO'">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Localizador do Voo</label>
+              <input type="text" formControlName="flight_voucher" (input)="onVoucherInput($event)" placeholder="Ex: ABCD12" maxlength="6" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all uppercase">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Companhia Aérea</label>
+              <input type="text" formControlName="airline" placeholder="Ex: Azul, Latam, Gol..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Origem</label>
+              <input type="text" formControlName="origin" placeholder="Ex: GRU - São Paulo" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group" *ngIf="selectedProductType === 'VOO'">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Destino *</label>
+              <app-city-autocomplete formControlName="destination" placeholder="Ex: MCZ - Maceió"
+                  cssClass="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></app-city-autocomplete>
+           </div>
+        </ng-container>
+
+        <!-- Bloco: HOSPEDAGEM ou PACOTE -->
+        <ng-container *ngIf="selectedProductType === 'PACOTE' || selectedProductType === 'HOSPEDAGEM'">
+           <div class="flex flex-col group" [ngClass]="{'md:col-span-2': selectedProductType === 'HOSPEDAGEM'}">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome do Hotel/Pousada</label>
+              <input type="text" formControlName="nome_hotel" placeholder="Ex: Ibis Copacabana" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Localizador Hotel</label>
+              <input type="text" formControlName="localizador_hotel" placeholder="Opcional" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tipo de Quarto</label>
+              <input type="text" formControlName="quarto" placeholder="Ex: Duplo Standard" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Regime Alimentação</label>
+              <select formControlName="regime_alimentacao" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none">
+                 <option value="">Selecione...</option>
+                 <option value="Sem Pensão">Sem Pensão</option>
+                 <option value="Café da Manhã">Café da Manhã</option>
+                 <option value="Meia Pensão">Meia Pensão</option>
+                 <option value="Pensão Completa">Pensão Completa</option>
+                 <option value="All Inclusive">All Inclusive</option>
+              </select>
+           </div>
+        </ng-container>
+
+        <!-- Bloco: CRUZEIRO -->
+        <ng-container *ngIf="selectedProductType === 'CRUZEIRO'">
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cia. Marítima</label>
+              <input type="text" formControlName="cruise_company" placeholder="Ex: MSC, Costa, Royal Caribbean" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome do Navio</label>
+              <input type="text" formControlName="ship_name" placeholder="Ex: MSC Seaview" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+           <div class="flex flex-col group">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nº da Cabine</label>
+              <input type="text" formControlName="cabin" placeholder="Ex: 11042" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+           </div>
+        </ng-container>
+
+     </div>
   </div>
 
   <!-- Notes Section -->
@@ -160,13 +257,13 @@
   <div class="flex justify-end gap-4 pt-4 border-t border-slate-100">
     @if (isEditMode()) {
     <button type="button" (click)="onCancel()"
-      class="px-6 py-3 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-semibold transition-all shadow-sm">
+      class="px-6 py-3 rounded-xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-semibold transition-all shadow-sm active:scale-95">
       Cancelar
     </button>
     }
 
     <button type="submit" [disabled]="reservationForm.invalid"
-      class="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-2">
+      class="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-2">
       @if (isEditMode()) {
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

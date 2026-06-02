@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Reservation } from '../models/reservation';
+import { Reservation, ProductType } from '../models/reservation';
 import { supabase } from './supabase';
 import { AuthService } from './auth.service';
 import { TenantService } from './tenant.service';
@@ -139,8 +139,9 @@ export class ReservationService {
         const newRes = {
           ...data,
           passengers: data.passengers || [],
-          checklist: payload.checklist // Use the payload checklist which is guaranteed correct
+          checklist: payload.checklist
         };
+        
         this.reservationsSignal.update(current => [newRes as Reservation, ...current]);
       }
     } catch (error) {

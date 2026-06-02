@@ -17,6 +17,8 @@ export interface FlightSegment {
   has_connection?: boolean;
   connection_city?: string;
   connection_time?: string; // HH:mm
+  seats_included?: boolean;
+  checked_baggage?: boolean;
 }
 
 export interface QuoteFlightDetails {

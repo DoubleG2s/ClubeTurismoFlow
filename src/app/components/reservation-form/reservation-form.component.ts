@@ -1,29 +1,43 @@
 import { Component, EventEmitter, Output, Input, OnInit, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Reservation } from '../../models/reservation';
+import { Reservation, ProductType } from '../../models/reservation';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 import { AiVoucherService } from '../../services/ai-voucher.service';
+import { HotelService } from '../../services/hotel.service';
+import { formReveal, alertSlide, fieldReveal, passengerItem } from '../../animations/reservation.animations';
 
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent],
   templateUrl: './reservation-form.component.html',
+  animations: [formReveal, alertSlide, fieldReveal, passengerItem],
 })
 export class ReservationFormComponent implements OnInit {
   @Input() reservationToEdit: Reservation | null = null;
   @Input() set prefillData(data: Partial<Reservation> | null) {
     if (data && !this.isEditMode() && this.reservationForm) {
-       this.reservationForm.patchValue({
+      this.reservationForm.patchValue({
          destination: data.destination || '',
          date: data.date || '',
          return_date: (data as any).return_date || '',
-         flight_voucher: (data as any).flight_voucher || '',
          reservation_number: (data as any).reservation_number || '',
-         notes: (data as any).notes || ''
+         notes: (data as any).notes || '',
+         // Novos campos flat
+         product_type: data.product_type || ProductType.PACOTE,
+         supplier: data.supplier || '',
+         flight_voucher: data.flight_voucher || '',
+         airline: data.airline || '',
+         origin: data.origin || '',
+         nome_hotel: data.nome_hotel || '',
+         quarto: data.quarto || '',
+         regime_alimentacao: data.regime_alimentacao || '',
+         localizador_hotel: data.localizador_hotel || '',
+         cruise_company: data.cruise_company || '',
+         ship_name: data.ship_name || '',
+         cabin: data.cabin || ''
        });
-       
        const px = (data as any).passengers;
        if (px && Array.isArray(px) && px.length > 0) {
          const validPassengers = px.filter(p => typeof p === 'string' && p.trim().length > 0);
@@ -54,9 +68,17 @@ export class ReservationFormComponent implements OnInit {
   isExtracting = signal(false);
   extractionWarning = signal<string | null>(null);
 
+  productTypes = [
+    { value: ProductType.PACOTE, label: 'Pacote de Viagem' },
+    { value: ProductType.VOO, label: 'Somente Voo' },
+    { value: ProductType.HOSPEDAGEM, label: 'Somente Hospedagem' },
+    { value: ProductType.CRUZEIRO, label: 'Cruzeiro Marítimo' },
+  ];
+
   // Inject ChangeDetectorRef for Zoneless updates
   private cdr = inject(ChangeDetectorRef);
   private aiVoucherService = inject(AiVoucherService);
+  public hotelService = inject(HotelService);
 
   constructor(private fb: FormBuilder) {
     this.initForm();
@@ -65,12 +87,22 @@ export class ReservationFormComponent implements OnInit {
   // Method to build/rebuild the form structure from scratch
   private initForm() {
     this.reservationForm = this.fb.group({
+      product_type: [ProductType.PACOTE, Validators.required],
+      supplier: [''],
       reservation_number: ['', Validators.required],
       destination: ['', Validators.required],
       date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
-      // return_date e flight_voucher agora são OBRIGATÓRIOS
       return_date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
-      flight_voucher: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
+      flight_voucher: [''],
+      airline: [''],
+      origin: [''],
+      nome_hotel: [''],
+      quarto: [''],
+      regime_alimentacao: [''],
+      localizador_hotel: [''],
+      cruise_company: [''],
+      ship_name: [''],
+      cabin: [''],
       passengers: this.fb.array([this.createPassengerControl()]),
       notes: ['']
     });
@@ -81,11 +113,22 @@ export class ReservationFormComponent implements OnInit {
       this.isEditMode.set(true);
 
       this.reservationForm.patchValue({
+        product_type: this.reservationToEdit.product_type || ProductType.PACOTE,
+        supplier: this.reservationToEdit.supplier || '',
         reservation_number: this.reservationToEdit.reservation_number,
         destination: this.reservationToEdit.destination || '',
         date: this.reservationToEdit.date,
         return_date: this.reservationToEdit.return_date || '',
         flight_voucher: this.reservationToEdit.flight_voucher || '',
+        airline: this.reservationToEdit.airline || '',
+        origin: this.reservationToEdit.origin || '',
+        nome_hotel: this.reservationToEdit.nome_hotel || '',
+        quarto: this.reservationToEdit.quarto || '',
+        regime_alimentacao: this.reservationToEdit.regime_alimentacao || '',
+        localizador_hotel: this.reservationToEdit.localizador_hotel || '',
+        cruise_company: this.reservationToEdit.cruise_company || '',
+        ship_name: this.reservationToEdit.ship_name || '',
+        cabin: this.reservationToEdit.cabin || '',
         notes: this.reservationToEdit.notes || ''
       });
 
@@ -108,6 +151,10 @@ export class ReservationFormComponent implements OnInit {
         }
       }
     }
+  }
+
+  get selectedProductType(): ProductType {
+    return this.reservationForm?.get('product_type')?.value;
   }
 
   get passengers() {
@@ -143,13 +190,13 @@ export class ReservationFormComponent implements OnInit {
     this.reservationForm.get(controlName)?.setValue(value);
   }
 
-  onVoucherInput(event: Event) {
+  onVoucherInput(event: Event, controlName: string = 'flight_voucher') {
     const input = event.target as HTMLInputElement;
     let value = input.value.toUpperCase();
     if (value.length > 6) value = value.slice(0, 6);
 
     input.value = value;
-    this.reservationForm.get('flight_voucher')?.setValue(value);
+    this.reservationForm.get(controlName)?.setValue(value);
   }
 
   async onFileSelected(event: Event) {
@@ -180,11 +227,14 @@ export class ReservationFormComponent implements OnInit {
       }
 
       this.reservationForm.patchValue({
+        product_type: extracted.product_type || this.reservationForm.get('product_type')?.value,
         destination: extracted.destino || this.reservationForm.get('destination')?.value,
         date: extracted.data_ida || this.reservationForm.get('date')?.value,
         return_date: extracted.data_volta || this.reservationForm.get('return_date')?.value,
-        flight_voucher: extracted.voo_voucher || this.reservationForm.get('flight_voucher')?.value,
         reservation_number: extracted.reserva_voucher || this.reservationForm.get('reservation_number')?.value,
+        flight_voucher: extracted.voo_voucher || this.reservationForm.get('flight_voucher')?.value,
+        nome_hotel: extracted.hotel_nome || this.reservationForm.get('nome_hotel')?.value,
+        localizador_hotel: extracted.hotel_localizador || this.reservationForm.get('localizador_hotel')?.value,
         notes: extracted.notes_prefill || this.reservationForm.get('notes')?.value
       });
 
@@ -215,18 +265,28 @@ export class ReservationFormComponent implements OnInit {
     if (this.reservationForm.valid) {
       const formValue = this.reservationForm.value;
 
-      // Validação extra
-      if (formValue.flight_voucher && formValue.flight_voucher.length !== 6) {
-        alert('O voucher deve ter exatamente 6 caracteres.');
-        return;
+      // Enforce uppercase locator
+      if (formValue.flight_voucher) {
+         formValue.flight_voucher = formValue.flight_voucher.toUpperCase();
       }
 
       const payload = {
+        product_type: formValue.product_type,
+        supplier: formValue.supplier,
         reservation_number: formValue.reservation_number,
         destination: formValue.destination,
         date: formValue.date,
-        return_date: formValue.return_date, // Agora obrigatório
-        flight_voucher: formValue.flight_voucher, // Agora obrigatório
+        return_date: formValue.return_date,
+        flight_voucher: formValue.flight_voucher || null,
+        airline: formValue.airline || null,
+        origin: formValue.origin || null,
+        nome_hotel: formValue.nome_hotel || null,
+        quarto: formValue.quarto || null,
+        regime_alimentacao: formValue.regime_alimentacao || null,
+        localizador_hotel: formValue.localizador_hotel || null,
+        cruise_company: formValue.cruise_company || null,
+        ship_name: formValue.ship_name || null,
+        cabin: formValue.cabin || null,
         passengers: formValue.passengers,
         notes: formValue.notes
       };

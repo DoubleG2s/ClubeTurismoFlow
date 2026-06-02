@@ -133,9 +133,14 @@ export class AuthService {
       return { error: error.message };
     }
 
-    // FIX: Manually await handleSession here. 
-    // This ensures the LoginComponent waits for the Profile to be loaded 
-    // before the promise resolves and the loading spinner stops.
+    // Guard: block login if the user has never confirmed their e-mail.
+    // This is a defensive layer — the primary enforcement is the Supabase
+    // "Enable email confirmations" toggle in Authentication → Settings.
+    if (data.user && !data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      return { error: 'E-mail não confirmado. Por favor, verifique sua caixa de entrada e clique no link de confirmação antes de fazer login.' };
+    }
+
     if (data.session) {
       await this.handleSession(data.session);
     }

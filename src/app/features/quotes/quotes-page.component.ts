@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommissionCalculatorComponent } from '../../components/commission-calculator/commission-calculator.component';
 import { QuoteCardComponent } from '../../components/quote-card/quote-card.component';
 import { QuoteFormComponent } from '../../components/quote-form/quote-form.component';
 import { Quote } from '../../models/quote';
@@ -9,7 +10,7 @@ type QuoteSubTab = 'cadastro' | 'calculadora';
 @Component({
   selector: 'app-quotes-page',
   standalone: true,
-  imports: [CommonModule, QuoteFormComponent, QuoteCardComponent],
+  imports: [CommonModule, QuoteFormComponent, QuoteCardComponent, CommissionCalculatorComponent],
   templateUrl: './quotes-page.component.html'
 })
 export class QuotesPageComponent {
