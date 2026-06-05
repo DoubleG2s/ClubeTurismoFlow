@@ -87,9 +87,23 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error('[Stripe] Erro ao preparar Payment Element:', error);
-    return res.status(500).json({
+    const details = String(error.message || error);
+    const statusCode =
+      details.includes('Sessao') ||
+      details.includes('Perfil do usuario') ||
+      details.includes('Usuario sem empresa') ||
+      details.includes('empresa informada')
+        ? 403
+        : details.toLowerCase().includes('permission') ||
+            details.toLowerCase().includes('api key') ||
+            details.toLowerCase().includes('no such price') ||
+            details.toLowerCase().includes('no such customer')
+          ? 502
+          : 500;
+
+    return res.status(statusCode).json({
       error: 'Falha ao preparar o formulario de pagamento da Stripe.',
-      details: String(error.message || error)
+      details
     });
   }
 }

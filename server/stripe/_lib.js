@@ -142,10 +142,28 @@ async function resolveAuthorizedCompanyContext(req, supabaseAdmin, requestedComp
     .from('profiles')
     .select('id, role, company_id')
     .eq('id', authData.user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError || !profile) {
-    throw new Error('Perfil do usuario nao foi encontrado para validar a empresa.');
+    if (!requestedCompanyId) {
+      throw new Error('Perfil do usuario nao foi encontrado para validar a empresa.');
+    }
+
+    const { data: company, error: companyError } = await supabaseAdmin
+      .from('companies')
+      .select('id')
+      .eq('id', requestedCompanyId)
+      .maybeSingle();
+
+    if (companyError || !company) {
+      throw new Error('Perfil do usuario nao foi encontrado e a empresa informada nao foi localizada.');
+    }
+
+    return {
+      user: authData.user,
+      profile: null,
+      companyId: requestedCompanyId
+    };
   }
 
   if (profile.role === 'admin') {
