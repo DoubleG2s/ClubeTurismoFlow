@@ -184,11 +184,22 @@ async function resolveAuthorizedCompanyContext(req, supabaseAdmin, requestedComp
       throw new Error('Perfil do usuario nao foi encontrado para validar a empresa.');
     }
 
-    const { data: company, error: companyError } = await supabaseUser
+    let { data: company, error: companyError } = await supabaseUser
       .from('companies')
       .select('id')
       .eq('id', requestedCompanyId)
       .maybeSingle();
+
+    if (companyError || !company) {
+      const adminCompanyResult = await supabaseAdmin
+        .from('companies')
+        .select('id')
+        .eq('id', requestedCompanyId)
+        .maybeSingle();
+
+      company = adminCompanyResult.data;
+      companyError = adminCompanyResult.error;
+    }
 
     if (companyError || !company) {
       throw new Error('Perfil do usuario nao foi encontrado e a empresa informada nao foi localizada.');
