@@ -22,12 +22,12 @@ type PaymentOption = {
         type="button"
         (click)="select.emit(option.id)"
         [class.ring-2]="selected === option.id"
-        [class.ring-amber-400]="selected === option.id"
-        class="rounded-[22px] border border-white/10 bg-neutral-900/70 px-4 py-4 text-left transition hover:border-amber-400/40 hover:bg-neutral-900"
+        [class.ring-amber-300]="selected === option.id"
+        class="rounded-[22px] border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md"
       >
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex items-center gap-3">
-            <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-amber-300">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 text-amber-600">
               <svg *ngIf="option.icon === 'credit_card'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <rect x="3" y="5" width="18" height="14" rx="2"></rect>
                 <path d="M3 10h18"></path>
@@ -40,15 +40,15 @@ type PaymentOption = {
               </svg>
             </span>
             <div>
-              <span class="block text-base font-black uppercase tracking-[0.08em] text-white">{{ option.title }}</span>
-              <span class="mt-1 block text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">{{ option.helper }}</span>
+              <span class="block text-base font-black uppercase tracking-[0.08em] text-slate-900">{{ option.title }}</span>
+              <span class="mt-1 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">{{ option.helper }}</span>
             </div>
           </div>
-          <span class="shrink-0 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
+          <span class="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700">
             {{ option.badge }}
           </span>
         </div>
-        <p class="mt-3 text-sm leading-6 text-neutral-400">{{ option.subtitle }}</p>
+        <p class="mt-3 text-sm leading-6 text-slate-600">{{ option.subtitle }}</p>
       </button>
     </div>
   `

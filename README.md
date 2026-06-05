@@ -88,6 +88,7 @@ Notas do Asaas:
 - Configure o webhook para `POST /api/asaas/webhook`.
 - O token em `ASAAS_WEBHOOK_TOKEN` e opcional, mas recomendado.
 - O Pix e exibido na propria pagina; o checkout de debito so abre fora quando o usuario clicar.
+- Para testes locais, use `ASAAS_MONTHLY_AMOUNT=5` em `.env.local`, que e o minimo aceito pelo Asaas.
 
 ### Migracao Recomendada Sem Perder Dados
 

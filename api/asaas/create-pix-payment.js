@@ -16,10 +16,22 @@ function getMonthlyAmount() {
   return Number(process.env.ASAAS_MONTHLY_AMOUNT || process.env.STRIPE_ONE_TIME_AMOUNT_CENTS / 100 || 370);
 }
 
+function resolvePixAmount(value) {
+  const amount = Number(value || getMonthlyAmount());
+  return Math.max(Number.isFinite(amount) ? amount : 0, 5);
+}
+
 function buildDueDate() {
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 1);
   return dueDate.toISOString().slice(0, 10);
+}
+
+function normalizeErrorText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }
 
 export default async function handler(req, res) {
@@ -63,12 +75,16 @@ export default async function handler(req, res) {
       body: {
         customer: customer.id,
         billingType: 'PIX',
-        value: Number(value || getMonthlyAmount()),
+        value: resolvePixAmount(value),
         dueDate: buildDueDate(),
         description: 'Clube Turismo Flow - Acesso mensal via Pix',
         externalReference: companyId
       }
     });
+
+    if (String(payment.billingType || '').toUpperCase() !== 'PIX') {
+      throw new Error('A cobranca foi criada no Asaas, mas nao voltou habilitada para Pix. Confira se a conta Asaas esta liberada para receber Pix neste ambiente.');
+    }
 
     const pixData = await fetchPixQrCode(payment.id);
 
@@ -99,10 +115,13 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('[Asaas] Erro ao criar cobranca Pix:', error);
     const details = String(error.message || error);
+    const normalizedDetails = normalizeErrorText(details);
     const statusCode =
-      details.includes('nao pertence a este ambiente') || details.includes('não pertence a este ambiente')
+      normalizedDetails.includes('nao pertence a este ambiente')
         ? 400
-        : details.includes('nao permite pagamentos via Pix') || details.includes('não permite pagamentos via Pix')
+        : normalizedDetails.includes('nao permite pagamentos via pix') ||
+            normalizedDetails.includes('nao voltou habilitada para pix') ||
+            normalizedDetails.includes('nao esta habilitada para gerar pix')
           ? 409
           : 500;
 
@@ -110,7 +129,7 @@ export default async function handler(req, res) {
       statusCode === 400
         ? 'A chave do Asaas nao pertence ao ambiente configurado.'
         : statusCode === 409
-          ? 'A conta Asaas atual nao esta habilitada para gerar Pix neste ambiente.'
+          ? 'A conta Asaas atual nao esta habilitada para receber Pix neste ambiente. Ative Pix na conta Asaas ou use outro metodo de pagamento.'
           : 'Falha ao criar a cobranca Pix no Asaas.';
 
     return res.status(statusCode).json({

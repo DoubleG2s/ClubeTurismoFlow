@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 import { AuthService } from './auth.service';
 import { TenantService } from './tenant.service';
 import { SaasInvoice } from '../models/saas-invoice';
+import { environment } from '../../environments/environment';
 
 export type CheckoutPaymentMethod = 'credit_card' | 'pix' | 'debit_card';
 
@@ -29,9 +30,27 @@ export class SubscriptionService {
   readonly subscriptionManagement = computed(() => this.managementSignal());
 
   private getApiUrl(path: string) {
-    return window.location.hostname === 'localhost'
-      ? `http://localhost:3000${path}`
-      : path;
+    const apiBaseUrl = (environment.apiBaseUrl || '').replace(/\/$/, '');
+    return apiBaseUrl ? `${apiBaseUrl}${path}` : path;
+  }
+
+  private async parseApiResponse(response: Response) {
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    const body = await response.text();
+    const looksLikeHtml = body.trimStart().startsWith('<!DOCTYPE') || body.trimStart().startsWith('<html');
+
+    if (looksLikeHtml) {
+      throw new Error(
+        'A rota da API retornou HTML em vez de JSON. Rode o app com "npm run vercel:dev" ou configure apiBaseUrl para o servidor das functions.'
+      );
+    }
+
+    throw new Error(body || `Resposta inesperada da API (${response.status}).`);
   }
 
   private async buildApiHeaders(options?: { allowMissingAuth?: boolean }) {
@@ -262,7 +281,7 @@ export class SubscriptionService {
       })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       const error = new Error(result.details || result.error || 'Erro ao criar checkout embutido.') as Error & {
         status?: number;
@@ -299,7 +318,7 @@ export class SubscriptionService {
       })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       const error = new Error(result.details || result.error || 'Erro ao preparar checkout personalizado.') as Error & {
         status?: number;
@@ -334,7 +353,7 @@ export class SubscriptionService {
       })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       const error = new Error(result.details || result.error || 'Erro ao criar assinatura na Stripe.') as Error & {
         status?: number;
@@ -373,9 +392,9 @@ export class SubscriptionService {
       })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
-      throw new Error(result.details || result.error || 'Erro ao gerar cobranca Pix.');
+      throw new Error(result.error || result.details || 'Erro ao gerar cobranca Pix.');
     }
 
     return result;
@@ -406,7 +425,7 @@ export class SubscriptionService {
       })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       throw new Error(result.details || result.error || 'Erro ao preparar checkout de debito.');
     }
@@ -431,7 +450,7 @@ export class SubscriptionService {
       })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       throw new Error(result.details || result.error || 'Erro ao consultar o status do Asaas.');
     }
@@ -449,7 +468,7 @@ export class SubscriptionService {
       body: JSON.stringify({ companyId, sessionId })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       throw new Error(result.details || result.error || 'Erro ao sincronizar a assinatura.');
     }
@@ -467,7 +486,7 @@ export class SubscriptionService {
       body: JSON.stringify({ companyId })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       throw new Error(result.error || 'Erro ao abrir o portal da assinatura.');
     }
@@ -491,7 +510,7 @@ export class SubscriptionService {
         body: JSON.stringify({ companyId })
       });
 
-      const result = await response.json();
+      const result = await this.parseApiResponse(response);
       if (!response.ok) {
         throw new Error(result.details || result.error || 'Erro ao carregar gerenciamento da assinatura.');
       }
@@ -518,7 +537,7 @@ export class SubscriptionService {
       body: JSON.stringify({ companyId })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       throw new Error(result.details || result.error || 'Erro ao cancelar assinatura.');
     }
@@ -536,7 +555,7 @@ export class SubscriptionService {
       body: JSON.stringify({ companyId })
     });
 
-    const result = await response.json();
+    const result = await this.parseApiResponse(response);
     if (!response.ok) {
       throw new Error(result.details || result.error || 'Erro ao reativar assinatura.');
     }

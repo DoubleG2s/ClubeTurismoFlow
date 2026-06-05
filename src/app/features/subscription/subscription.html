@@ -1,425 +1,766 @@
-<div class="subscription-shell min-h-screen bg-neutral-900 flex flex-col justify-start font-sans selection:bg-amber-500 selection:text-neutral-900" [ngClass]="shouldUseCheckoutFocusLayout() ? 'px-0 py-0' : 'px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-4'">
-  <div class="subscription-container subscription-container--desktop-tight w-full mx-auto" [class.subscription-container--checkout-focus]="shouldUseCheckoutFocusLayout()">
-    <div *ngIf="!isCreditCardPaymentStage()" class="subscription-hero text-center mb-3 sm:mb-4">
-      <div class="mx-auto flex items-center justify-center h-11 w-11 sm:h-12 sm:w-12 bg-neutral-800 border-2 border-amber-500 mb-3 sm:mb-4 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.22)]">
-        <svg class="h-8 w-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h2 class="text-[1.8rem] sm:text-4xl font-black text-white tracking-tight uppercase">Clube Turismo Flow</h2>
-      <p class="mt-1 text-[10px] sm:text-sm text-neutral-400 font-medium">PLANOS E ASSINATURA</p>
+<div class="subscription-page" [class.subscription-page--checkout-focus]="shouldUseCheckoutFocusLayout()">
+  <div class="subscription-page__container">
+    <div *ngIf="isInitializing()" class="subscription-loading-state">
+      <div class="subscription-loading-state__badge">Pagamento</div>
+      <div class="subscription-loading-state__spinner"></div>
+      <h2 class="subscription-loading-state__title">Preparando sua assinatura</h2>
+      <p class="subscription-loading-state__text">
+        Estamos carregando os dados da empresa, status atual da assinatura e historico de cobrancas.
+      </p>
     </div>
 
-    <div class="subscription-card bg-neutral-800 shadow-2xl overflow-hidden rounded-[28px] border border-white/8 border-t-4 border-amber-500" [class.subscription-card--checkout-focus]="shouldUseCheckoutFocusLayout()">
-      <div class="px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-5 xl:px-7 xl:py-6">
-        <div *ngIf="isInitializing()" class="subscription-inline-loader subscription-inline-loader--screen my-8 sm:my-10">
-          <div class="subscription-inline-loader__badge">Pagamento</div>
-          <div class="subscription-inline-loader__spinner"></div>
-          <h3 class="subscription-inline-loader__title">Preparando os dados da empresa</h3>
-          <p class="subscription-inline-loader__text">Estamos carregando o status da assinatura e o historico da sua agencia.</p>
+    <ng-container *ngIf="!isInitializing()">
+      <section class="subscription-hero">
+        <div class="subscription-hero__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 10V8a5 5 0 0 1 10 0v2"></path>
+            <rect x="4.5" y="10" width="15" height="10" rx="3"></rect>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v2"></path>
+            <circle cx="17.5" cy="16.5" r="3"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.5 15v3"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 16.5h3"></path>
+          </svg>
         </div>
 
-        <div *ngIf="!isInitializing() && isAccessGrantedStatus(companyStatus()?.subscription_status)" class="mb-6">
-          <app-payment-status-card
-            eyebrow="Status atual"
-            [title]="getActiveStatusTitle()"
-            [description]="getActiveStatusDescription()"
-            [tone]="getActiveStatusTone()"
-            [meta]="getStatusMeta()"
-          />
-        </div>
+        <h1 class="subscription-hero__title">
+          {{ shouldShowPaymentFlow() ? 'Desbloqueie todo o potencial do Clube Turismo Flow' : 'Gerencie sua assinatura Clube Turismo Flow' }}
+        </h1>
 
-        <div *ngIf="errorMessage()" class="rounded-2xl bg-red-950/40 border border-red-500/40 p-4 mb-5 sm:mb-6">
-          <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">{{ errorMessage() }}</h3>
-        </div>
+        <p class="subscription-hero__description">
+          {{ shouldShowPaymentFlow()
+            ? 'Preencha os dados da sua agencia, escolha o plano ideal e finalize sua assinatura.'
+            : 'Seu acesso esta ativo. Revise o plano, acompanhe cobrancas e gerencie a assinatura quando precisar.' }}
+        </p>
 
-        <div *ngIf="successMessage()" class="subscription-toast-wrap">
-          <div class="subscription-toast subscription-toast--success" role="status" aria-live="polite">
-            <div class="subscription-toast__header">
-              <h3 class="subscription-toast__title">Operacao bem-sucedida</h3>
-              <button
-                type="button"
-                class="subscription-toast__close"
-                (click)="dismissSuccessMessage()"
-                aria-label="Fechar notificacao de sucesso"
-              >
-                ×
+        <div class="subscription-hero__price">{{ formatCurrency(monthlyPrice) }} / mes</div>
+
+        <div class="subscription-hero__secure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="6.5" y="10.5" width="11" height="8" rx="2"></rect>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 10.5V8.5a3 3 0 0 1 6 0v2"></path>
+          </svg>
+          <span>Pagamento 100% seguro</span>
+        </div>
+      </section>
+
+      <div *ngIf="errorMessage()" class="subscription-alert subscription-alert--error">
+        <strong>Erro:</strong>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <div *ngIf="successMessage()" class="subscription-alert subscription-alert--success">
+        <div class="subscription-alert__content">
+          <strong>Sucesso:</strong>
+          <span>{{ successMessage() }}</span>
+        </div>
+        <button type="button" class="subscription-alert__close" (click)="dismissSuccessMessage()" aria-label="Fechar">
+          x
+        </button>
+      </div>
+
+      <div *ngIf="infoMessage()" class="subscription-alert subscription-alert--info">
+        <strong>Atualizacao:</strong>
+        <span>{{ infoMessage() }}</span>
+      </div>
+
+      <div *ngIf="showPaymentConfirmedPopup()" class="subscription-confirmation-overlay" role="dialog" aria-modal="true" aria-labelledby="paymentConfirmedTitle">
+        <div class="subscription-confirmation-modal">
+          <div class="subscription-confirmation-modal__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+
+          <p class="subscription-confirmation-modal__eyebrow">Pix confirmado</p>
+          <h2 id="paymentConfirmedTitle" class="subscription-confirmation-modal__title">Pagamento aprovado</h2>
+          <p class="subscription-confirmation-modal__text">
+            Recebemos a confirmacao do Asaas e o acesso da empresa ja foi atualizado.
+          </p>
+
+          <button type="button" class="subscription-button subscription-button--primary subscription-button--full" (click)="dismissPaymentConfirmedPopup()">
+            Continuar
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!shouldShowPaymentFlow() && isAccessGrantedStatus(companyStatus()?.subscription_status)" class="subscription-status-banner">
+        <app-payment-status-card
+          eyebrow="Status atual"
+          [title]="getActiveStatusTitle()"
+          [description]="getActiveStatusDescription()"
+          [tone]="getActiveStatusTone()"
+          [meta]="getStatusMeta()"
+        />
+
+        <div class="subscription-status-banner__actions">
+          <button type="button" class="subscription-button subscription-button--primary" (click)="openPaymentEditor()">
+            Trocar forma de pagamento
+          </button>
+        </div>
+      </div>
+
+      <section class="subscription-main-card" *ngIf="shouldShowPaymentFlow()">
+        <div class="subscription-stepper">
+          <div class="subscription-step" [class.subscription-step--active]="currentStep() === 1" [class.subscription-step--completed]="currentStep() > 1">
+            <div class="subscription-step__top">
+              <button type="button" class="subscription-step__circle" (click)="goToStep(1)">
+                <ng-container *ngIf="currentStep() > 1; else stepOneLabel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </ng-container>
+                <ng-template #stepOneLabel>1</ng-template>
               </button>
-            </div>
-            <p class="subscription-toast__text">{{ successMessage() }}</p>
-          </div>
-        </div>
-
-        <div *ngIf="infoMessage()" class="rounded-2xl bg-amber-950/40 border border-amber-500/40 p-4 mb-5 sm:mb-6 text-center">
-          <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Atualizacao</h3>
-          <p class="mt-2 text-amber-100 text-sm">{{ infoMessage() }}</p>
-        </div>
-
-        <div *ngIf="!isInitializing()" class="subscription-form-shell space-y-6 sm:space-y-8 relative">
-          <div *ngIf="!isCreditCardPaymentStage()" class="text-center pb-4 border-b border-neutral-700">
-            <h3 class="text-lg sm:text-xl font-bold text-white uppercase">
-              {{ isAccessGrantedStatus(companyStatus()?.subscription_status) ? 'Gerenciar Pagamento' : 'Desbloqueio de Acesso' }}
-            </h3>
-            <p class="mx-auto mt-2 max-w-2xl text-sm text-neutral-400">
-              {{ shouldShowPaymentFlow() ? 'Preencha os dados e siga as etapas para finalizar o pagamento.' : 'Seu acesso esta ativo. O pagamento so volta a aparecer quando vencer ou se voce quiser trocar a forma de pagamento.' }}
-            </p>
-            <div class="subscription-price-chip mt-3 inline-flex items-center px-4 py-2 bg-neutral-900 border border-neutral-700 text-amber-500 font-bold tracking-[0.18em] sm:tracking-widest text-sm sm:text-base">
-              R$ 370,00 / MES
-            </div>
-            <p class="mt-2 text-sm text-amber-300 font-semibold">
-              {{ shouldShowPaymentFlow() ? 'Escolha como pagar nas etapas abaixo' : 'Pagamento oculto ate o vencimento ou alteracao manual' }}
-            </p>
-          </div>
-
-          <div *ngIf="!shouldShowPaymentFlow()" class="subscription-form-panel max-w-4xl mx-auto space-y-4">
-            <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-              <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Pagamento Atual</h4>
-              <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">Ativo</span>
-            </div>
-
-            <p class="text-sm leading-7 text-neutral-300">
-              O acesso desta agencia esta liberado ate {{ formatDate(companyStatus()?.subscription_expires_at || companyStatus()?.next_due_date) }}.
-              Quando esse prazo vencer, a tela de pagamento aparece automaticamente de novo.
-            </p>
-
-            <div class="flex flex-col gap-3 sm:flex-row">
-              <button type="button" (click)="openPaymentEditor()" class="subscription-primary-button rounded-2xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-neutral-950">
-                Trocar forma de pagamento
-              </button>
-            </div>
-          </div>
-
-          <div *ngIf="shouldShowPaymentFlow() && !isCreditCardPaymentStage()" class="subscription-checkout-steps">
-            <div class="subscription-checkout-steps__item" [class.subscription-checkout-steps__item--active]="currentStep() === 1">
-              <span class="subscription-checkout-steps__number">1</span>
-              <span>Dados</span>
-            </div>
-            <div class="subscription-checkout-steps__item" [class.subscription-checkout-steps__item--active]="currentStep() === 2">
-              <span class="subscription-checkout-steps__number">2</span>
-              <span>Escolha</span>
-            </div>
-            <div class="subscription-checkout-steps__item" [class.subscription-checkout-steps__item--active]="currentStep() === 3">
-              <span class="subscription-checkout-steps__number">3</span>
-              <span>Pagar</span>
-            </div>
-          </div>
-
-          <div *ngIf="shouldShowPaymentFlow() && currentStep() === 1" class="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div class="subscription-form-panel subscription-form-panel--compact space-y-5">
-              <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-                <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Dados da Agencia</h4>
-                <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">Passo 1</span>
+              <div class="subscription-step__line">
+                <span class="subscription-step__line-fill" [class.subscription-step__line-fill--active]="currentStep() > 1"></span>
               </div>
+            </div>
+            <h3 class="subscription-step__title">Dados da agencia</h3>
+            <p class="subscription-step__meta">Etapa 1 de 3</p>
+          </div>
 
-              <div class="grid gap-4 md:grid-cols-2">
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">Razao Social / Nome *</label>
+          <div class="subscription-step" [class.subscription-step--active]="currentStep() === 2" [class.subscription-step--completed]="currentStep() > 2">
+            <div class="subscription-step__top">
+              <button type="button" class="subscription-step__circle" (click)="goToStep(2)">
+                <ng-container *ngIf="currentStep() > 2; else stepTwoLabel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </ng-container>
+                <ng-template #stepTwoLabel>2</ng-template>
+              </button>
+              <div class="subscription-step__line">
+                <span class="subscription-step__line-fill" [class.subscription-step__line-fill--active]="currentStep() > 2"></span>
+              </div>
+            </div>
+            <h3 class="subscription-step__title">Escolha do plano</h3>
+            <p class="subscription-step__meta">Etapa 2 de 3</p>
+          </div>
+
+          <div class="subscription-step" [class.subscription-step--active]="currentStep() === 3">
+            <div class="subscription-step__top">
+              <button type="button" class="subscription-step__circle" (click)="goToStep(3)">3</button>
+            </div>
+            <h3 class="subscription-step__title">Finalizar pagamento</h3>
+            <p class="subscription-step__meta">Etapa 3 de 3</p>
+          </div>
+        </div>
+
+        <div class="subscription-stage-grid" *ngIf="currentStep() === 1">
+          <article class="subscription-panel subscription-panel--form">
+            <div class="subscription-panel__header">
+              <div class="subscription-panel__icon subscription-panel__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 21h16"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 21V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h.01M14 9h.01M10 13h.01M14 13h.01M10 17h4"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="subscription-panel__title">Informacoes da agencia</h2>
+                <p class="subscription-panel__subtitle">Informe os dados da sua agencia para continuarmos.</p>
+              </div>
+            </div>
+
+            <div class="subscription-form-grid">
+              <label class="subscription-field-group subscription-field-group--full">
+                <span class="subscription-field-group__label">Razao social / Nome</span>
+                <span class="subscription-field-group__control">
                   <input
                     type="text"
                     [ngModel]="companyName"
                     (ngModelChange)="formatName($event)"
                     name="companyName"
                     autocomplete="organization"
-                    [ngClass]="{'border-red-500 focus:ring-red-500': fieldErrors()['companyName'], 'border-neutral-700 focus:ring-amber-500': !fieldErrors()['companyName']}"
-                    class="subscription-field block w-full text-white focus:border-amber-500 focus:ring-1 text-sm px-4 py-3 transition-colors"
-                  >
-                  <small class="text-red-500 text-xs mt-1 block font-bold tracking-wider" *ngIf="fieldErrors()['companyName']">{{ fieldErrors()['companyName'] }}</small>
-                </div>
+                    class="subscription-input"
+                    [class.subscription-input--error]="fieldErrors()['companyName']"
+                  />
+                </span>
+                <small class="subscription-field-group__error" *ngIf="fieldErrors()['companyName']">{{ fieldErrors()['companyName'] }}</small>
+              </label>
 
-                <div>
-                  <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">E-mail Comercial *</label>
+              <label class="subscription-field-group">
+                <span class="subscription-field-group__label">E-mail comercial</span>
+                <span class="subscription-field-group__control">
                   <input
                     type="email"
                     [ngModel]="email"
                     (ngModelChange)="formatEmail($event)"
                     name="email"
                     autocomplete="email"
-                    [ngClass]="{'border-red-500 focus:ring-red-500': fieldErrors()['email'], 'border-neutral-700 focus:ring-amber-500': !fieldErrors()['email']}"
-                    class="subscription-field block w-full text-white focus:border-amber-500 focus:ring-1 text-sm px-4 py-3 transition-colors"
-                  >
-                  <small class="text-red-500 text-xs mt-1 block font-bold tracking-wider" *ngIf="fieldErrors()['email']">{{ fieldErrors()['email'] }}</small>
-                </div>
+                    class="subscription-input"
+                    [class.subscription-input--error]="fieldErrors()['email']"
+                  />
+                  <span class="subscription-field-group__ok" *ngIf="email && !fieldErrors()['email']">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </span>
+                </span>
+                <small class="subscription-field-group__error" *ngIf="fieldErrors()['email']">{{ fieldErrors()['email'] }}</small>
+              </label>
 
-                <div>
-                  <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">CNPJ / CPF *</label>
+              <label class="subscription-field-group">
+                <span class="subscription-field-group__label">CNPJ / CPF</span>
+                <span class="subscription-field-group__control">
                   <input
                     type="text"
                     [ngModel]="taxId"
                     (ngModelChange)="formatTaxId($event)"
                     name="taxId"
                     autocomplete="off"
-                    [ngClass]="{'border-red-500 focus:ring-red-500': fieldErrors()['taxId'], 'border-neutral-700 focus:ring-amber-500': !fieldErrors()['taxId']}"
-                    class="subscription-field block w-full text-white focus:border-amber-500 focus:ring-1 text-sm px-4 py-3 font-mono tracking-widest transition-colors"
-                  >
-                  <small class="text-red-500 text-xs mt-1 block font-bold tracking-wider" *ngIf="fieldErrors()['taxId']">{{ fieldErrors()['taxId'] }}</small>
-                </div>
+                    class="subscription-input subscription-input--mono"
+                    [class.subscription-input--error]="fieldErrors()['taxId']"
+                  />
+                  <span class="subscription-field-group__ok" *ngIf="taxId && !fieldErrors()['taxId']">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </span>
+                </span>
+                <small class="subscription-field-group__error" *ngIf="fieldErrors()['taxId']">{{ fieldErrors()['taxId'] }}</small>
+              </label>
 
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">CEP (Opcional)</label>
+              <label class="subscription-field-group">
+                <span class="subscription-field-group__label">CEP (opcional)</span>
+                <span class="subscription-field-group__control">
                   <input
                     type="text"
                     [ngModel]="postalCode"
                     (ngModelChange)="formatPostalCode($event)"
                     name="postalCode"
-                    placeholder="00000-000"
                     autocomplete="postal-code"
-                    class="subscription-field block w-full border-neutral-700 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-sm px-4 py-3 font-mono tracking-widest transition-colors"
-                  >
-                </div>
-              </div>
+                    placeholder="88000-000"
+                    class="subscription-input subscription-input--mono"
+                  />
+                </span>
+              </label>
 
-              <div class="flex justify-end pt-3">
-                <button type="button" (click)="goToNextStep()" class="subscription-primary-button rounded-2xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-neutral-950">
-                  Continuar
-                </button>
+              <label class="subscription-field-group">
+                <span class="subscription-field-group__label">Telefone / WhatsApp (opcional)</span>
+                <span class="subscription-field-group__control">
+                  <input
+                    type="text"
+                    [ngModel]="phone"
+                    (ngModelChange)="formatPhone($event)"
+                    name="phone"
+                    autocomplete="tel"
+                    placeholder="(48) 99999-9999"
+                    class="subscription-input subscription-input--mono"
+                  />
+                </span>
+              </label>
+            </div>
+
+            <div class="subscription-note-box">
+              <div class="subscription-note-box__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 11v5"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="subscription-note-box__title">Importante: Certifique-se de que os dados estao corretos.</p>
+                <p class="subscription-note-box__text">Eles serao utilizados na emissao da nota fiscal e no seu cadastro.</p>
               </div>
             </div>
 
-            <div class="subscription-form-panel subscription-form-panel--compact space-y-4">
-              <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-                <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Resumo</h4>
-                <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">Passo 2</span>
+            <button type="button" class="subscription-button subscription-button--primary subscription-button--full" (click)="goToNextStep()">
+              <span>Continuar</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 6l6 6-6 6"></path>
+              </svg>
+            </button>
+
+            <p class="subscription-stage-caption">Etapa 1 de 3</p>
+          </article>
+
+          <aside class="subscription-panel subscription-panel--summary">
+            <div class="subscription-panel__header">
+              <div class="subscription-panel__icon subscription-panel__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 10h16"></path>
+                </svg>
               </div>
-
-              <div class="subscription-summary-card">
-                <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Empresa</p>
-                <p class="mt-2 text-lg font-bold text-white">{{ companyName || 'Informe o nome da agencia' }}</p>
+              <div>
+                <h2 class="subscription-panel__title">Resumo da assinatura</h2>
               </div>
-
-              <div class="subscription-summary-card">
-                <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Valor</p>
-                <p class="mt-2 text-2xl font-black text-amber-400">{{ formatCurrency(monthlyPrice) }}</p>
-              </div>
-
-              <div class="subscription-summary-card">
-                <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Como funciona</p>
-                <p class="mt-2 text-sm leading-6 text-neutral-300">Primeiro preencha os dados. Depois vamos para a escolha do pagamento.</p>
-              </div>
-
-              <p class="text-center text-xs leading-relaxed text-neutral-500">
-                Etapa 1 de 3.
-              </p>
-            </div>
-          </div>
-
-          <div *ngIf="shouldShowPaymentFlow() && currentStep() === 2" class="subscription-form-panel subscription-form-panel--wide max-w-4xl mx-auto space-y-5">
-            <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-              <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Escolha o Metodo</h4>
-              <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">Passo 2</span>
             </div>
 
-            <app-payment-method-selector
-              [selected]="selectedMethod()"
-              (select)="selectPaymentMethod($event)"
-            />
-
-            <div class="subscription-modal-step rounded-[24px] border border-white/10 bg-white/5 p-5">
-              <div class="flex flex-col gap-4">
+            <div class="subscription-summary-plan">
+              <div class="subscription-summary-plan__top">
                 <div>
-                  <h4 class="text-2xl font-black text-white">{{ getCurrentMethodHeadline() }}</h4>
-                  <p class="mt-2 max-w-2xl text-sm leading-6 text-neutral-300">{{ getCurrentMethodDescription() }}</p>
+                  <p class="subscription-summary-plan__eyebrow">Plano selecionado</p>
+                  <h3 class="subscription-summary-plan__title">Plano Profissional</h3>
                 </div>
-                <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button type="button" (click)="goToPreviousStep()" class="subscription-secondary-button subscription-secondary-button--compact">
-                    Voltar
-                  </button>
-                  <button type="button" (click)="goToNextStep()" class="subscription-primary-button rounded-2xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-neutral-950">
-                    Ir para pagamento
-                  </button>
-                </div>
+                <span class="subscription-summary-plan__badge">Mais escolhido</span>
+              </div>
+
+              <p class="subscription-summary-plan__description">
+                Ideal para agencias que desejam crescer ainda mais.
+              </p>
+
+              <ul class="subscription-summary-plan__list">
+                <li>Gestao completa de viagens</li>
+                <li>Emissao de documentos</li>
+                <li>Relatorios inteligentes</li>
+                <li>Suporte prioritario</li>
+                <li>E muito mais...</li>
+              </ul>
+
+              <div class="subscription-price-card">
+                <p class="subscription-price-card__label">Valor mensal</p>
+                <strong class="subscription-price-card__value">{{ formatCurrency(monthlyPrice) }}</strong>
+                <p class="subscription-price-card__text">Cobrado mensalmente no cartao de credito.</p>
               </div>
             </div>
-          </div>
 
-          <div *ngIf="shouldShowPaymentFlow() && currentStep() === 3" class="subscription-form-panel subscription-form-panel--wide mx-auto space-y-5" [ngClass]="selectedMethod() === 'credit_card' ? 'max-w-5xl' : 'max-w-4xl'">
-            <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-              <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Finalizar Pagamento</h4>
-              <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">Passo 3</span>
+            <div class="subscription-security-card">
+              <div class="subscription-security-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.5l1.8 1.8 3.7-4"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="subscription-security-card__title">Ambiente 100% seguro</p>
+                <p class="subscription-security-card__text">Seus dados estao protegidos com criptografia de ponta a ponta.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="subscription-stage-grid" *ngIf="currentStep() === 2">
+          <article class="subscription-panel subscription-panel--form">
+            <div class="subscription-panel__header">
+              <div class="subscription-panel__icon subscription-panel__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 6l6 6-6 6"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="subscription-panel__title">Escolha como deseja pagar</h2>
+                <p class="subscription-panel__subtitle">Selecione o metodo de pagamento que melhor combina com a sua agencia.</p>
+              </div>
             </div>
 
-            <div class="space-y-5">
-              <div *ngIf="selectedMethod() === 'credit_card'" class="payment-stage-screen">
-                <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-                  <button type="button" (click)="goToPreviousStep()" class="subscription-secondary-button subscription-secondary-button--compact">
-                    Voltar
-                  </button>
-                  <button *ngIf="isAccessGrantedStatus(companyStatus()?.subscription_status)" type="button" (click)="closePaymentEditor()" class="subscription-secondary-button subscription-secondary-button--compact">
-                    Cancelar alteracao
-                  </button>
-                </div>
-
-                <div #paymentElementHost class="payment-element-host" [class.payment-element-host--loading]="!stripeReady()">
-                  <div *ngIf="!stripeReady()" class="payment-element-placeholder">
-                    <div class="payment-element-placeholder__spinner"></div>
-                    <span class="payment-element-placeholder__text">Preparando formulario...</span>
+            <div class="subscription-method-list">
+              <button
+                type="button"
+                class="subscription-method-card"
+                [class.subscription-method-card--selected]="selectedMethod() === 'credit_card'"
+                (click)="selectPaymentMethod('credit_card')"
+              >
+                <div class="subscription-method-card__top">
+                  <div class="subscription-method-card__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                      <path d="M3 10h18"></path>
+                    </svg>
                   </div>
+                  <span class="subscription-method-card__badge">Recomendado</span>
                 </div>
+                <h3 class="subscription-method-card__title">Cartao de credito</h3>
+                <p class="subscription-method-card__text">Ative a cobranca recorrente mensal direto pela Stripe com experiencia integrada.</p>
+              </button>
 
-                <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button type="button" class="subscription-primary-button rounded-2xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-neutral-950" [disabled]="!stripeReady() || isSubmittingStripe()" (click)="confirmStripePaymentAndCreateSubscription()">
-                    {{ isSubmittingStripe() ? 'Confirmando...' : 'Confirmar pagamento' }}
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="selectedMethod() !== 'credit_card'" class="subscription-modal-step rounded-[24px] border border-white/10 bg-white/5 p-5">
-                <div class="flex flex-col gap-4">
-                  <div>
-                    <h4 class="text-2xl font-black text-white">{{ getCurrentMethodHeadline() }}</h4>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-neutral-300">{{ getCurrentMethodDescription() }}</p>
-                    <p class="mt-3 text-xs uppercase tracking-[0.2em] text-amber-300">
-                      {{ selectedMethod() === 'pix' ? 'O Pix e gerado automaticamente logo abaixo do botao voltar.' : 'Use os botoes para continuar com o debito no Asaas.' }}
-                    </p>
+              <button
+                type="button"
+                class="subscription-method-card"
+                [class.subscription-method-card--selected]="selectedMethod() === 'pix'"
+                (click)="selectPaymentMethod('pix')"
+              >
+                <div class="subscription-method-card__top">
+                  <div class="subscription-method-card__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7l4-4 4 4"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 17l4 4 4-4"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7 8l-4 4 4 4"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4-4 4"></path>
+                    </svg>
                   </div>
-                  <div class="flex flex-col gap-3 sm:flex-row sm:justify-start">
-                    <button type="button" (click)="goToPreviousStep()" class="subscription-secondary-button subscription-secondary-button--compact">
-                      Voltar
-                    </button>
-                    <button *ngIf="isAccessGrantedStatus(companyStatus()?.subscription_status)" type="button" (click)="closePaymentEditor()" class="subscription-secondary-button subscription-secondary-button--compact">
-                      Cancelar alteracao
-                    </button>
-                  </div>
+                  <span class="subscription-method-card__badge">Instantaneo</span>
+                </div>
+                <h3 class="subscription-method-card__title">Pix</h3>
+                <p class="subscription-method-card__text">Gere o QR Code e copie o codigo Pix sem sair da tela de assinatura.</p>
+              </button>
+
+            </div>
+
+            <div class="subscription-step-actions">
+              <button type="button" class="subscription-button subscription-button--ghost" (click)="goToPreviousStep()">
+                Voltar
+              </button>
+              <button type="button" class="subscription-button subscription-button--primary" (click)="goToNextStep()">
+                Ir para pagamento
+              </button>
+            </div>
+          </article>
+
+          <aside class="subscription-panel subscription-panel--summary">
+            <div class="subscription-panel__header">
+              <div class="subscription-panel__icon subscription-panel__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="subscription-panel__title">Resumo da selecao</h2>
+              </div>
+            </div>
+
+            <div class="subscription-summary-stack">
+              <div class="subscription-summary-box">
+                <span class="subscription-summary-box__label">Plano</span>
+                <strong class="subscription-summary-box__value">Plano Profissional</strong>
+              </div>
+              <div class="subscription-summary-box">
+                <span class="subscription-summary-box__label">Pagamento escolhido</span>
+                <strong class="subscription-summary-box__value">
+                  {{
+                    selectedMethod() === 'credit_card'
+                      ? 'Cartao de credito'
+                      : selectedMethod() === 'pix'
+                        ? 'Pix'
+                        : 'Cartao de debito'
+                  }}
+                </strong>
+              </div>
+              <div class="subscription-summary-box">
+                <span class="subscription-summary-box__label">Valor mensal</span>
+                <strong class="subscription-summary-box__value subscription-summary-box__value--price">{{ formatCurrency(monthlyPrice) }}</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="subscription-stage-grid subscription-stage-grid--payment" *ngIf="currentStep() === 3">
+          <article class="subscription-panel subscription-panel--form">
+            <div class="subscription-panel__header">
+              <div class="subscription-panel__icon subscription-panel__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+                  <path d="M4 10h16"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="subscription-panel__title">{{ getCurrentMethodHeadline() }}</h2>
+                <p class="subscription-panel__subtitle">{{ getCurrentMethodDescription() }}</p>
+              </div>
+            </div>
+
+            <div class="subscription-step-actions subscription-step-actions--top">
+              <button type="button" class="subscription-button subscription-button--ghost" (click)="goToPreviousStep()">
+                Voltar
+              </button>
+              <button
+                *ngIf="isAccessGrantedStatus(companyStatus()?.subscription_status)"
+                type="button"
+                class="subscription-button subscription-button--ghost"
+                (click)="closePaymentEditor()"
+              >
+                Cancelar alteracao
+              </button>
+            </div>
+
+            <div *ngIf="selectedMethod() === 'credit_card'" class="subscription-payment-host">
+              <div #paymentElementHost class="payment-element-host" [class.payment-element-host--loading]="!stripeReady()">
+                <div *ngIf="!stripeReady()" class="payment-element-placeholder">
+                  <div class="payment-element-placeholder__spinner"></div>
+                  <span class="payment-element-placeholder__text">Preparando formulario...</span>
                 </div>
               </div>
 
-              <div *ngIf="selectedMethod() === 'pix' && !pixPayment() && !isPreparingPix()" class="subscription-empty-state">
-                O Pix vai aparecer aqui embaixo em instantes.
+              <button
+                type="button"
+                class="subscription-button subscription-button--primary subscription-button--full"
+                [disabled]="!stripeReady() || isSubmittingStripe()"
+                (click)="confirmStripePaymentAndCreateSubscription()"
+              >
+                {{ isSubmittingStripe() ? 'Confirmando...' : 'Confirmar pagamento' }}
+              </button>
+            </div>
+
+            <div *ngIf="selectedMethod() === 'pix'" class="subscription-payment-block">
+              <div *ngIf="isPreparingPix()" class="subscription-inline-state">
+                <div class="subscription-inline-state__spinner"></div>
+                <h3>Gerando Pix...</h3>
+                <p>Estamos preparando o QR Code e o codigo copia e cola.</p>
               </div>
 
-              <div *ngIf="selectedMethod() === 'pix' && isPreparingPix()" class="embedded-checkout-loading">
-                <div class="w-12 h-12 border-4 border-neutral-500/30 border-t-amber-500 rounded-full animate-spin"></div>
-                <span class="mt-4 text-sm text-neutral-300 uppercase tracking-widest font-bold">Gerando Pix...</span>
-                <p class="mt-3 text-sm text-neutral-400">Estamos preparando o QR Code e o codigo copia e cola.</p>
-              </div>
+              <div *ngIf="!isPreparingPix() && pixPayment()" class="subscription-pix-layout">
+                <div class="subscription-pix-qr">
+                  <img *ngIf="pixPayment()!.qrCodeDataUrl" [src]="pixPayment()!.qrCodeDataUrl" alt="QR Code Pix" />
+                </div>
 
-              <div *ngIf="selectedMethod() === 'pix' && pixPayment()" class="subscription-checkout-panel subscription-checkout-panel--full">
-                <app-pix-payment-panel
-                  [qrCodeDataUrl]="pixPayment()!.qrCodeDataUrl"
-                [copyPaste]="pixPayment()!.pixCopyPaste"
-                [amount]="formatCurrency(pixPayment()!.amount)"
-                [dueDate]="formatDate(pixPayment()!.dueDate)"
-                [paymentId]="pixPayment()!.asaasPaymentId"
-                [invoiceUrl]="pixPayment()!.invoiceUrl || ''"
-                [statusLabel]="getPixStatusLabel()"
-                [copySuccess]="pixCopySuccess()"
-                (copy)="copyPixCode()"
-                (refresh)="refreshAsaasPaymentStatus('pix', pixPayment()?.asaasPaymentId, true)"
-              />
-              </div>
+                <div class="subscription-pix-details">
+                  <div class="subscription-pix-badges">
+                    <span class="subscription-pill subscription-pill--amber">Pix</span>
+                    <span class="subscription-pill">{{ getPixStatusLabel() }}</span>
+                  </div>
 
-              <div *ngIf="selectedMethod() === 'debit_card' && !debitCheckout() && !isPreparingDebit()" class="subscription-empty-state">
-                O checkout de debito vai aparecer aqui embaixo em instantes.
-              </div>
+                  <div class="subscription-payment-stats">
+                    <div class="subscription-payment-stat">
+                      <span>Valor</span>
+                      <strong>{{ formatCurrency(pixPayment()!.amount) }}</strong>
+                    </div>
+                    <div class="subscription-payment-stat">
+                      <span>Vencimento</span>
+                      <strong>{{ formatDate(pixPayment()!.dueDate) }}</strong>
+                    </div>
+                    <div class="subscription-payment-stat">
+                      <span>Pagamento</span>
+                      <strong>{{ pixPayment()!.asaasPaymentId }}</strong>
+                    </div>
+                  </div>
 
-              <div *ngIf="selectedMethod() === 'debit_card' && isPreparingDebit()" class="embedded-checkout-loading">
-                <div class="w-12 h-12 border-4 border-neutral-500/30 border-t-amber-500 rounded-full animate-spin"></div>
-                <span class="mt-4 text-sm text-neutral-300 uppercase tracking-widest font-bold">Preparando debito...</span>
-              </div>
+                  <div class="subscription-copy-box">
+                    <p class="subscription-copy-box__label">Codigo Pix</p>
+                    <p class="subscription-copy-box__text">{{ pixPayment()!.pixCopyPaste || 'O codigo copia e cola aparecera aqui.' }}</p>
+                  </div>
 
-              <div *ngIf="selectedMethod() === 'debit_card' && debitCheckout()" class="subscription-checkout-panel subscription-checkout-panel--full">
-                <div class="space-y-4">
-                  <p class="text-sm text-neutral-300">Status atual: <strong class="text-white">{{ getDebitStatusLabel() }}</strong></p>
-                  <p class="text-sm text-neutral-400">ID do pagamento: {{ debitCheckout()!.asaasPaymentId }}</p>
-                  <p class="text-sm text-neutral-400">Valor: {{ formatCurrency(debitCheckout()!.amount) }}</p>
-                  <p class="text-sm text-neutral-400">Vencimento: {{ formatDate(debitCheckout()!.dueDate) }}</p>
-
-                  <div class="flex flex-col gap-3 sm:flex-row">
-                    <button type="button" class="subscription-primary-button rounded-2xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-neutral-950" (click)="continueDebitInCurrentTab()">
-                      Continuar na mesma aba
+                  <div class="subscription-step-actions">
+                    <button type="button" class="subscription-button subscription-button--primary" (click)="copyPixCode()">
+                      {{ pixCopySuccess() ? 'Codigo copiado' : 'Copiar codigo Pix' }}
                     </button>
-                    <button type="button" class="subscription-secondary-button subscription-secondary-button--compact" (click)="openDebitInNewTab()">
-                      Abrir em nova aba
-                    </button>
-                    <button type="button" class="subscription-secondary-button subscription-secondary-button--compact" (click)="refreshAsaasPaymentStatus('debit_card', debitCheckout()?.asaasPaymentId, true)">
+                    <button type="button" class="subscription-button subscription-button--ghost" (click)="refreshAsaasPaymentStatus('pix', pixPayment()?.asaasPaymentId, true)">
                       Atualizar status
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div class="max-w-4xl mx-auto" *ngIf="!shouldUseCheckoutFocusLayout()">
-            <div class="subscription-history-toggle">
+              <div *ngIf="!isPreparingPix() && !pixPayment()" class="subscription-empty-box">
+                O Pix vai aparecer aqui em instantes.
+              </div>
+            </div>
+
+          </article>
+
+          <aside class="subscription-panel subscription-panel--summary">
+            <div class="subscription-panel__header">
+              <div class="subscription-panel__icon subscription-panel__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z"></path>
+                </svg>
+              </div>
               <div>
-                <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Historico de Cobrancas</h4>
-                <p class="mt-2 text-sm text-neutral-400">Abra somente quando quiser consultar pagamentos antigos.</p>
-              </div>
-              <button
-                type="button"
-                (click)="toggleInvoiceHistory()"
-                class="subscription-secondary-button subscription-secondary-button--compact"
-              >
-                {{ showInvoiceHistory() ? 'Fechar historico' : 'Ver historico' }}
-              </button>
-            </div>
-
-            <div class="subscription-history-panel mt-4" *ngIf="showInvoiceHistory()">
-              <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-                <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Historico aberto</h4>
-                <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">{{ visibleInvoices().length }} registro(s)</span>
-              </div>
-
-              <div *ngIf="visibleInvoices().length > 0" class="mt-4 grid grid-cols-1 gap-3">
-                <div *ngFor="let invoice of visibleInvoices()" class="invoice-card border border-white/10 bg-neutral-900/70 px-4 py-4">
-                  <div class="invoice-card__top flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p class="text-sm font-bold text-white">{{ formatCurrency(invoice.value) }}</p>
-                      <p class="mt-1 text-xs text-neutral-400">Vencimento: {{ formatDate(invoice.due_date) }}</p>
-                    </div>
-                    <span class="invoice-card__status inline-flex w-fit items-center border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em]"
-                      [ngClass]="{
-                        'border-emerald-500/30 bg-emerald-500/10 text-emerald-300': invoice.status === 'RECEIVED',
-                        'border-amber-500/30 bg-amber-500/10 text-amber-300': invoice.status === 'PENDING',
-                        'border-red-500/30 bg-red-500/10 text-red-300': invoice.status === 'OVERDUE',
-                        'border-neutral-500/30 bg-neutral-500/10 text-neutral-300': invoice.status === 'CANCELED'
-                      }">
-                      {{ getInvoiceStatusLabel(invoice.status) }}
-                    </span>
-                  </div>
-
-                  <div class="invoice-card__bottom mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="invoice-card__id text-[11px] uppercase tracking-[0.18em] text-neutral-500">
-                      ID: {{ invoice.stripe_payment_id || invoice.asaas_payment_id }}
-                    </p>
-                    <a *ngIf="invoice.payment_url || invoice.external_checkout_url"
-                      [href]="invoice.payment_url || invoice.external_checkout_url || ''"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="invoice-card__action text-left text-xs font-bold uppercase tracking-[0.18em] text-amber-400 hover:text-amber-300">
-                      Abrir cobranca
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div *ngIf="visibleInvoices().length === 0" class="subscription-empty-state mt-4">
-                Ainda nao ha cobrancas registradas para esta empresa.
+                <h2 class="subscription-panel__title">Resumo do pagamento</h2>
               </div>
             </div>
-          </div>
 
-          <div *ngIf="hasStripeSubscriptionManagement() && !shouldUseCheckoutFocusLayout()" class="subscription-form-panel max-w-4xl mx-auto space-y-4">
-            <div class="flex items-center justify-between border-b border-neutral-700/80 pb-3">
-              <h4 class="text-sm font-bold text-amber-500 uppercase tracking-[0.25em]">Gerenciamento da Stripe</h4>
-              <span class="text-[11px] text-neutral-500 uppercase tracking-[0.2em]">Portal</span>
+            <div class="subscription-summary-stack">
+              <div class="subscription-summary-box">
+                <span class="subscription-summary-box__label">Empresa</span>
+                <strong class="subscription-summary-box__value">{{ companyName || 'Sua agencia' }}</strong>
+              </div>
+              <div class="subscription-summary-box">
+                <span class="subscription-summary-box__label">Forma de pagamento</span>
+                <strong class="subscription-summary-box__value">
+                  {{
+                    selectedMethod() === 'credit_card'
+                      ? 'Cartao de credito'
+                      : selectedMethod() === 'pix'
+                        ? 'Pix'
+                        : 'Cartao de debito'
+                  }}
+                </strong>
+              </div>
+              <div class="subscription-summary-box">
+                <span class="subscription-summary-box__label">Valor mensal</span>
+                <strong class="subscription-summary-box__value subscription-summary-box__value--price">{{ formatCurrency(monthlyPrice) }}</strong>
+              </div>
             </div>
 
-            <div class="subscription-management-grid">
-              <button type="button" (click)="openSubscriptionPortal()" [disabled]="isManagingSubscription()" class="subscription-secondary-button">
-                Abrir Portal da Stripe
-              </button>
-              <button type="button" (click)="cancelSubscription()" [disabled]="isManagingSubscription() || subscriptionManagement()?.cancelAtPeriodEnd" class="subscription-danger-button">
-                Cancelar no Fim do Ciclo
-              </button>
-              <button type="button" (click)="reactivateSubscription()" [disabled]="isManagingSubscription() || !subscriptionManagement()?.cancelAtPeriodEnd" class="subscription-success-button">
-                Reativar Renovacao
-              </button>
+            <div class="subscription-security-card">
+              <div class="subscription-security-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.5l1.8 1.8 3.7-4"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="subscription-security-card__title">Pagamento protegido</p>
+                <p class="subscription-security-card__text">Checkout integrado, seguro e compatível com o fluxo atual da sua assinatura.</p>
+              </div>
             </div>
-          </div>
-
+          </aside>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section class="subscription-section-card" *ngIf="!shouldUseCheckoutFocusLayout()">
+        <div class="subscription-section-card__header">
+          <div>
+            <div class="subscription-section-card__title-row">
+              <div class="subscription-section-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="4" y="5" width="16" height="15" rx="2"></rect>
+                  <path d="M8 3v4"></path>
+                  <path d="M16 3v4"></path>
+                  <path d="M4 10h16"></path>
+                </svg>
+              </div>
+              <h2 class="subscription-section-card__title">Historico de cobrancas</h2>
+            </div>
+            <p class="subscription-section-card__subtitle">Acompanhe suas ultimas cobrancas e pagamentos.</p>
+          </div>
+
+          <button type="button" class="subscription-button subscription-button--ghost subscription-button--header" (click)="toggleInvoiceHistory()">
+            {{ showInvoiceHistory() ? 'Ocultar historico' : 'Ver historico completo' }}
+          </button>
+        </div>
+
+        <div class="subscription-history-table" *ngIf="showInvoiceHistory()">
+          <div class="subscription-history-table__head">
+            <span>Data</span>
+            <span>Descricao</span>
+            <span>Valor</span>
+            <span>Status</span>
+            <span>Pagamento</span>
+            <span></span>
+          </div>
+
+          <div *ngIf="visibleInvoices().length > 0; else noInvoices">
+            <div class="subscription-history-table__row" *ngFor="let invoice of visibleInvoices()">
+              <span>{{ formatDate(invoice.paid_at || invoice.created_at || invoice.due_date) }}</span>
+              <span>Assinatura Plano Profissional</span>
+              <span>{{ formatCurrency(invoice.value) }}</span>
+              <span>
+                <span
+                  class="subscription-status-chip"
+                  [ngClass]="{
+                    'subscription-status-chip--green': invoice.status === 'RECEIVED',
+                    'subscription-status-chip--orange': invoice.status === 'PENDING',
+                    'subscription-status-chip--red': invoice.status === 'OVERDUE',
+                    'subscription-status-chip--gray': invoice.status === 'CANCELED'
+                  }"
+                >
+                  {{ getInvoiceStatusLabel(invoice.status) }}
+                </span>
+              </span>
+              <span class="subscription-payment-label">
+                {{
+                  invoice.payment_method === 'credit_card'
+                    ? 'Cartao'
+                    : invoice.payment_method === 'pix'
+                      ? 'Pix'
+                      : 'Debito'
+                }}
+                <strong>{{ invoice.payment_provider === 'stripe' ? 'Stripe' : 'Asaas' }}</strong>
+              </span>
+              <span class="subscription-history-table__actions">
+                <a
+                  *ngIf="invoice.payment_url || invoice.external_checkout_url"
+                  [href]="invoice.payment_url || invoice.external_checkout_url || ''"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="subscription-icon-button"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v10"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 11l4 4 4-4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14"></path>
+                  </svg>
+                </a>
+              </span>
+            </div>
+          </div>
+
+          <ng-template #noInvoices>
+            <div class="subscription-empty-row">Ainda nao ha cobrancas registradas para esta empresa.</div>
+          </ng-template>
+        </div>
+      </section>
+
+      <section class="subscription-section-card" *ngIf="hasStripeSubscriptionManagement() && !shouldUseCheckoutFocusLayout()">
+        <div class="subscription-section-card__header">
+          <div>
+            <div class="subscription-section-card__title-row">
+              <div class="subscription-section-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z"></path>
+                </svg>
+              </div>
+              <h2 class="subscription-section-card__title">Gerenciamento da Stripe</h2>
+            </div>
+            <p class="subscription-section-card__subtitle">Gerencie sua assinatura, metodos de pagamento e cobranca.</p>
+          </div>
+
+          <button type="button" class="subscription-button subscription-button--ghost subscription-button--header" (click)="openSubscriptionPortal()" [disabled]="isManagingSubscription()">
+            Abrir portal da Stripe
+          </button>
+        </div>
+
+        <div class="subscription-management-cards">
+          <button type="button" class="subscription-management-card" (click)="refreshAllData()" [disabled]="isManagingSubscription()">
+            <div class="subscription-management-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 20v-6h-6"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 10a8 8 0 0 0-13.66-4.66L4 8"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 14a8 8 0 0 0 13.66 4.66L20 16"></path>
+              </svg>
+            </div>
+            <div class="subscription-management-card__body">
+              <strong>Sincronizar assinatura</strong>
+              <span>Atualize status, historico e informacoes da cobranca.</span>
+            </div>
+            <span class="subscription-management-card__arrow">></span>
+          </button>
+
+          <button
+            type="button"
+            class="subscription-management-card subscription-management-card--danger"
+            (click)="cancelSubscription()"
+            [disabled]="isManagingSubscription() || subscriptionManagement()?.cancelAtPeriodEnd"
+          >
+            <div class="subscription-management-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18"></path>
+              </svg>
+            </div>
+            <div class="subscription-management-card__body">
+              <strong>Cancelar renovacao</strong>
+              <span>Interrompa a renovacao automatica ao final do ciclo atual.</span>
+            </div>
+            <span class="subscription-management-card__arrow">></span>
+          </button>
+
+          <button
+            type="button"
+            class="subscription-management-card subscription-management-card--success"
+            (click)="reactivateSubscription()"
+            [disabled]="isManagingSubscription() || !subscriptionManagement()?.cancelAtPeriodEnd"
+          >
+            <div class="subscription-management-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 20v-6h-6"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 10a8 8 0 1 0-2.34 5.66L20 16"></path>
+              </svg>
+            </div>
+            <div class="subscription-management-card__body">
+              <strong>Reativar renovacao</strong>
+              <span>Ative novamente a renovacao automatica da assinatura.</span>
+            </div>
+            <span class="subscription-management-card__arrow">></span>
+          </button>
+        </div>
+      </section>
+
+      <footer class="subscription-footer" *ngIf="!shouldUseCheckoutFocusLayout()">
+        <span>© 2024 Clube Turismo Flow. Todos os direitos reservados.</span>
+        <div class="subscription-footer__links">
+          <a href="#" (click)="$event.preventDefault()">Termos de uso</a>
+          <a href="#" (click)="$event.preventDefault()">Politica de privacidade</a>
+        </div>
+      </footer>
+    </ng-container>
   </div>
 </div>

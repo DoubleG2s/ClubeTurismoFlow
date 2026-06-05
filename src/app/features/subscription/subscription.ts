@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { StripeElements, StripePaymentElement, loadStripe, Stripe } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
 import { CheckoutPaymentMethod, SubscriptionService } from '../../services/subscription.service';
-import { PaymentMethodSelectorComponent } from './components/payment-method-selector.component';
 import { PaymentStatusCardComponent } from './components/payment-status-card.component';
-import { PixPaymentPanelComponent } from './components/pix-payment-panel.component';
 
 type PixCheckoutState = {
   asaasPaymentId: string;
@@ -32,9 +30,7 @@ type DebitCheckoutState = {
   imports: [
     CommonModule,
     FormsModule,
-    PaymentMethodSelectorComponent,
-    PaymentStatusCardComponent,
-    PixPaymentPanelComponent
+    PaymentStatusCardComponent
   ],
   templateUrl: './subscription.html',
   styleUrls: ['./subscription.css']
@@ -63,6 +59,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   errorMessage = signal('');
   successMessage = signal('');
   infoMessage = signal('');
+  showPaymentConfirmedPopup = signal(false);
   selectedMethod = signal<CheckoutPaymentMethod>('credit_card');
 
   isPreparingStripe = signal(false);
@@ -78,7 +75,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   debitCheckout = signal<DebitCheckoutState | null>(null);
 
   isManagingSubscription = signal(false);
-  showInvoiceHistory = signal(false);
+  showInvoiceHistory = signal(true);
   showPaymentEditor = signal(false);
   currentStep = signal<1 | 2 | 3>(1);
 
@@ -88,8 +85,9 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   taxId = '';
   postalCode = '';
   email = '';
+  phone = '';
 
-  readonly monthlyPrice = 370;
+  readonly monthlyPrice = environment.monthlyPrice || 370;
 
   constructor() {
     effect(() => {
@@ -252,6 +250,27 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
         : numeric;
   }
 
+  formatPhone(value: string) {
+    const numeric = value.replace(/\D/g, '').substring(0, 11);
+
+    if (numeric.length <= 2) {
+      this.phone = numeric;
+      return;
+    }
+
+    if (numeric.length <= 7) {
+      this.phone = `(${numeric.substring(0, 2)}) ${numeric.substring(2)}`;
+      return;
+    }
+
+    if (numeric.length <= 10) {
+      this.phone = `(${numeric.substring(0, 2)}) ${numeric.substring(2, 6)}-${numeric.substring(6)}`;
+      return;
+    }
+
+    this.phone = `(${numeric.substring(0, 2)}) ${numeric.substring(2, 7)}-${numeric.substring(7)}`;
+  }
+
   async submitPaymentFlow() {
     this.preparePaymentFlow();
 
@@ -322,28 +341,30 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       clientSecret,
       locale: 'pt-BR',
       appearance: {
-        theme: 'night',
+        theme: 'stripe',
         variables: {
-          colorPrimary: '#f59e0b',
-          colorBackground: '#0f1114',
-          colorText: '#f5f5f5',
-          colorDanger: '#ef4444',
-          colorTextSecondary: '#a3a3a3',
-          borderRadius: '12px'
+          colorPrimary: '#ff8a00',
+          colorBackground: '#ffffff',
+          colorText: '#0f172a',
+          colorDanger: '#dc2626',
+          colorTextSecondary: '#64748b',
+          colorSuccess: '#16a34a',
+          borderRadius: '18px',
+          spacingUnit: '6px'
         },
         rules: {
           '.Block': {
-            backgroundColor: '#0f1114',
-            border: '1px solid #2c2c2c',
-            boxShadow: 'none'
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(15, 23, 42, 0.08)',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)'
           },
           '.Input': {
-            backgroundColor: '#111317',
-            border: '1px solid #2c2c2c',
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(15, 23, 42, 0.08)',
             boxShadow: 'none'
           },
           '.Label': {
-            color: '#f5f5f5'
+            color: '#334155'
           }
         }
       }
@@ -535,6 +556,9 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       if (['RECEIVED', 'CONFIRMED'].includes(String(result.status || '').toUpperCase())) {
         this.clearPaymentPolling();
         this.successMessage.set('Pagamento confirmado. O acesso da empresa ja foi atualizado.');
+        if (method === 'pix') {
+          this.showPaymentConfirmedPopup.set(true);
+        }
       } else if (showFeedback) {
         this.infoMessage.set('Status atualizado com sucesso.');
       }
@@ -578,6 +602,19 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   dismissSuccessMessage() {
     this.clearSuccessMessageTimeout();
     this.successMessage.set('');
+  }
+
+  dismissPaymentConfirmedPopup() {
+    this.showPaymentConfirmedPopup.set(false);
+  }
+
+  goBackToDashboard() {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   private persistSuccessFlash(message: string) {
