@@ -56,9 +56,23 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error('[Stripe] Erro ao consultar gerenciamento da assinatura:', error);
+
+    const details = String(error.message || error);
+    const isExpectedMissingContext =
+      details.includes('Perfil do usuario nao foi encontrado') ||
+      details.includes('Usuario sem empresa vinculada') ||
+      details.includes('Empresa nao encontrada');
+
+    if (isExpectedMissingContext) {
+      return res.status(200).json({
+        subscription: null,
+        warning: details
+      });
+    }
+
     return res.status(400).json({
       error: 'Falha ao carregar os dados de gerenciamento da assinatura.',
-      details: String(error.message || error)
+      details
     });
   }
 }
