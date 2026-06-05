@@ -41,6 +41,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
 
   private subscriptionService = inject(SubscriptionService);
   private stripeInstance: Stripe | null = null;
+  private stripePublishableKey: string | null = null;
   private stripeElements: StripeElements | null = null;
   private paymentElement: StripePaymentElement | null = null;
   private paymentPollingInterval: ReturnType<typeof setInterval> | null = null;
@@ -320,12 +321,11 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
     await this.startSelectedPaymentMethod();
   }
 
-  private async getOrCreateStripeInstance() {
-    if (this.stripeInstance) {
+  private async getOrCreateStripeInstance(publishableKey = environment.stripePublishableKey) {
+    if (this.stripeInstance && this.stripePublishableKey === publishableKey) {
       return this.stripeInstance;
     }
 
-    const publishableKey = environment.stripePublishableKey;
     if (!publishableKey) {
       throw new Error('Falta a STRIPE_PUBLISHABLE_KEY para carregar o checkout da Stripe.');
     }
@@ -336,6 +336,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
     }
 
     this.stripeInstance = stripe;
+    this.stripePublishableKey = publishableKey;
     return stripe;
   }
 
@@ -363,7 +364,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
         throw new Error('A Stripe nao retornou os dados para carregar o checkout personalizado.');
       }
 
-      await this.mountStripePaymentElement(result.clientSecret);
+      await this.mountStripePaymentElement(result.clientSecret, result.publishableKey || environment.stripePublishableKey);
       this.stripeSetupIntentId.set(result.setupIntentId);
       this.infoMessage.set('Formulario de cartao carregado. Confirme o pagamento para ativar a assinatura.');
     } catch (error: any) {
@@ -373,9 +374,9 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private async mountStripePaymentElement(clientSecret: string) {
+  private async mountStripePaymentElement(clientSecret: string, publishableKey: string) {
     this.destroyStripePaymentElement();
-    const stripe = await this.getOrCreateStripeInstance();
+    const stripe = await this.getOrCreateStripeInstance(publishableKey);
     this.stripeElements = stripe.elements({
       clientSecret,
       locale: 'pt-BR',
@@ -1066,7 +1067,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
         throw new Error(submitResult.error.message || 'Revise os dados do cartao e tente novamente.');
       }
 
-      const stripe = await this.getOrCreateStripeInstance();
+      const stripe = this.stripeInstance || await this.getOrCreateStripeInstance(this.stripePublishableKey || environment.stripePublishableKey);
       const confirmationResult = await stripe.confirmSetup({
         elements: this.stripeElements,
         redirect: 'if_required'

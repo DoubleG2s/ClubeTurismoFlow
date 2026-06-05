@@ -5,8 +5,55 @@ const STRIPE_API_VERSION = '2026-02-25.clover';
 const COMPANY_SELECT =
   'id, name, slug, billing_email, billing_postal_code, tax_id, subscription_status, subscription_plan, subscription_expires_at, payment_provider, payment_method, payment_status, stripe_customer_id, stripe_subscription_id, asaas_customer_id, asaas_payment_id, asaas_subscription_id, pix_automatic_authorization_id, paid_at, next_due_date, external_checkout_url';
 
+function getStripeSecretKey() {
+  return process.env.STRIPE_RESTRICTED_KEY || process.env.STRIPE_SECRET_KEY || '';
+}
+
+function getStripePublishableKey() {
+  const isProductionEnv =
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production';
+
+  if (isProductionEnv) {
+    return process.env.PROD_STRIPE_PUBLISHABLE_KEY ||
+      process.env.STRIPE_PUBLISHABLE_KEY ||
+      process.env.VITE_STRIPE_PUBLISHABLE_KEY ||
+      '';
+  }
+
+  return process.env.DEV_STRIPE_PUBLISHABLE_KEY ||
+    process.env.STRIPE_PUBLISHABLE_KEY ||
+    process.env.VITE_STRIPE_PUBLISHABLE_KEY ||
+    '';
+}
+
+function getStripeKeyMode(key) {
+  if (String(key || '').startsWith('sk_live_') || String(key || '').startsWith('rk_live_') || String(key || '').startsWith('pk_live_')) {
+    return 'live';
+  }
+
+  if (String(key || '').startsWith('sk_test_') || String(key || '').startsWith('rk_test_') || String(key || '').startsWith('pk_test_')) {
+    return 'test';
+  }
+
+  return 'unknown';
+}
+
+function assertMatchingStripeKeyModes(secretKey, publishableKey) {
+  const secretMode = getStripeKeyMode(secretKey);
+  const publishableMode = getStripeKeyMode(publishableKey);
+
+  if (secretMode === 'unknown' || publishableMode === 'unknown' || secretMode === publishableMode) {
+    return;
+  }
+
+  throw new Error(
+    `As chaves da Stripe estao misturadas: backend ${secretMode} e publishable ${publishableMode}. Use sk/rk e pk do mesmo modo.`
+  );
+}
+
 function createStripeClient() {
-  const secretKey = process.env.STRIPE_RESTRICTED_KEY || process.env.STRIPE_SECRET_KEY;
+  const secretKey = getStripeSecretKey();
 
   if (!secretKey) {
     throw new Error('Falta a variavel STRIPE_RESTRICTED_KEY ou STRIPE_SECRET_KEY.');
@@ -726,6 +773,7 @@ module.exports = {
   STRIPE_API_VERSION,
   addCors,
   addDaysToIso,
+  assertMatchingStripeKeyModes,
   assertNoBlockingSubscription,
   createStripeClient,
   createSupabaseAdmin,
@@ -738,6 +786,8 @@ module.exports = {
   getCompanyBySubscriptionId,
   getEffectiveCompanyStatusFromSubscription,
   getNextRenewalAt,
+  getStripePublishableKey,
+  getStripeSecretKey,
   hasBlockingCompanyAccess,
   normalizePostalCode,
   normalizeTaxId,

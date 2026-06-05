@@ -1,9 +1,12 @@
 ﻿const {
   addCors,
+  assertMatchingStripeKeyModes,
   createStripeClient,
   createSupabaseAdmin,
   ensureStripeCustomerForCompany,
   getCompanyById,
+  getStripePublishableKey,
+  getStripeSecretKey,
   hasBlockingCompanyAccess,
   normalizeTaxId,
   resolveAuthorizedCompanyContext
@@ -20,12 +23,21 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const publishableKey =
-    process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  const secretKey = getStripeSecretKey();
+  const publishableKey = getStripePublishableKey();
 
   if (!publishableKey) {
     return res.status(500).json({
       error: 'Falta a variavel STRIPE_PUBLISHABLE_KEY para renderizar o formulario da Stripe.'
+    });
+  }
+
+  try {
+    assertMatchingStripeKeyModes(secretKey, publishableKey);
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Configuracao da Stripe inconsistente.',
+      details: String(error.message || error)
     });
   }
 
