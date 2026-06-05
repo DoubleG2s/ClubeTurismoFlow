@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   createStripeClient,
   createSupabaseAdmin,
@@ -9,7 +9,7 @@ const {
   resolveAuthorizedCompanyContext
 } = require('./_lib');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
     const message =
       statusCode === 400
-        ? 'O cliente Stripe salvo para esta empresa é inválido ou não existe mais.'
+        ? 'O cliente Stripe salvo para esta empresa Ã© invÃ¡lido ou nÃ£o existe mais.'
         : 'Falha ao abrir o portal da Stripe.';
 
     return res.status(statusCode).json({
@@ -57,3 +57,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

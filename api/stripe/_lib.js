@@ -1,4 +1,4 @@
-const Stripe = require('stripe');
+﻿const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
 const STRIPE_API_VERSION = '2026-02-25.clover';
@@ -6,10 +6,10 @@ const COMPANY_SELECT =
   'id, name, slug, billing_email, billing_postal_code, tax_id, subscription_status, subscription_plan, subscription_expires_at, payment_provider, payment_method, payment_status, stripe_customer_id, stripe_subscription_id, asaas_customer_id, asaas_payment_id, asaas_subscription_id, pix_automatic_authorization_id, paid_at, next_due_date, external_checkout_url';
 
 function createStripeClient() {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
+  const secretKey = process.env.STRIPE_RESTRICTED_KEY || process.env.STRIPE_SECRET_KEY;
 
   if (!secretKey) {
-    throw new Error('Falta a variavel STRIPE_SECRET_KEY.');
+    throw new Error('Falta a variavel STRIPE_RESTRICTED_KEY ou STRIPE_SECRET_KEY.');
   }
 
   return new Stripe(secretKey, {
@@ -446,16 +446,20 @@ function getLatestInvoiceStatus(subscription, fallbackInvoice = null) {
 function getStripePaidAt(subscription, invoice = null) {
   const latestInvoice = invoice || (typeof subscription?.latest_invoice === 'object' ? subscription.latest_invoice : null);
 
+  if (subscription?.status === 'trialing') {
+    return null;
+  }
+
+  if (latestInvoice && latestInvoice.status !== 'paid') {
+    return null;
+  }
+
   if (latestInvoice?.status_transitions?.paid_at) {
     return toIsoFromUnix(latestInvoice.status_transitions.paid_at);
   }
 
   if (latestInvoice?.created) {
     return toIsoFromUnix(latestInvoice.created);
-  }
-
-  if (subscription?.created) {
-    return toIsoFromUnix(subscription.created);
   }
 
   return null;
@@ -526,6 +530,25 @@ const BLOCKED_SUBSCRIPTION_STATUSES = [
 
 function canBlockNewSubscription(status) {
   return BLOCKED_SUBSCRIPTION_STATUSES.includes(String(status || '').toLowerCase());
+}
+
+function hasBlockingCompanyAccess(company) {
+  const subscriptionStatus = String(company?.subscription_status || '').toLowerCase();
+  const paymentStatus = String(company?.payment_status || '').toLowerCase();
+
+  if (!['active', 'trial'].includes(subscriptionStatus)) {
+    return false;
+  }
+
+  if (paymentStatus === 'pending') {
+    return false;
+  }
+
+  if (paymentStatus === 'paid') {
+    return true;
+  }
+
+  return Boolean(company?.stripe_subscription_id);
 }
 
 function buildExistingSubscriptionMessage(subscription) {
@@ -673,8 +696,9 @@ async function tryRecordWebhookEvent(supabase, { id, provider, eventType, compan
     return true;
   }
 
+  const eventId = String(id).startsWith(`${provider}:`) ? String(id) : `${provider}:${id}`;
   const insertPayload = {
-    id,
+    id: eventId,
     provider,
     event_type: eventType,
     company_id: companyId,
@@ -714,6 +738,7 @@ module.exports = {
   getCompanyBySubscriptionId,
   getEffectiveCompanyStatusFromSubscription,
   getNextRenewalAt,
+  hasBlockingCompanyAccess,
   normalizePostalCode,
   normalizeTaxId,
   readRawBody,
@@ -725,3 +750,4 @@ module.exports = {
   updateCompanySubscription,
   upsertInvoiceRecord
 };
+

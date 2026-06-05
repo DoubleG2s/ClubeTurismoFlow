@@ -48,6 +48,7 @@ Thumbs.db
 # ignore apenas arquivos sensíveis se existirem
 .env
 .env.*
+!.env.example
 .agent
 .vercel
 /docs

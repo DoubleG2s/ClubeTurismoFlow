@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   createStripeClient,
   createSupabaseAdmin,
@@ -7,7 +7,7 @@ const {
   syncCompanyFromSubscription
 } = require('./_lib');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
     const subscriptionId = company.stripe_subscription_id;
     if (!subscriptionId) {
-      return res.status(400).json({ error: 'A empresa ainda não possui assinatura Stripe vinculada.' });
+      return res.status(400).json({ error: 'A empresa ainda nÃ£o possui assinatura Stripe vinculada.' });
     }
 
     const subscription = await stripe.subscriptions.update(subscriptionId, {
@@ -57,3 +57,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

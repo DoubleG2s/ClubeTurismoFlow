@@ -141,6 +141,23 @@ ASAAS_WEBHOOK_TOKEN=defina-um-token-opcional-para-validar-o-webhook
 ASAAS_MONTHLY_AMOUNT=5
 ```
 
+Quando desenvolvimento/teste e producao usam chaves diferentes, prefira os prefixos explicitos:
+
+```env
+DEV_STRIPE_PUBLISHABLE_KEY=pk_test_...
+DEV_ASAAS_MONTHLY_AMOUNT=5
+
+PROD_STRIPE_PUBLISHABLE_KEY=pk_live_...
+PROD_ASAAS_MONTHLY_AMOUNT=370
+```
+
+O mesmo padrao existe para:
+
+- `DEV_SUPABASE_URL` / `PROD_SUPABASE_URL`
+- `DEV_SUPABASE_ANON_KEY` / `PROD_SUPABASE_ANON_KEY`
+- `DEV_GEMINI_API_KEY` / `PROD_GEMINI_API_KEY`
+- `DEV_API_BASE_URL` / `PROD_API_BASE_URL`
+
 ### Como o `inject-env.js` funciona
 
 Antes de rodar ou buildar, os scripts chamam:
@@ -149,7 +166,9 @@ Antes de rodar ou buildar, os scripts chamam:
 npm run inject
 ```
 
-Esse comando le `.env` e, em ambiente nao produtivo, tambem le `.env.local` com prioridade maior. Depois ele gera:
+Esse comando le `.env` e, em ambiente nao produtivo, tambem le `.env.local` com prioridade maior para o ambiente de desenvolvimento. O arquivo de producao e gerado sem deixar `.env.local` sobrescrever os valores produtivos.
+
+Depois ele gera:
 
 - `src/environments/environment.ts`
 - `src/environments/environment.prod.ts`
@@ -162,6 +181,12 @@ Variaveis injetadas no Angular:
 - `STRIPE_PUBLISHABLE_KEY`
 - `API_BASE_URL`
 - `ASAAS_MONTHLY_AMOUNT`
+
+Fallbacks importantes:
+
+- Desenvolvimento usa `DEV_*` quando existir; se nao existir, usa a variavel sem prefixo.
+- Producao usa `PROD_*` quando existir; se nao existir, usa a variavel sem prefixo.
+- Se `environment.prod.ts` receber `pk_test_`, o script mostra um aviso para lembrar que Stripe ainda esta em modo teste.
 
 Variaveis usadas apenas no backend/serverless:
 

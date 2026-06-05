@@ -1,6 +1,6 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+﻿const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -11,13 +11,13 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido.' });
+    return res.status(405).json({ error: 'MÃ©todo nÃ£o permitido.' });
   }
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no servidor Vercel.' });
+      return res.status(500).json({ error: 'GEMINI_API_KEY nÃ£o configurada no servidor Vercel.' });
     }
 
     const { text, pdfBase64, pdfMimeType, history } = req.body;
@@ -29,16 +29,16 @@ export default async function handler(req, res) {
         responseMimeType: "application/json",
       },
       systemInstruction: `
-        Você é um assistente operacional moderno do "Clube Turismo Flow".
-        Sua função é interpretar as requisições, ler arquivos PDF como vouchers de pacotes de viagem, extrair os dados e acionar ações de sistema.
+        VocÃª Ã© um assistente operacional moderno do "Clube Turismo Flow".
+        Sua funÃ§Ã£o Ã© interpretar as requisiÃ§Ãµes, ler arquivos PDF como vouchers de pacotes de viagem, extrair os dados e acionar aÃ§Ãµes de sistema.
         Retorne SEMPRE um objeto JSON estrito com a interface:
         {
-          "message": "Resposta amigável relatando a ação ou perguntando novos dados.",
+          "message": "Resposta amigÃ¡vel relatando a aÃ§Ã£o ou perguntando novos dados.",
           "action": {
              "type": "NONE" | "CREATE_RESERVATION" | "CREATE_QUOTE" | "APPLY_FILTER",
              "payload": {
                 "destination": "Destino se houver",
-                "passenger": "Nome completo ou do passageiro principal responsável se houver",
+                "passenger": "Nome completo ou do passageiro principal responsÃ¡vel se houver",
                 "adults": numero,
                 "children": numero,
                 "dateStr": "Data identificada d/m/Y",
@@ -47,11 +47,11 @@ export default async function handler(req, res) {
           }
         }
         
-        Regras de Inteligência:
+        Regras de InteligÃªncia:
         1. Se faltar destino ou passageiro para uma reserva, retorne type "NONE" e o pergunte amigavelmente (Use o "message").
-        2. Se você olhar no histórico e ver que o usuário acabou de responder os dados faltantes, crie a ação (CREATE_RESERVATION, etc).
-        3. Se receber um arquivo MimeType PDF anexo, extraia o máximo de informações (Hospedagem, Voo, Passageiros, destino/hotel) como se fosse um analista, e dispare CREATE_RESERVATION pré-preenchendo tudo o que achou de relevante no payload (destination, etc) informando no "message" com sucesso os dados identificados.
-        4. Transações de formulário NUNCA salvam, a action prepara a tela e o humano salva manualmente.
+        2. Se vocÃª olhar no histÃ³rico e ver que o usuÃ¡rio acabou de responder os dados faltantes, crie a aÃ§Ã£o (CREATE_RESERVATION, etc).
+        3. Se receber um arquivo MimeType PDF anexo, extraia o mÃ¡ximo de informaÃ§Ãµes (Hospedagem, Voo, Passageiros, destino/hotel) como se fosse um analista, e dispare CREATE_RESERVATION prÃ©-preenchendo tudo o que achou de relevante no payload (destination, etc) informando no "message" com sucesso os dados identificados.
+        4. TransaÃ§Ãµes de formulÃ¡rio NUNCA salvam, a action prepara a tela e o humano salva manualmente.
       `
     });
 
@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
     let responseText = '';
     
-    // Tratativa de Histórico nativo no SDK
+    // Tratativa de HistÃ³rico nativo no SDK
     if (history && Array.isArray(history) && history.length > 0) {
        const chat = model.startChat({ history });
        const result = await chat.sendMessage(promptParts);
@@ -92,6 +92,7 @@ export default async function handler(req, res) {
     
   } catch (error) {
     console.error('Gemini API Error:', error);
-    return res.status(500).json({ error: 'Erro ao processar integração GenAI', details: String(error) });
+    return res.status(500).json({ error: 'Erro ao processar integraÃ§Ã£o GenAI', details: String(error) });
   }
 }
+

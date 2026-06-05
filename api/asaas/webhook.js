@@ -1,7 +1,9 @@
-const {
+﻿const {
+  addCors,
   asaasRequest,
   createSupabaseAdmin,
   getCompanyByAsaasPaymentId,
+  mapAsaasStatusToPaymentStatus,
   tryRecordWebhookEvent,
   updateCompanyFromAsaasPayment,
   updateCompanySubscription,
@@ -9,7 +11,65 @@ const {
   validateAsaasWebhookToken
 } = require('./_lib');
 
-export default async function handler(req, res) {
+function buildAsaasEventId(event) {
+  if (event?.id) {
+    return event.id;
+  }
+
+  const paymentId = event?.payment?.id || event?.payment?.object || 'sem-pagamento';
+  const eventType = event?.event || 'unknown';
+  const status = event?.payment?.status || 'sem-status';
+
+  return `${eventType}:${paymentId}:${status}`;
+}
+
+async function resolveLatestPayment(event) {
+  const paymentId = event?.payment?.id;
+
+  if (!paymentId) {
+    return event?.payment || null;
+  }
+
+  try {
+    return await asaasRequest(`/v3/payments/${paymentId}`);
+  } catch (error) {
+    if (event?.payment) {
+      return event.payment;
+    }
+
+    throw error;
+  }
+}
+
+function shouldMarkCompanyCanceled(eventName, payment) {
+  const status = String(payment?.status || '').toUpperCase();
+
+  return [
+    'PAYMENT_DELETED',
+    'PAYMENT_CANCELED',
+    'PAYMENT_REFUNDED',
+    'PAYMENT_REFUND_REQUESTED',
+    'PAYMENT_CREDIT_CARD_CAPTURE_REFUSED'
+  ].includes(eventName) || [
+    'CANCELED',
+    'REFUNDED',
+    'REFUND_REQUESTED'
+  ].includes(status);
+}
+
+function shouldMarkCompanyPastDue(eventName, payment) {
+  const status = String(payment?.status || '').toUpperCase();
+
+  return eventName === 'PAYMENT_OVERDUE' || status === 'OVERDUE';
+}
+
+module.exports = async function handler(req, res) {
+  addCors(res);
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -21,12 +81,13 @@ export default async function handler(req, res) {
 
     const supabase = createSupabaseAdmin();
     const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const eventId = event.id || `${event.event || 'event'}:${event.payment?.id || event.payment?.object || Date.now()}`;
+    const eventName = event.event || 'unknown';
+    const eventId = buildAsaasEventId(event);
 
     const wasRecorded = await tryRecordWebhookEvent(supabase, {
       id: eventId,
       provider: 'asaas',
-      eventType: event.event || 'unknown',
+      eventType: eventName,
       companyId: null,
       payload: event
     });
@@ -39,21 +100,29 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, ignored: true });
     }
 
-    const company = await getCompanyByAsaasPaymentId(supabase, event.payment.id);
+    const payment = await resolveLatestPayment(event);
+    const paymentId = payment?.id || event.payment.id;
+    const company = await getCompanyByAsaasPaymentId(supabase, paymentId);
 
     if (!company) {
       return res.status(200).json({ received: true, ignored: true });
     }
 
-    const payment = await asaasRequest(`/v3/payments/${event.payment.id}`);
-
     await updateCompanyFromAsaasPayment(supabase, company, payment);
     await upsertAsaasInvoiceRecord(supabase, company.id, payment);
 
-    if (event.event === 'PAYMENT_DELETED' || event.event === 'PAYMENT_CANCELED') {
+    if (shouldMarkCompanyCanceled(eventName, payment)) {
       await updateCompanySubscription(supabase, company.id, {
         payment_provider: 'asaas',
-        payment_status: 'canceled'
+        payment_status: 'canceled',
+        subscription_status: company.payment_status === 'paid' ? company.subscription_status : 'inactive',
+        external_checkout_url: null
+      });
+    } else if (shouldMarkCompanyPastDue(eventName, payment)) {
+      await updateCompanySubscription(supabase, company.id, {
+        payment_provider: 'asaas',
+        payment_status: mapAsaasStatusToPaymentStatus(payment.status),
+        subscription_status: 'past_due'
       });
     }
 
@@ -75,3 +144,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

@@ -458,6 +458,29 @@ export class SubscriptionService {
     return result;
   }
 
+  async cancelAsaasPayment(payload: {
+    asaasPaymentId: string;
+  }) {
+    const companyId = this.tenantService.getCurrentCompanyId();
+    if (!companyId) throw new Error('Company ID indisponivel. Efetue login na sua agencia.');
+
+    const response = await fetch(this.getApiUrl('/api/asaas/cancel-payment'), {
+      method: 'POST',
+      headers: await this.buildApiHeaders(),
+      body: JSON.stringify({
+        companyId,
+        asaasPaymentId: payload.asaasPaymentId
+      })
+    });
+
+    const result = await this.parseApiResponse(response);
+    if (!response.ok) {
+      throw new Error(result.details || result.error || 'Erro ao cancelar o pagamento Pix.');
+    }
+
+    return result;
+  }
+
   async syncCompanySubscription(sessionId?: string) {
     const companyId = this.tenantService.getCurrentCompanyId();
     if (!companyId) throw new Error('Company ID indisponivel. Efetue login na sua agencia.');

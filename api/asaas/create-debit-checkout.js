@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   asaasRequest,
   createSupabaseAdmin,
@@ -21,7 +21,7 @@ function buildDueDate() {
   return dueDate.toISOString().slice(0, 10);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -101,3 +101,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

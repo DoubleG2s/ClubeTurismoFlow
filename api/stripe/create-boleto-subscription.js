@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   assertNoBlockingSubscription,
   createStripeClient,
@@ -13,7 +13,7 @@ const {
 
 const DAYS_UNTIL_DUE = 3;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -121,3 +121,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

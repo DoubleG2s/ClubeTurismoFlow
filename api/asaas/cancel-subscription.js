@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+﻿const { createClient } = require('@supabase/supabase-js');
 
-export default async function handler(req, res) {
-  // Configurando CORS básico
+module.exports = async function handler(req, res) {
+  // Configurando CORS bÃ¡sico
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -11,22 +11,22 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido.' });
+    return res.status(405).json({ error: 'MÃ©todo nÃ£o permitido.' });
   }
 
   const { companyId, subscriptionId } = req.body;
 
   if (!companyId || !subscriptionId) {
-    return res.status(400).json({ error: 'Faltam dados obrigatórios para cancelamento.' });
+    return res.status(400).json({ error: 'Faltam dados obrigatÃ³rios para cancelamento.' });
   }
 
   const ASAAS_API_KEY = process.env.ASAAS_API_KEY;
   const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_ANON_KEY; 
 
-  if (!ASAAS_API_KEY) { return res.status(500).json({ error: 'Falta variável ASAAS_API_KEY' }); }
-  if (!SUPABASE_URL) { return res.status(500).json({ error: 'Falta variável SUPABASE_URL' }); }
-  if (!SUPABASE_SERVICE_KEY) { return res.status(500).json({ error: 'Falta variável SUPABASE_ANON_KEY' }); }
+  if (!ASAAS_API_KEY) { return res.status(500).json({ error: 'Falta variÃ¡vel ASAAS_API_KEY' }); }
+  if (!SUPABASE_URL) { return res.status(500).json({ error: 'Falta variÃ¡vel SUPABASE_URL' }); }
+  if (!SUPABASE_SERVICE_KEY) { return res.status(500).json({ error: 'Falta variÃ¡vel SUPABASE_ANON_KEY' }); }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     const cancelData = await cancelResponse.json();
 
     if (!cancelResponse.ok && cancelData.errors) {
-       // Mesmo se der erro no asaas, às vezes ela já estava apagada.
+       // Mesmo se der erro no asaas, Ã s vezes ela jÃ¡ estava apagada.
        console.error('[Asaas] Cancellation Failed:', cancelData.errors);
        return res.status(400).json({ error: 'Falha ao cancelar no Gateway.', details: cancelData.errors });
     }
@@ -67,3 +67,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erro de servidor', details: String(error) });
   }
 }
+
+

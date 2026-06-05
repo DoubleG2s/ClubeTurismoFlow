@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   asaasRequest,
   createSupabaseAdmin,
@@ -10,7 +10,7 @@ const {
   upsertAsaasInvoiceRecord
 } = require('./_lib');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -70,3 +70,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

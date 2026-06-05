@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   createStripeClient,
   createSupabaseAdmin,
@@ -40,7 +40,7 @@ async function syncInvoiceHistory(stripe, supabase, companyId, customerId, subsc
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -107,3 +107,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

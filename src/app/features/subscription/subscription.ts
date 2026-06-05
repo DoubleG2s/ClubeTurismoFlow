@@ -12,6 +12,7 @@ type PixCheckoutState = {
   pixCopyPaste: string;
   amount: number;
   dueDate: string | null;
+  expiresAt: string;
   invoiceUrl: string | null;
   status: string;
 };
@@ -43,9 +44,13 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   private stripeElements: StripeElements | null = null;
   private paymentElement: StripePaymentElement | null = null;
   private paymentPollingInterval: ReturnType<typeof setInterval> | null = null;
+  private pixCountdownInterval: ReturnType<typeof setInterval> | null = null;
   private pixCopyFeedbackTimeout: ReturnType<typeof setTimeout> | null = null;
+  private errorMessageTimeout: ReturnType<typeof setTimeout> | null = null;
+  private infoMessageTimeout: ReturnType<typeof setTimeout> | null = null;
   private successMessageTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly successFlashStorageKey = 'clube-turismo-flow:subscription-success-flash';
+  private readonly pixPaymentTimeoutMs = 15 * 60 * 1000;
 
   companyStatus = signal<any>(null);
   subscriptionManagement = this.subscriptionService.subscriptionManagement;
@@ -68,6 +73,8 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   stripeSetupIntentId = signal('');
 
   isPreparingPix = signal(false);
+  isCancelingPix = signal(false);
+  pixTimeRemainingSeconds = signal(0);
   pixPayment = signal<PixCheckoutState | null>(null);
   pixCopySuccess = signal(false);
 
@@ -104,6 +111,34 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       }, 5000);
     });
 
+    effect(() => {
+      const message = this.errorMessage();
+      this.clearErrorMessageTimeout();
+
+      if (!message) {
+        return;
+      }
+
+      this.errorMessageTimeout = setTimeout(() => {
+        this.errorMessage.set('');
+        this.errorMessageTimeout = null;
+      }, 7000);
+    });
+
+    effect(() => {
+      const message = this.infoMessage();
+      this.clearInfoMessageTimeout();
+
+      if (!message) {
+        return;
+      }
+
+      this.infoMessageTimeout = setTimeout(() => {
+        this.infoMessage.set('');
+        this.infoMessageTimeout = null;
+      }, 5000);
+    });
+
     void this.initializePage();
   }
 
@@ -114,7 +149,10 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.destroyStripePaymentElement();
     this.clearPaymentPolling();
+    this.clearPixCountdown();
     this.clearPixCopyFeedbackTimeout();
+    this.clearErrorMessageTimeout();
+    this.clearInfoMessageTimeout();
     this.clearSuccessMessageTimeout();
   }
 
@@ -187,6 +225,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
     this.pixCopySuccess.set(false);
     this.clearPixCopyFeedbackTimeout();
     this.clearPaymentPolling();
+    this.clearPixCountdown();
   }
 
   preparePaymentFlow() {
@@ -413,6 +452,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
     this.destroyStripePaymentElement();
     this.debitCheckout.set(null);
     this.clearPaymentPolling();
+    this.clearPixCountdown();
     this.pixCopySuccess.set(false);
     this.clearPixCopyFeedbackTimeout();
     this.isPreparingPix.set(true);
@@ -430,6 +470,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       const qrCodeDataUrl = result.pixQrCode
         ? `data:image/png;base64,${result.pixQrCode}`
         : '';
+      const expiresAt = new Date(Date.now() + this.pixPaymentTimeoutMs).toISOString();
 
       this.pixPayment.set({
         asaasPaymentId: result.asaasPaymentId,
@@ -437,11 +478,13 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
         pixCopyPaste: result.pixCopyPaste || '',
         amount: Number(result.value || this.monthlyPrice),
         dueDate: result.dueDate || null,
+        expiresAt,
         invoiceUrl: result.invoiceUrl || null,
         status: result.status || 'PENDING'
       });
 
       this.infoMessage.set('Pix gerado com sucesso. Agora e so escanear o QR Code ou copiar o codigo abaixo.');
+      this.startPixCountdown(expiresAt);
       this.startPaymentPolling('pix', result.asaasPaymentId);
       await this.loadStatus(true);
       await this.loadManagementData(true);
@@ -506,6 +549,40 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  private startPixCountdown(expiresAt: string) {
+    this.clearPixCountdown();
+
+    const updateRemainingTime = () => {
+      const remainingSeconds = Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      this.pixTimeRemainingSeconds.set(remainingSeconds);
+
+      if (remainingSeconds > 0) {
+        return;
+      }
+
+      this.clearPixCountdown();
+      this.clearPaymentPolling();
+      this.pixPayment.update((current) =>
+        current && ['PENDING', 'AWAITING_RISK_ANALYSIS'].includes(String(current.status || '').toUpperCase())
+          ? { ...current, status: 'EXPIRED' }
+          : current
+      );
+      this.infoMessage.set('O tempo para pagamento deste Pix acabou. Cancele esta cobranca ou gere um novo Pix.');
+    };
+
+    updateRemainingTime();
+    this.pixCountdownInterval = setInterval(updateRemainingTime, 1000);
+  }
+
+  private clearPixCountdown() {
+    if (this.pixCountdownInterval) {
+      clearInterval(this.pixCountdownInterval);
+      this.pixCountdownInterval = null;
+    }
+
+    this.pixTimeRemainingSeconds.set(0);
+  }
+
   async refreshAsaasPaymentStatus(
     method: CheckoutPaymentMethod,
     paymentId?: string,
@@ -555,6 +632,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
 
       if (['RECEIVED', 'CONFIRMED'].includes(String(result.status || '').toUpperCase())) {
         this.clearPaymentPolling();
+        this.clearPixCountdown();
         this.successMessage.set('Pagamento confirmado. O acesso da empresa ja foi atualizado.');
         if (method === 'pix') {
           this.showPaymentConfirmedPopup.set(true);
@@ -566,6 +644,38 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       if (showFeedback) {
         this.errorMessage.set(error.message || 'Nao foi possivel consultar o status do pagamento.');
       }
+    }
+  }
+
+  async cancelPixPayment() {
+    const currentPix = this.pixPayment();
+
+    if (!currentPix?.asaasPaymentId || this.isCancelingPix()) {
+      return;
+    }
+
+    try {
+      this.isCancelingPix.set(true);
+      this.errorMessage.set('');
+      this.infoMessage.set('Cancelando Pix...');
+
+      await this.subscriptionService.cancelAsaasPayment({
+        asaasPaymentId: currentPix.asaasPaymentId
+      });
+
+      this.clearPaymentPolling();
+      this.clearPixCountdown();
+      this.pixPayment.set(null);
+      this.pixCopySuccess.set(false);
+      this.successMessage.set('Pix cancelado com sucesso. Escolha outra forma de pagamento para continuar.');
+      this.infoMessage.set('');
+      await this.loadStatus(true);
+      await this.loadManagementData(true);
+      this.currentStep.set(2);
+    } catch (error: any) {
+      this.errorMessage.set(error.message || 'Nao foi possivel cancelar o Pix.');
+    } finally {
+      this.isCancelingPix.set(false);
     }
   }
 
@@ -597,6 +707,30 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       clearTimeout(this.successMessageTimeout);
       this.successMessageTimeout = null;
     }
+  }
+
+  private clearErrorMessageTimeout() {
+    if (this.errorMessageTimeout) {
+      clearTimeout(this.errorMessageTimeout);
+      this.errorMessageTimeout = null;
+    }
+  }
+
+  private clearInfoMessageTimeout() {
+    if (this.infoMessageTimeout) {
+      clearTimeout(this.infoMessageTimeout);
+      this.infoMessageTimeout = null;
+    }
+  }
+
+  dismissErrorMessage() {
+    this.clearErrorMessageTimeout();
+    this.errorMessage.set('');
+  }
+
+  dismissInfoMessage() {
+    this.clearInfoMessageTimeout();
+    this.infoMessage.set('');
   }
 
   dismissSuccessMessage() {
@@ -797,6 +931,10 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   }
 
   getActiveStatusTitle() {
+    if (this.companyStatus()?.subscription_status === 'trial') {
+      return 'Teste gratis ativo pela Stripe';
+    }
+
     if (this.companyStatus()?.payment_provider === 'stripe') {
       return 'Assinatura mensal ativa pela Stripe';
     }
@@ -807,6 +945,10 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
   getActiveStatusDescription() {
     const validUntil = this.companyStatus()?.subscription_expires_at || this.companyStatus()?.next_due_date || null;
     const validUntilLabel = validUntil ? this.formatDate(validUntil) : 'a data ainda esta sendo sincronizada';
+
+    if (this.companyStatus()?.subscription_status === 'trial') {
+      return `Seu teste gratis esta liberado ate ${validUntilLabel}. A primeira mensalidade sera cobrada automaticamente ao final desse periodo.`;
+    }
 
     if (this.companyStatus()?.payment_provider === 'stripe') {
       return `Seu acesso esta liberado ate ${validUntilLabel}. Se nao houver novo pagamento ou renovacao apos esse prazo, o sistema bloqueia novamente.`;
@@ -939,7 +1081,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
       }
 
       this.infoMessage.set('Cartao confirmado. Criando assinatura mensal...');
-      await this.subscriptionService.createStripeSubscription({
+      const subscriptionResult = await this.subscriptionService.createStripeSubscription({
         companyName: this.companyName,
         email: this.email,
         taxId: this.taxId.replace(/\D/g, ''),
@@ -948,7 +1090,7 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
 
       await this.loadStatus(true);
       await this.loadManagementData(true);
-      this.persistSuccessFlash('Pagamento confirmado com sucesso. A assinatura mensal da Stripe ja esta ativa.');
+      this.persistSuccessFlash(this.getStripeActivationSuccessMessage(subscriptionResult));
       this.destroyStripePaymentElement();
       this.showPaymentEditor.set(false);
       this.currentStep.set(1);
@@ -979,9 +1121,36 @@ export class SubscriptionComponent implements AfterViewInit, OnDestroy {
         return 'Vencido';
       case 'CANCELED':
         return 'Cancelado';
+      case 'EXPIRED':
+        return 'Tempo esgotado';
       default:
         return 'Aguardando pagamento';
     }
+  }
+
+  formatPixCountdown(seconds: number) {
+    const safeSeconds = Math.max(0, Number(seconds || 0));
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainingSeconds = safeSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  }
+
+  isPixPending() {
+    const status = String(this.pixPayment()?.status || '').toUpperCase();
+    return ['PENDING', 'AWAITING_RISK_ANALYSIS'].includes(status);
+  }
+
+  private getStripeActivationSuccessMessage(result: any) {
+    const trialPeriodDays = Number(result?.trialPeriodDays || 14);
+    const trialEnd = result?.trialEnd ? new Date(Number(result.trialEnd) * 1000).toISOString() : null;
+    const trialEndLabel = trialEnd ? this.formatDate(trialEnd) : `daqui a ${trialPeriodDays} dias`;
+
+    if (trialPeriodDays > 0) {
+      return `Cartao verificado com sucesso. Seu teste gratis de ${trialPeriodDays} dias comecou agora; a primeira mensalidade sera cobrada em ${trialEndLabel}.`;
+    }
+
+    return 'Pagamento confirmado com sucesso. A assinatura mensal da Stripe ja esta ativa.';
   }
 
   formatDate(value: string | null | undefined) {

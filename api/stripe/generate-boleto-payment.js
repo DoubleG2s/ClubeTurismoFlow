@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   createStripeClient,
   createSupabaseAdmin,
@@ -31,7 +31,7 @@ async function resolvePayableInvoice(stripe, subscriptionId) {
   return invoices.data.find(isPayableInvoice) || null;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -100,3 +100,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

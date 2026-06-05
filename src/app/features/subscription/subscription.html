@@ -43,24 +43,36 @@
         </div>
       </section>
 
-      <div *ngIf="errorMessage()" class="subscription-alert subscription-alert--error">
-        <strong>Erro:</strong>
-        <span>{{ errorMessage() }}</span>
-      </div>
-
-      <div *ngIf="successMessage()" class="subscription-alert subscription-alert--success">
-        <div class="subscription-alert__content">
-          <strong>Sucesso:</strong>
-          <span>{{ successMessage() }}</span>
+      <div *ngIf="errorMessage() || successMessage() || infoMessage()" class="subscription-toast-stack" aria-live="polite">
+        <div *ngIf="errorMessage()" class="subscription-alert subscription-alert--error">
+          <div class="subscription-alert__content">
+            <strong>Erro:</strong>
+            <span>{{ errorMessage() }}</span>
+          </div>
+          <button type="button" class="subscription-alert__close" (click)="dismissErrorMessage()" aria-label="Fechar">
+            x
+          </button>
         </div>
-        <button type="button" class="subscription-alert__close" (click)="dismissSuccessMessage()" aria-label="Fechar">
-          x
-        </button>
-      </div>
 
-      <div *ngIf="infoMessage()" class="subscription-alert subscription-alert--info">
-        <strong>Atualizacao:</strong>
-        <span>{{ infoMessage() }}</span>
+        <div *ngIf="successMessage()" class="subscription-alert subscription-alert--success">
+          <div class="subscription-alert__content">
+            <strong>Sucesso:</strong>
+            <span>{{ successMessage() }}</span>
+          </div>
+          <button type="button" class="subscription-alert__close" (click)="dismissSuccessMessage()" aria-label="Fechar">
+            x
+          </button>
+        </div>
+
+        <div *ngIf="infoMessage()" class="subscription-alert subscription-alert--info">
+          <div class="subscription-alert__content">
+            <strong>Atualizacao:</strong>
+            <span>{{ infoMessage() }}</span>
+          </div>
+          <button type="button" class="subscription-alert__close" (click)="dismissInfoMessage()" aria-label="Fechar">
+            x
+          </button>
+        </div>
       </div>
 
       <div *ngIf="showPaymentConfirmedPopup()" class="subscription-confirmation-overlay" role="dialog" aria-modal="true" aria-labelledby="paymentConfirmedTitle">
@@ -314,7 +326,7 @@
               <div class="subscription-price-card">
                 <p class="subscription-price-card__label">Valor mensal</p>
                 <strong class="subscription-price-card__value">{{ formatCurrency(monthlyPrice) }}</strong>
-                <p class="subscription-price-card__text">Cobrado mensalmente no cartao de credito.</p>
+                <p class="subscription-price-card__text">No cartao, a primeira cobranca acontece apos 14 dias gratis.</p>
               </div>
             </div>
 
@@ -365,7 +377,7 @@
                   <span class="subscription-method-card__badge">Recomendado</span>
                 </div>
                 <h3 class="subscription-method-card__title">Cartao de credito</h3>
-                <p class="subscription-method-card__text">Ative a cobranca recorrente mensal direto pela Stripe com experiencia integrada.</p>
+                <p class="subscription-method-card__text">Verifique o cartao agora, use 14 dias gratis e deixe a cobranca mensal automatica pela Stripe.</p>
               </button>
 
               <button
@@ -482,7 +494,7 @@
                 [disabled]="!stripeReady() || isSubmittingStripe()"
                 (click)="confirmStripePaymentAndCreateSubscription()"
               >
-                {{ isSubmittingStripe() ? 'Confirmando...' : 'Confirmar pagamento' }}
+                {{ isSubmittingStripe() ? 'Confirmando...' : 'Verificar cartao e iniciar teste' }}
               </button>
             </div>
 
@@ -502,6 +514,11 @@
                   <div class="subscription-pix-badges">
                     <span class="subscription-pill subscription-pill--amber">Pix</span>
                     <span class="subscription-pill">{{ getPixStatusLabel() }}</span>
+                  </div>
+
+                  <div class="subscription-pix-timer" [class.subscription-pix-timer--expired]="pixTimeRemainingSeconds() === 0">
+                    <span>Tempo para pagar</span>
+                    <strong>{{ formatPixCountdown(pixTimeRemainingSeconds()) }}</strong>
                   </div>
 
                   <div class="subscription-payment-stats">
@@ -530,6 +547,14 @@
                     </button>
                     <button type="button" class="subscription-button subscription-button--ghost" (click)="refreshAsaasPaymentStatus('pix', pixPayment()?.asaasPaymentId, true)">
                       Atualizar status
+                    </button>
+                    <button
+                      type="button"
+                      class="subscription-button subscription-button--danger"
+                      (click)="cancelPixPayment()"
+                      [disabled]="isCancelingPix() || !isPixPending()"
+                    >
+                      {{ isCancelingPix() ? 'Cancelando...' : 'Cancelar Pix' }}
                     </button>
                   </div>
                 </div>

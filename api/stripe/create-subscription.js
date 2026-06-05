@@ -5,14 +5,21 @@
   assertNoBlockingSubscription,
   ensureStripeCustomerForCompany,
   getCompanyById,
+  hasBlockingCompanyAccess,
   normalizeTaxId,
   resolveAuthorizedCompanyContext,
   syncCompanyFromSubscription
 } = require('./_lib');
 
-const STRIPE_TRIAL_PERIOD_DAYS = 0;
+const DEFAULT_STRIPE_TRIAL_PERIOD_DAYS = 14;
 
-export default async function handler(req, res) {
+function getStripeTrialPeriodDays() {
+  const value = Number(process.env.STRIPE_TRIAL_PERIOD_DAYS || DEFAULT_STRIPE_TRIAL_PERIOD_DAYS);
+
+  return Number.isFinite(value) && value >= 0 ? Math.floor(value) : DEFAULT_STRIPE_TRIAL_PERIOD_DAYS;
+}
+
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -40,6 +47,12 @@ export default async function handler(req, res) {
 
     const { companyId } = await resolveAuthorizedCompanyContext(req, supabase, requestedCompanyId);
     const company = await getCompanyById(supabase, companyId);
+
+    if (hasBlockingCompanyAccess(company)) {
+      return res.status(409).json({
+        error: 'Esta agencia ja possui uma assinatura em vigor. Use o portal para gerenciar.'
+      });
+    }
 
     // Nota humana:
     // mesmo no fluxo embutido, a empresa nao pode criar outra recorrencia mensal.
@@ -69,7 +82,9 @@ export default async function handler(req, res) {
     }
 
     // A assinatura nasce aqui, usando o payment method salvo pelo SetupIntent.
-    // Assim a cobranca segue com o Billing da Stripe, mas o formulario continua embutido no app.
+    // O trial de 14 dias comeca depois da verificacao do cartao.
+    // A primeira mensalidade e cobrada pela Stripe no fim do trial, e as proximas seguem o ciclo mensal do price.
+    const trialPeriodDays = getStripeTrialPeriodDays();
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [
@@ -77,6 +92,7 @@ export default async function handler(req, res) {
           price: priceId
         }
       ],
+      trial_period_days: trialPeriodDays || undefined,
       default_payment_method:
         typeof setupIntent.payment_method === 'string'
           ? setupIntent.payment_method
@@ -86,13 +102,10 @@ export default async function handler(req, res) {
       },
       metadata: {
         companyId,
-        taxId: cleanTaxId
+        taxId: cleanTaxId,
+        trialPeriodDays: String(trialPeriodDays)
       }
     });
-
-    if (STRIPE_TRIAL_PERIOD_DAYS > 0) {
-      subscription.trial_period_days = STRIPE_TRIAL_PERIOD_DAYS;
-    }
 
     await syncCompanyFromSubscription(
       supabase,
@@ -105,7 +118,9 @@ export default async function handler(req, res) {
       success: true,
       subscriptionId: subscription.id,
       customerId: customer.id,
-      status: subscription.status
+      status: subscription.status,
+      trialEnd: subscription.trial_end || null,
+      trialPeriodDays
     });
   } catch (error) {
     console.error('[Stripe] Erro ao criar assinatura embutida:', error);
@@ -122,4 +137,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
 

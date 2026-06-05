@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   addDaysToIso,
   createSupabaseAdmin,
@@ -253,3 +253,4 @@ module.exports = {
   upsertAsaasInvoiceRecord,
   validateAsaasWebhookToken
 };
+

@@ -1,14 +1,15 @@
-const {
+﻿const {
   addCors,
   createStripeClient,
   createSupabaseAdmin,
   ensureStripeCustomerForCompany,
   getCompanyById,
+  hasBlockingCompanyAccess,
   normalizeTaxId,
   resolveAuthorizedCompanyContext
 } = require('./_lib');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -40,10 +41,7 @@ export default async function handler(req, res) {
     const { companyId } = await resolveAuthorizedCompanyContext(req, supabase, requestedCompanyId);
     const company = await getCompanyById(supabase, companyId);
 
-    if (
-      (company.stripe_subscription_id || company.asaas_subscription_id) &&
-      ['active', 'trial'].includes(String(company.subscription_status || '').toLowerCase())
-    ) {
+    if (hasBlockingCompanyAccess(company)) {
       return res.status(400).json({
         error: 'Esta agencia ja possui uma assinatura em vigor. Use o portal para gerenciar.'
       });
@@ -83,3 +81,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

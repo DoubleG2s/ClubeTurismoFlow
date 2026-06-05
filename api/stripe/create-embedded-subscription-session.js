@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   assertNoBlockingSubscription,
   createStripeClient,
@@ -15,7 +15,7 @@ function getStripeMonthlyPriceId() {
   return process.env.STRIPE_MONTHLY_PRICE_ID || process.env.STRIPE_PRICE_ID || '';
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -120,3 +120,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

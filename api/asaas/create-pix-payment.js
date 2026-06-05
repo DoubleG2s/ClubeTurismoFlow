@@ -1,4 +1,4 @@
-const {
+﻿const {
   addCors,
   asaasRequest,
   createSupabaseAdmin,
@@ -34,7 +34,7 @@ function normalizeErrorText(value) {
     .toLowerCase();
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   addCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -138,3 +138,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

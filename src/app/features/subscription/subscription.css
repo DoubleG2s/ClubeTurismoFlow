@@ -95,17 +95,29 @@
   height: 18px;
 }
 
+.subscription-toast-stack {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 120;
+  display: grid;
+  gap: 12px;
+  width: min(520px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
 .subscription-alert {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  border-radius: 22px;
+  border-radius: 18px;
   padding: 18px 20px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: #ffffff;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.04);
-  margin-bottom: 16px;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.16);
+  animation: subscription-toast-in 0.22s ease-out;
+  pointer-events: auto;
 }
 
 .subscription-alert strong {
@@ -116,6 +128,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  min-width: 0;
+  line-height: 1.45;
 }
 
 .subscription-alert__close {
@@ -125,6 +139,7 @@
   cursor: pointer;
   font-size: 20px;
   line-height: 1;
+  flex: 0 0 auto;
 }
 
 .subscription-alert--error {
@@ -140,6 +155,18 @@
 .subscription-alert--info {
   color: #9a5b00;
   background: #fff7ed;
+}
+
+@keyframes subscription-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .subscription-confirmation-overlay {
@@ -549,6 +576,16 @@
   color: #0f172a;
   background: #ffffff;
   border-color: rgba(15, 23, 42, 0.08);
+}
+
+.subscription-button--danger {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: rgba(220, 38, 38, 0.18);
+}
+
+.subscription-button--danger:hover:not(:disabled) {
+  background: #fee2e2;
 }
 
 .subscription-button--full {
@@ -967,6 +1004,39 @@
   background: #eff6ff;
   border-color: rgba(59, 130, 246, 0.16);
   color: #2563eb;
+}
+
+.subscription-pix-timer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.subscription-pix-timer span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subscription-pix-timer strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: #f97316;
+}
+
+.subscription-pix-timer--expired {
+  border-color: rgba(220, 38, 38, 0.2);
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.subscription-pix-timer--expired strong {
+  color: #dc2626;
 }
 
 .subscription-payment-stats {
@@ -1388,6 +1458,13 @@
 }
 
 @media (max-width: 640px) {
+  .subscription-toast-stack {
+    top: 14px;
+    right: 14px;
+    left: 14px;
+    width: auto;
+  }
+
   .subscription-hero {
     padding-top: 16px;
   }

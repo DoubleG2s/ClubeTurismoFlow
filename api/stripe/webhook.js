@@ -1,4 +1,5 @@
-const {
+﻿const {
+  addCors,
   createStripeClient,
   createSupabaseAdmin,
   getCompanyByCustomerId,
@@ -12,7 +13,7 @@ const {
   upsertInvoiceRecord
 } = require('./_lib');
 
-export const config = {
+const config = {
   api: {
     bodyParser: false
   }
@@ -21,13 +22,17 @@ export const config = {
 async function buildVerifiedEvent(stripe, req) {
   const signature = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const rawBody = await readRawBody(req);
 
   if (signature && webhookSecret) {
-    const rawBody = await readRawBody(req);
     return stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   }
 
-  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  const body = rawBody?.length
+    ? JSON.parse(rawBody.toString('utf8'))
+    : typeof req.body === 'string'
+      ? JSON.parse(req.body)
+      : req.body;
 
   if (!body?.id) {
     throw new Error('Evento Stripe invalido.');
@@ -38,8 +43,7 @@ async function buildVerifiedEvent(stripe, req) {
 
 async function persistStripeInvoice(supabase, companyId, invoice, paymentMethod = 'credit_card') {
   await upsertInvoiceRecord(supabase, companyId, {
-    stripe_payment_id:
-      typeof invoice.payment_intent === 'string' ? invoice.payment_intent : invoice.payment_intent?.id || invoice.id,
+    stripe_payment_id: invoice.id,
     stripe_subscription_id:
       typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription?.id || null,
     payment_provider: 'stripe',
@@ -81,7 +85,13 @@ async function resolveCompanyForInvoice(supabase, invoice) {
   return null;
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
+  addCors(res);
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -185,6 +195,19 @@ export default async function handler(req, res) {
         break;
       }
 
+      case 'invoice.finalized':
+      case 'invoice.updated': {
+        const invoice = event.data.object;
+        const company = await resolveCompanyForInvoice(supabase, invoice);
+
+        if (!company) {
+          break;
+        }
+
+        await persistStripeInvoice(supabase, company.id, invoice);
+        break;
+      }
+
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         const company = await resolveCompanyForInvoice(supabase, invoice);
@@ -199,6 +222,29 @@ export default async function handler(req, res) {
           payment_method: 'credit_card',
           payment_status: 'failed',
           subscription_status: 'past_due'
+        });
+        break;
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        const subscription = event.data.object;
+        const company =
+          (await getCompanyBySubscriptionId(supabase, subscription.id)) ||
+          (await getCompanyByCustomerId(
+            supabase,
+            typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id
+          ));
+
+        if (!company) {
+          break;
+        }
+
+        await updateCompanySubscription(supabase, company.id, {
+          payment_provider: 'stripe',
+          payment_method: 'credit_card',
+          payment_status: 'pending',
+          subscription_status: 'trial',
+          next_due_date: subscription.trial_end ? toIsoFromUnix(subscription.trial_end) : company.next_due_date
         });
         break;
       }
@@ -240,3 +286,7 @@ export default async function handler(req, res) {
     });
   }
 }
+
+handler.config = config;
+module.exports = handler;
+
