@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy, ViewChild, effect } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
@@ -50,6 +50,7 @@ import { QuoteService } from '@services/quote.service';
 import { ReservationService } from '@services/reservation.service';
 import { SubscriptionService } from '@services/subscription.service';
 import { expandCollapse, listStagger } from '@app/animations/reservation.animations';
+import { animate } from 'motion';
 
 @Component({
   selector: 'app-root',
@@ -79,7 +80,7 @@ import { expandCollapse, listStagger } from '@app/animations/reservation.animati
   templateUrl: './app.component.html',
   animations: [expandCollapse, listStagger],
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private flightService = inject(FlightService);
   private reservationService = inject(ReservationService);
   private quoteService = inject(QuoteService);
@@ -93,12 +94,50 @@ export class AppComponent implements OnInit, OnDestroy {
   // ViewChild para controlar o formulÃ¡rio de cotaÃ§Ã£o
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
   @ViewChild(SubscriptionComponent) subscriptionView?: SubscriptionComponent;
+  @ViewChild('sidebarEl') sidebarEl?: ElementRef<HTMLElement>;
 
   // UI state
   sidebarOpen = signal<boolean>(false);
+  sidebarCollapsed = signal<boolean>(false);
 
-  toggleSidebar() { this.sidebarOpen.update(v => !v); }
-  closeSidebar()  { this.sidebarOpen.set(false); }
+  private readonly SIDEBAR_EXPANDED = '220px';
+  private readonly SIDEBAR_COLLAPSED = '56px';
+
+  ngAfterViewInit() {
+    if (this.sidebarEl?.nativeElement) {
+      this.sidebarEl.nativeElement.style.width = this.SIDEBAR_EXPANDED;
+    }
+  }
+
+  toggleSidebar() {
+    if (window.innerWidth >= 1024) {
+      this.toggleCollapse();
+    } else {
+      this.sidebarOpen.update(v => !v);
+    }
+  }
+
+  toggleCollapse() {
+    const sidebar = this.sidebarEl?.nativeElement;
+    if (!sidebar) return;
+
+    // Ensure inline width is set so Motion has a concrete starting value
+    if (!sidebar.style.width) {
+      sidebar.style.width = getComputedStyle(sidebar).width;
+    }
+
+    const newCollapsed = !this.sidebarCollapsed();
+    this.sidebarCollapsed.set(newCollapsed);
+
+    // Motion drives the sidebar width; CSS transitions handle label visibility
+    animate(
+      sidebar,
+      { width: newCollapsed ? this.SIDEBAR_COLLAPSED : this.SIDEBAR_EXPANDED },
+      { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+    );
+  }
+
+  closeSidebar() { this.sidebarOpen.set(false); }
 
   // Breadcrumb label for topbar
   activeTabLabel = computed(() => {
