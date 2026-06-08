@@ -279,9 +279,13 @@ export class HotelEmailGeneratorComponent {
   fillFromReservation(res: Reservation) {
     this.data.checkIn = formatPtBrDateToInputValue(res.date);
     this.data.checkOut = formatPtBrDateToInputValue(res.return_date || '');
+    this.data.hotelName = res.nome_hotel || '';
     this.data.apartments = [this.createNewApartment('APTO 1')];
-    
-    // Fill guests
+
+    if (res.localizador_hotel) this.data.apartments[0].locator = res.localizador_hotel;
+    if (res.quarto) this.data.apartments[0].description = res.quarto;
+    if (res.regime_alimentacao) this.data.apartments[0].pension = res.regime_alimentacao;
+
     if (res.passengers && res.passengers.length > 0) {
       this.data.apartments[0].guests = res.passengers.map(p => ({ name: p }));
       this.data.apartments[0].adults = res.passengers.length;
