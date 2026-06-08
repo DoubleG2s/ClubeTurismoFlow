@@ -72,101 +72,121 @@
       <!-- Navigation -->
       <nav class="ct-sb-nav">
 
-        <!-- Operação -->
-        <div class="ct-sb-section">
-          <div class="ct-sb-section-label">Operação</div>
-
-          <!-- Voos -->
-          <button class="ct-sb-item" [class.active]="activeTab() === 'voos'" title="Voos"
-                  (click)="switchTab('voos'); closeSidebar()">
-            <lucide-icon name="plane" class="w-4 h-4 flex-shrink-0"></lucide-icon>
-            <span class="ct-sb-label">Voos</span>
-          </button>
-
-          <!-- Gestão de Reservas -->
-          <button class="ct-sb-item" [class.active]="activeTab() === 'reservas'" title="Gestão de Reservas"
-                  (click)="switchTab('reservas'); closeSidebar()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-              <rect x="8" y="2" width="8" height="4" rx="1"/>
+        @if (isLockedOut()) {
+          <!-- ── Locked state: aviso + acesso apenas à Assinatura ── -->
+          <div class="ct-sb-lock-notice">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0 mt-px" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            <span class="ct-sb-label">Gestão de Reservas</span>
-          </button>
+            <span class="ct-sb-label text-[11px] leading-snug">Assinatura inativa. Renove para acessar o sistema.</span>
+          </div>
 
-          <!-- Cotações -->
-          <button class="ct-sb-item" [class.active]="activeTab() === 'cotacoes'" title="Cotações"
-                  (click)="switchTab('cotacoes'); closeSidebar()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            <span class="ct-sb-label">Cotações</span>
-          </button>
-        </div>
+          <div class="ct-sb-section">
+            <button class="ct-sb-item" [class.active]="activeTab() === 'assinatura'" title="Assinatura"
+                    (click)="switchTab('assinatura'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
+              <span class="ct-sb-label">Assinatura</span>
+            </button>
+          </div>
 
-        <!-- CRM -->
-        <div class="ct-sb-section">
-          <div class="ct-sb-section-label">CRM</div>
+        } @else {
+          <!-- ── Acesso completo: usuário com assinatura ativa ── -->
 
-          <!-- Hotel -->
-          <button class="ct-sb-item" [class.active]="activeTab() === 'hotel'" title="Hotel"
-                  (click)="switchTab('hotel'); closeSidebar()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"/>
-              <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"/>
-              <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"/>
-              <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
-            </svg>
-            <span class="ct-sb-label">Hotel</span>
-          </button>
-        </div>
+          <!-- Operação -->
+          <div class="ct-sb-section">
+            <div class="ct-sb-section-label">Operação</div>
 
-        <!-- Sistema -->
-        @if (authService.isAdmin()) {
-        <div class="ct-sb-section">
-          <div class="ct-sb-section-label">Sistema</div>
+            <button class="ct-sb-item" [class.active]="activeTab() === 'voos'" title="Voos"
+                    (click)="switchTab('voos'); closeSidebar()">
+              <lucide-icon name="plane" class="w-4 h-4 flex-shrink-0"></lucide-icon>
+              <span class="ct-sb-label">Voos</span>
+            </button>
 
-          <!-- Admin Master -->
-          <button class="ct-sb-item" [class.active]="activeTab() === 'admin'" title="Administração"
-                  (click)="switchTab('admin'); closeSidebar()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            <span class="ct-sb-label">Administração</span>
-          </button>
+            <button class="ct-sb-item" [class.active]="activeTab() === 'reservas'" title="Gestão de Reservas"
+                    (click)="switchTab('reservas'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                <rect x="8" y="2" width="8" height="4" rx="1"/>
+              </svg>
+              <span class="ct-sb-label">Gestão de Reservas</span>
+            </button>
 
-          <!-- Usuários -->
-          <button class="ct-sb-item" [class.active]="activeTab() === 'usuarios'" title="Usuários"
-                  (click)="switchTab('usuarios'); closeSidebar()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="8.5" cy="7" r="4"/>
-              <line x1="20" y1="8" x2="20" y2="14"/>
-              <line x1="23" y1="11" x2="17" y2="11"/>
-            </svg>
-            <span class="ct-sb-label">Usuários</span>
-          </button>
-        </div>
-        }
+            <button class="ct-sb-item" [class.active]="activeTab() === 'cotacoes'" title="Cotações"
+                    (click)="switchTab('cotacoes'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              <span class="ct-sb-label">Cotações</span>
+            </button>
+          </div>
 
-        <!-- Assinatura (for non-locked users) -->
-        @if (!isLockedOut()) {
-        <div class="ct-sb-section">
-          <button class="ct-sb-item" [class.active]="activeTab() === 'assinatura'" title="Assinatura"
-                  (click)="switchTab('assinatura'); closeSidebar()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="5" width="20" height="14" rx="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-            <span class="ct-sb-label">Assinatura</span>
-          </button>
-        </div>
+          <!-- CRM -->
+          <div class="ct-sb-section">
+            <div class="ct-sb-section-label">CRM</div>
+
+            <button class="ct-sb-item" [class.active]="activeTab() === 'hotel'" title="Hotel"
+                    (click)="switchTab('hotel'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"/>
+                <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"/>
+                <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"/>
+                <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+              </svg>
+              <span class="ct-sb-label">Hotel</span>
+            </button>
+          </div>
+
+          <!-- Sistema (admin only) -->
+          @if (authService.isAdmin()) {
+          <div class="ct-sb-section">
+            <div class="ct-sb-section-label">Sistema</div>
+
+            <button class="ct-sb-item" [class.active]="activeTab() === 'admin'" title="Administração"
+                    (click)="switchTab('admin'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span class="ct-sb-label">Administração</span>
+            </button>
+
+            <button class="ct-sb-item" [class.active]="activeTab() === 'usuarios'" title="Usuários"
+                    (click)="switchTab('usuarios'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="8.5" cy="7" r="4"/>
+                <line x1="20" y1="8" x2="20" y2="14"/>
+                <line x1="23" y1="11" x2="17" y2="11"/>
+              </svg>
+              <span class="ct-sb-label">Usuários</span>
+            </button>
+          </div>
+          }
+
+          <!-- Assinatura -->
+          <div class="ct-sb-section">
+            <button class="ct-sb-item" [class.active]="activeTab() === 'assinatura'" title="Assinatura"
+                    (click)="switchTab('assinatura'); closeSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
+              <span class="ct-sb-label">Assinatura</span>
+            </button>
+          </div>
+
         }
 
       </nav>

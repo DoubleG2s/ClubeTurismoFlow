@@ -342,6 +342,24 @@
     /* ── Nav ──────────────────────────────────────────────────── */
     .ct-sb-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 6px 8px; }
     .ct-sb-section { padding: 8px 0 2px; }
+
+    /* ── Locked state notice ──────────────────────────────────── */
+    .ct-sb-lock-notice {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin: 8px 0 4px;
+      padding: 9px 10px;
+      background: var(--warn-50, #fff8ed);
+      border: 1px solid var(--warn-200, #fde7a4);
+      border-radius: 7px;
+      color: var(--warn-700, #92530a);
+      font-size: 11px; font-weight: 500; line-height: 1.45;
+      overflow: hidden;
+    }
+    .ct-sidebar.is-collapsed .ct-sb-lock-notice {
+      padding: 8px;
+      justify-content: center;
+      gap: 0;
+    }
     .ct-sb-section-label {
       padding: 0 6px 5px;
       font-size: 10px; font-weight: 600;
