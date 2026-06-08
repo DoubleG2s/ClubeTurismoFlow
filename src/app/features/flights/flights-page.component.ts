@@ -11,6 +11,8 @@ import { Flight } from '../../models/flight';
   templateUrl: './flights-page.component.html'
 })
 export class FlightsPageComponent {
+  formOpen = false;
+
   @Input() flights: Flight[] = [];
   @Input() prefilledFlightData: Partial<Flight> | null = null;
 

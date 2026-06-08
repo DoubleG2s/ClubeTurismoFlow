@@ -1,203 +1,157 @@
-<div
-  class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:shadow-purple-100 transition-all duration-300 flex flex-col h-full group">
+<div class="q-card q-theme h-full flex flex-col">
 
-  <!-- Header: Supplier & Amount -->
-  <div class="p-5 border-b border-slate-100 flex justify-between items-start bg-slate-50/50 rounded-t-2xl">
+  <!-- Header -->
+  <div class="res-card__head flex justify-between items-start gap-3">
     <div class="flex-1 min-w-0 pr-2">
-      <p class="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1 truncate">{{ quote.supplier }}</p>
-      <h3 class="text-lg font-bold text-slate-800 leading-tight truncate" title="{{ quote.title }}">{{ quote.title }}
-      </h3>
+      <p class="eyebrow mb-1 truncate">{{ quote.supplier }}</p>
+      <h3 class="text-base font-bold truncate" style="color: var(--n-900);" title="{{ quote.title }}">{{ quote.title }}</h3>
       @if (quote.subtitle) {
-      <p class="text-xs text-slate-500 mt-0.5 truncate">{{ quote.subtitle }}</p>
+        <p class="text-xs truncate mt-0.5" style="color: var(--n-500);">{{ quote.subtitle }}</p>
       }
     </div>
 
-    <div class="text-right whitespace-nowrap">
-      <!-- Main Amount (Display first option or range) -->
+    <div class="text-right whitespace-nowrap flex-shrink-0">
       @if (totalOptions() > 1) {
         @if (lowestPrice() !== null) {
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">A partir de</div>
-          <div class="font-bold text-xl text-purple-700 font-mono tracking-tight">
+          <div class="eyebrow mb-0.5">A partir de</div>
+          <div class="text-xl font-bold font-mono" style="color: var(--brand-700); letter-spacing: -0.02em;">
             {{ formatCurrencyValue(lowestPrice()!) }}
           </div>
         } @else {
-          <div class="text-sm text-slate-400 font-bold">Sem valor</div>
+          <span class="eyebrow" style="color: var(--n-400);">Sem valor</span>
         }
       } @else {
         @if (mainHotel(); as hotel) {
-          <div class="font-bold text-xl text-purple-700 font-mono tracking-tight">
+          <div class="text-xl font-bold font-mono" style="color: var(--brand-700); letter-spacing: -0.02em;">
             {{ formatCurrencyValue(hotel.amount, hotel.currency) }}
           </div>
         } @else {
-          <div class="text-sm text-slate-400 font-bold">Sem valor</div>
+          <span class="eyebrow" style="color: var(--n-400);">Sem valor</span>
         }
       }
     </div>
   </div>
 
   <!-- Body -->
-  <div class="p-5 space-y-4 flex-grow">
+  <div class="res-card__body">
 
     @if (totalOptions() > 1) {
-      <!-- MULTI OPTIONS SUMMARY -->
-      <div class="flex items-center gap-2 mb-2">
-        <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-black rounded-md uppercase tracking-wider">
-          {{ totalOptions() }} Opções Disponíveis
-        </span>
+      <div>
+        <span class="ct-pill ct-pill-brand">{{ totalOptions() }} Opções</span>
       </div>
 
-      <!-- General Dates (Based on first option) -->
-      <div class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
+      <div class="flex items-center gap-2 text-sm rounded-lg px-3 py-2" style="background: var(--n-50); border: 1px solid var(--n-150); color: var(--n-600);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" style="color: var(--brand-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
         <span class="font-semibold">{{ mainOption().check_in }}</span>
-        <span class="text-slate-400">-></span>
+        <span style="color: var(--n-400);">→</span>
         <span class="font-semibold">{{ mainOption().check_out }}</span>
       </div>
 
-      <!-- Hotels Summary -->
-      <div class="text-sm text-slate-600 mt-3">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Inclui opções como:</p>
-        <ul class="list-disc list-inside space-y-0.5">
+      <div>
+        <p class="eyebrow mb-1.5">Inclui opções como:</p>
+        <ul class="space-y-0.5">
           @for (name of uniqueHotelNames(); track name) {
-            <li class="font-medium text-slate-700 truncate" title="{{ name }}">{{ name }}</li>
+            <li class="text-sm font-medium truncate" style="color: var(--n-700);" title="{{ name }}">{{ name }}</li>
           }
           @if (uniqueHotelNames().length === 0) {
-            <li class="text-slate-400 italic">Hotéis a definir</li>
+            <li class="text-sm italic" style="color: var(--n-400);">Hotéis a definir</li>
           }
         </ul>
       </div>
 
     } @else {
-      <!-- SINGLE OPTION (Legacy/Simple) -->
-      
-      <!-- Dates -->
-      <div class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
+      <div class="flex items-center gap-2 text-sm rounded-lg px-3 py-2" style="background: var(--n-50); border: 1px solid var(--n-150); color: var(--n-600);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" style="color: var(--brand-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
         <span class="font-semibold">{{ mainOption().check_in }}</span>
-        <span class="text-slate-400">-></span>
+        <span style="color: var(--n-400);">→</span>
         <span class="font-semibold">{{ mainOption().check_out }}</span>
       </div>
 
-      <!-- Hotel & Location Info -->
       @if (mainHotel(); as hotel) {
-      <div class="flex items-start gap-3">
-        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18" />
-            <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2" />
-            <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2" />
-            <path d="M10 6h4" />
-            <path d="M10 10h4" />
-            <path d="M10 14h4" />
-            <path d="M10 18h4" />
-          </svg>
+        <div class="flex items-start gap-3">
+          <div class="p-2 rounded-lg flex-shrink-0" style="background: var(--brand-50); color: var(--brand-600);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"/><path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"/><path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"/>
+              <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-sm font-bold truncate" style="color: var(--n-900);" title="{{ hotel.hotel_name }}">{{ hotel.hotel_name }}</h4>
+            <p class="text-xs font-medium truncate" style="color: var(--n-500);">{{ hotel.regime }}</p>
+            <p class="text-xs italic truncate mt-0.5" style="color: var(--n-400);">{{ hotel.accommodation }}</p>
+          </div>
         </div>
-        <div class="min-w-0">
-          <h4 class="font-bold text-slate-800 text-sm truncate" title="{{ hotel.hotel_name }}">{{ hotel.hotel_name }}</h4>
-          <p class="text-xs text-slate-500 font-medium truncate">{{ hotel.regime }}</p>
-          <p class="text-xs text-slate-500 mt-1 italic truncate">{{ hotel.accommodation }}</p>
-        </div>
-      </div>
       } @else {
-        <div class="flex items-center gap-3 opacity-50">
-          <div class="p-2 bg-slate-100 text-slate-400 rounded-lg shrink-0">
+        <div class="flex items-center gap-3 opacity-40">
+          <div class="p-2 rounded-lg flex-shrink-0" style="background: var(--n-100); color: var(--n-400);">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           </div>
-          <div class="text-xs font-medium text-slate-400 italic">Sem hotel definido</div>
+          <div class="text-xs font-medium italic" style="color: var(--n-400);">Sem hotel definido</div>
         </div>
       }
     }
 
-    <!-- Pax Info -->
-    <div class="flex items-center gap-1.5 text-xs font-medium text-slate-500 pt-2 border-t border-slate-50">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <div class="flex items-center gap-1.5 pt-2" style="border-top: 1px solid var(--n-100);">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
-      {{ mainOption().adults }} Adultos, {{ mainOption().children }} Crianças
+      <span class="text-xs font-medium" style="color: var(--n-500);">{{ mainOption().adults }} Adultos, {{ mainOption().children }} Crianças</span>
     </div>
-
   </div>
 
-  <!-- Footer Actions -->
-  <!-- Footer Actions -->
-  <div class="p-4 border-t border-slate-100 flex flex-wrap gap-2 bg-slate-50/30 rounded-b-2xl">
-    <button (click)="onShowProposal($event)"
-      class="flex-1 min-w-[30%] py-2 rounded-lg text-xs font-bold text-indigo-600 bg-white border border-slate-200 hover:text-indigo-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm flex items-center justify-center gap-1.5"
-      title="Abrir proposta">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  <!-- Footer -->
+  <div class="res-card__foot flex flex-wrap gap-1.5">
+    <button (click)="onShowProposal($event)" class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center" title="Abrir proposta" style="min-width: 30%;">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Ver
     </button>
 
-    <!-- Public Link Button -->
     <button (click)="onGeneratePublicLink($event)" [disabled]="isGeneratingLink()"
-      class="flex-1 min-w-[30%] py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 border"
-      [ngClass]="quote.is_public ? 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-purple-600'"
+      class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center" style="min-width: 30%;"
+      [style.background]="quote.is_public ? 'var(--brand-50)' : ''"
+      [style.color]="quote.is_public ? 'var(--brand-700)' : ''"
+      [style.border-color]="quote.is_public ? 'var(--brand-200)' : ''"
       title="Link para Cliente">
-      
       @if (isGeneratingLink()) {
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       } @else {
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
         </svg>
       }
       {{ quote.is_public ? 'Copiar' : 'Gerar Link' }}
     </button>
-    
-    @if(quote.is_public) {
-      <button (click)="onRevokePublicLink($event)" class="px-2 py-2 rounded-lg text-xs font-bold text-red-400 bg-white border border-slate-200 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm" title="Revogar acesso público">
+
+    @if (quote.is_public) {
+      <button (click)="onRevokePublicLink($event)" class="ct-icon-btn" style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px; color: var(--danger-500);" title="Revogar acesso público">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
       </button>
     }
 
-    <!-- View Button (New) -->
-    <button (click)="onView($event)"
-      class="px-3 py-2 rounded-lg text-xs font-bold text-emerald-600 bg-white border border-slate-200 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50 transition-all shadow-sm flex items-center justify-center"
-      title="Visualizar e Copiar Texto">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-        <circle cx="12" cy="12" r="3" />
+    <button (click)="onView($event)" class="ct-icon-btn" style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px;" title="Visualizar e Copiar Texto">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
       </svg>
     </button>
 
-    <button (click)="edit.emit(quote.id)"
-      class="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 transition-all shadow-sm"
-      title="Editar">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-        <path d="m15 5 4 4" />
+    <button (click)="edit.emit(quote.id)" class="ct-icon-btn" style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px;" title="Editar">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
       </svg>
     </button>
-    <button (click)="onDelete($event)"
-      class="px-3 py-2 rounded-lg text-xs font-bold text-slate-400 bg-white border border-slate-200 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm"
-      title="Excluir">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 6h18" />
-        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+
+    <button (click)="onDelete($event)" class="ct-icon-btn" style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px; color: var(--danger-500);" title="Excluir">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
       </svg>
     </button>
   </div>
@@ -205,98 +159,56 @@
 
 <!-- View Modal -->
 @if (showViewModal()) {
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="closeViewModal()"></div>
-
-  <div
-    class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh] animate-fade-in border border-slate-100">
-    <!-- Header -->
-    <div class="flex items-center justify-between p-5 border-b border-slate-100">
-      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  <div class="ct-modal-back" role="dialog" aria-modal="true">
+    <div class="ct-modal max-w-2xl">
+      <div class="ct-modal-head">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color: var(--brand-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
-        Texto Gerado
-      </h3>
-      <button (click)="closeViewModal()" class="text-slate-400 hover:text-slate-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Content -->
-    <div class="p-0 flex-grow overflow-hidden relative group">
-      <textarea readonly
-        class="w-full h-[50vh] p-5 text-sm font-mono text-slate-700 bg-slate-50 resize-none focus:outline-none"
-        [value]="generatedText()"></textarea>
-    </div>
-
-    <!-- Footer -->
-    <div class="p-5 border-t border-slate-100 flex justify-end gap-3 bg-white rounded-b-2xl">
-      <button (click)="closeViewModal()"
-        class="px-5 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition-colors">
-        Fechar
-      </button>
-      <button (click)="copyToClipboard()"
-        class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-        </svg>
-        Copiar Texto
-      </button>
+        <h3 class="text-base font-bold flex-1" style="color: var(--n-900);">Texto Gerado</h3>
+        <button (click)="closeViewModal()" class="ct-icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="ct-modal-body p-0 overflow-hidden">
+        <textarea readonly class="w-full font-mono text-sm resize-none focus:outline-none" style="height: 50vh; padding: 20px; background: var(--n-25); color: var(--n-700); border: none;" [value]="generatedText()"></textarea>
+      </div>
+      <div class="ct-modal-foot">
+        <button (click)="closeViewModal()" class="ct-btn ct-btn-ghost">Fechar</button>
+        <button (click)="copyToClipboard()" class="ct-btn ct-btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copiar Texto
+        </button>
+      </div>
     </div>
   </div>
-</div>
 }
 
 <!-- Delete Confirmation Modal -->
 @if (showDeleteModal()) {
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-
-  <!-- Backdrop -->
-  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="cancelDelete()"></div>
-
-  <!-- Modal Panel -->
-  <div class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-100 animate-fade-in">
-    <div class="flex flex-col items-center text-center">
-      <!-- Warning Icon -->
-      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+  <div class="ct-modal-back" role="dialog" aria-modal="true" (click)="cancelDelete()">
+    <div class="ct-modal max-w-sm" (click)="$event.stopPropagation()">
+      <div class="ct-modal-body flex flex-col items-center text-center py-6">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background: var(--danger-50); color: var(--danger-500);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-bold mb-2" style="color: var(--n-900);">Excluir Cotação?</h3>
+        <p class="text-sm mb-6 leading-relaxed" style="color: var(--n-500);">
+          Tem certeza que deseja excluir esta cotação permanentemente?<br>
+          <span class="text-xs font-medium" style="color: var(--danger-500);">Esta ação não pode ser desfeita.</span>
+        </p>
+        <div class="flex gap-3 w-full">
+          <button type="button" (click)="cancelDelete()" class="ct-btn ct-btn-ghost flex-1 justify-center">Cancelar</button>
+          <button type="button" (click)="confirmDelete()"
+            class="ct-btn flex-1 justify-center font-bold text-white"
+            style="background: var(--danger-500);">Excluir</button>
+        </div>
+        <p class="eyebrow mt-4" style="color: var(--n-400);">Pressione <kbd class="px-1 py-0.5 rounded font-mono text-[10px]" style="background: var(--n-100); border: 1px solid var(--n-200);">Enter</kbd> para confirmar</p>
       </div>
-
-      <h3 class="text-lg font-bold text-slate-900 mb-2">Excluir Cotação?</h3>
-      <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-        Tem certeza que deseja excluir esta cotação permanentemente? <br>
-        <span class="text-xs text-red-500 font-medium">Esta ação não pode ser desfeita.</span>
-      </p>
-
-      <div class="flex gap-3 w-full">
-        <button type="button" (click)="cancelDelete()"
-          class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-          Cancelar
-        </button>
-        <button type="button" (click)="confirmDelete()"
-          class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-0.5">
-          Excluir
-        </button>
-      </div>
-
-      <p class="text-[10px] text-slate-400 mt-4 font-medium">
-        Pressione <span
-          class="bg-slate-100 border border-slate-200 rounded px-1 py-0.5 text-slate-500 font-bold font-mono">Enter</span>
-        para confirmar
-      </p>
     </div>
   </div>
-</div>
 }

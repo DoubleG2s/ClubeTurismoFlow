@@ -1,469 +1,346 @@
-<div
-  class="rounded-2xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full relative group/card"
+<div class="res-card"
   [ngClass]="{
-    'bg-emerald-50 border-emerald-200 shadow-emerald-100': isComplete,
-    'bg-orange-50 border-orange-200': !isComplete && alertStatus === 'critical',
-    'bg-yellow-50/80 border-yellow-200': !isComplete && alertStatus === 'warning',
-    'bg-white border-slate-200': !isComplete && alertStatus !== 'critical' && alertStatus !== 'warning'
+    's-complete':  isComplete,
+    's-today':    !isComplete && alertStatus === 'today',
+    's-critical': !isComplete && alertStatus === 'critical',
+    's-warning':  !isComplete && alertStatus === 'warning'
   }">
 
-  <!-- Header: Number & Date -->
-  <div class="px-6 py-4 border-b flex justify-between items-start transition-colors duration-500" [ngClass]="{
-      'bg-emerald-100/40 border-emerald-100': isComplete,
-      'bg-orange-100/40 border-orange-100': !isComplete && alertStatus === 'critical',
-      'bg-yellow-100/40 border-yellow-100': !isComplete && alertStatus === 'warning',
-      'bg-slate-50/50 border-slate-100': !isComplete && alertStatus !== 'critical' && alertStatus !== 'warning'
-    }">
-    <div>
-      <div class="flex items-center gap-2 mb-1 flex-wrap">
-        <p class="text-[10px] uppercase tracking-widest font-bold"
-          [ngClass]="isComplete ? 'text-emerald-600' : 'text-slate-500'">
+  <!-- Header -->
+  <div class="res-card__head flex justify-between items-start gap-3">
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+        <p class="eyebrow">
           {{ reservation.product_type === 'VOO' ? 'Localizador do voo' : (reservation.product_type === 'HOSPEDAGEM' ? 'Localizador do hotel' : 'Reserva') }}
         </p>
 
-        <!-- Status Badges -->
         @if (isComplete) {
-        <span
-          class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-800 animate-fade-in">OK</span>
+          <span class="ct-pill ct-pill-brand">OK</span>
         } @else {
-        @switch (alertStatus) {
-        @case ('today') {
-        <span
-          class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 border border-sky-200 animate-pulse gap-1 shadow-sm">
-          ✈️ Viajando hoje
-        </span>
-        }
-        @case ('critical') {
-        <span
-          class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 animate-pulse gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z" />
-          </svg>
-          Atenção – viagem amanhã
-        </span>
-        }
-        @case ('warning') {
-        <span
-          class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-200 text-yellow-800 gap-1"
-          title="Próximo da data (2 dias)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-            <line x1="12" y1="9" x2="12" y2="13" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-          Atenção
-        </span>
-        }
-        }
+          @switch (alertStatus) {
+            @case ('today') {
+              <span class="ct-pill ct-pill-info animate-pulse gap-1">✈️ Viajando hoje</span>
+            }
+            @case ('critical') {
+              <span class="ct-pill ct-pill-danger animate-pulse gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/>
+                </svg>
+                Atenção – amanhã
+              </span>
+            }
+            @case ('warning') {
+              <span class="ct-pill ct-pill-warn gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Atenção
+              </span>
+            }
+          }
         }
       </div>
-      <h3 class="text-xl font-bold text-slate-800 font-mono">{{ reservation.reservation_number }}</h3>
 
-      <!-- Destination Display -->
+      <h3 class="text-xl font-bold font-mono" style="color: var(--n-900); letter-spacing: -0.01em;">{{ reservation.reservation_number }}</h3>
+
       @if (reservation.destination) {
-      <p class="text-sm font-semibold text-slate-600 flex items-center gap-1.5 mt-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-          <circle cx="12" cy="10" r="3" />
-        </svg>
-        {{ reservation.product_type === 'VOO' && reservation.origin ? reservation.origin + ' - ' + reservation.destination : reservation.destination }}
-      </p>
+        <p class="text-sm font-semibold flex items-center gap-1.5 mt-1" style="color: var(--n-600);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" style="color: var(--brand-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          {{ reservation.product_type === 'VOO' && reservation.origin ? reservation.origin + ' - ' + reservation.destination : reservation.destination }}
+        </p>
       }
 
-      <!-- Voucher Display with Click Action -->
       @if (reservation.flight_voucher && reservation.product_type !== 'VOO' && reservation.product_type !== 'HOSPEDAGEM') {
-      <button type="button" (click)="onVoucherClick($event)"
-        class="relative z-50 mt-1 flex items-center gap-1.5 text-sm font-mono text-slate-700 cursor-pointer hover:bg-black/5 hover:text-brand-700 rounded px-2 py-1 transition-all border border-transparent hover:border-black/10 w-fit group/voucher"
-        title="Clique para adicionar aos Voos">
-        <!-- Replaced Icon with Airplane -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 pointer-events-none -rotate-45" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z" />
-        </svg>
-        <span class="font-bold tracking-wide pointer-events-none text-base">{{ reservation.flight_voucher }}</span>
-        <svg xmlns="http://www.w3.org/2000/svg"
-          class="w-3.5 h-3.5 ml-0.5 text-brand-500 pointer-events-none opacity-50 group-hover/voucher:opacity-100 transition-opacity"
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-          stroke-linejoin="round">
-          <path d="M5 12h14" />
-          <path d="m12 5 7 7-7 7" />
-        </svg>
-      </button>
+        <button type="button" (click)="onVoucherClick($event)"
+          class="relative z-50 mt-1.5 flex items-center gap-1.5 font-mono rounded px-2 py-1 w-fit transition-all border border-transparent hover:border-n-200 group/voucher"
+          style="font-size: 13px; color: var(--n-700); background: transparent;"
+          title="Clique para adicionar aos Voos">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 pointer-events-none -rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4 1.5L1 19l7.4-1.4c.7-.1 1.4.2 1.9.7l2.7 2.7c.5.5 1.6.5 2.1 0 .6-.5.6-1.6 0-2.1l-2.7-2.7c-.5-.5-.8-1.2-.7-1.9z"/>
+          </svg>
+          <span class="font-bold tracking-wide pointer-events-none text-base">{{ reservation.flight_voucher }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 ml-0.5 pointer-events-none opacity-40 group-hover/voucher:opacity-100 transition-opacity" style="color: var(--brand-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+        </button>
       }
     </div>
 
-    <!-- Dates Section (Ida e Volta) -->
-    <div class="text-right flex flex-col gap-2">
+    <!-- Dates -->
+    <div class="text-right flex-shrink-0 flex flex-col gap-2">
       <div>
-        <p class="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Ida</p>
-        <p class="text-sm font-semibold text-slate-600">{{ reservation.date }}</p>
+        <p class="eyebrow mb-0.5">Ida</p>
+        <p class="text-sm font-semibold" style="color: var(--n-700);">{{ reservation.date }}</p>
       </div>
       @if (reservation.return_date) {
-      <div>
-        <p class="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Volta</p>
-        <p class="text-sm font-semibold text-slate-600">{{ reservation.return_date }}</p>
-      </div>
+        <div>
+          <p class="eyebrow mb-0.5">Volta</p>
+          <p class="text-sm font-semibold" style="color: var(--n-700);">{{ reservation.return_date }}</p>
+        </div>
       }
     </div>
   </div>
 
-  <div class="p-6 flex-grow flex flex-col gap-6">
+  <!-- Body -->
+  <div class="res-card__body">
 
     <!-- Hotel Info Dropdown -->
     @if (hasHotelInfo) {
-    <div>
-      <button (click)="toggleHotelInfo($event)"
-        class="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-all active:scale-[0.99] group">
-        <div class="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 group-hover:text-emerald-600 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22v-6.57"/><path d="M14 22v-6.57"/><path d="M14 10.15V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v18h20V12.5a2 2 0 0 0-2-2h-6"/><path d="M8 22H2"/><path d="M22 22h-6"/></svg>
-          <span class="text-xs font-bold text-slate-600 uppercase tracking-wider group-hover:text-emerald-700 transition-colors">Hotel</span>
-        </div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform duration-300" [class.rotate-180]="isHotelInfoExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      </button>
+      <div>
+        <button (click)="toggleHotelInfo($event)"
+          class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all active:scale-[0.99] group"
+          style="background: var(--n-50); border: 1px solid var(--n-150);">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-colors" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22v-6.57"/><path d="M14 22v-6.57"/><path d="M14 10.15V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v18h20V12.5a2 2 0 0 0-2-2h-6"/><path d="M8 22H2"/><path d="M22 22h-6"/></svg>
+            <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--n-600);">Hotel</span>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform transition-transform duration-300" [class.rotate-180]="isHotelInfoExpanded" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
 
-      <div class="overflow-hidden transition-all duration-300 ease-in-out" 
-           [ngClass]="isHotelInfoExpanded ? 'max-h-40 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'">
-        <div class="p-3 bg-white border border-slate-100 rounded-lg shadow-sm text-sm flex flex-col gap-1.5 relative before:absolute before:left-4 before:top-0 before:bottom-0 before:w-px before:bg-slate-200">
-          @if (reservation.nome_hotel) {
-          <div class="flex items-start gap-2 pl-4 relative">
-            <div class="absolute left-[-2px] top-2 w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-            <span class="text-slate-500 font-medium min-w-16">Hotel:</span>
-            <span class="text-slate-900 font-bold">{{ reservation.nome_hotel }}</span>
+        <div class="overflow-hidden transition-all duration-300 ease-in-out"
+             [ngClass]="isHotelInfoExpanded ? 'max-h-44 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'">
+          <div class="p-3 rounded-lg text-sm flex flex-col gap-1.5 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px"
+               style="background: var(--n-0); border: 1px solid var(--n-100); before-background: var(--n-200);">
+            @if (reservation.nome_hotel) {
+              <div class="flex items-start gap-2 pl-4 relative">
+                <div class="absolute left-[-2px] top-2 w-1.5 h-1.5 rounded-full" style="background: var(--brand-500);"></div>
+                <span class="font-medium min-w-16" style="color: var(--n-500);">Hotel:</span>
+                <span class="font-bold" style="color: var(--n-900);">{{ reservation.nome_hotel }}</span>
+              </div>
+            }
+            @if (reservation.quarto) {
+              <div class="flex items-start gap-2 pl-4 relative">
+                <div class="absolute left-[-2px] top-2 w-1.5 h-1.5 rounded-full" style="background: var(--n-300);"></div>
+                <span class="font-medium min-w-16" style="color: var(--n-500);">Quarto:</span>
+                <span class="font-semibold" style="color: var(--n-800);">{{ reservation.quarto }}</span>
+              </div>
+            }
+            @if (reservation.regime_alimentacao) {
+              <div class="flex items-start gap-2 pl-4 relative">
+                <div class="absolute left-[-2px] top-2 w-1.5 h-1.5 rounded-full" style="background: var(--n-300);"></div>
+                <span class="font-medium min-w-16" style="color: var(--n-500);">Regime:</span>
+                <span class="font-semibold" style="color: var(--n-800);">{{ reservation.regime_alimentacao }}</span>
+              </div>
+            }
+            @if (reservation.localizador_hotel) {
+              <div class="flex items-start gap-2 pl-4 relative">
+                <div class="absolute left-[-2px] top-2 w-1.5 h-1.5 rounded-full" style="background: var(--n-300);"></div>
+                <span class="font-medium min-w-16" style="color: var(--n-500);">Localizador:</span>
+                <span class="font-mono font-bold" style="color: var(--n-900);">{{ reservation.localizador_hotel }}</span>
+              </div>
+            }
           </div>
-          }
-          @if (reservation.quarto) {
-          <div class="flex items-start gap-2 pl-4 relative">
-            <div class="absolute left-[-2px] top-2 w-1 h-1 rounded-full bg-slate-400"></div>
-            <span class="text-slate-500 font-medium min-w-16">Quarto:</span>
-            <span class="text-slate-800 font-semibold">{{ reservation.quarto }}</span>
-          </div>
-          }
-          @if (reservation.regime_alimentacao) {
-          <div class="flex items-start gap-2 pl-4 relative">
-            <div class="absolute left-[-2px] top-2 w-1 h-1 rounded-full bg-slate-400"></div>
-            <span class="text-slate-500 font-medium min-w-16">Regime:</span>
-            <span class="text-slate-800 font-semibold">{{ reservation.regime_alimentacao }}</span>
-          </div>
-          }
-          @if (reservation.localizador_hotel) {
-          <div class="flex items-start gap-2 pl-4 relative">
-            <div class="absolute left-[-2px] top-2 w-1 h-1 rounded-full bg-slate-400"></div>
-            <span class="text-slate-500 font-medium min-w-16">Localizador:</span>
-            <span class="text-slate-800 font-mono font-bold">{{ reservation.localizador_hotel }}</span>
-          </div>
-          }
         </div>
       </div>
-    </div>
     }
 
     <!-- Passengers -->
     <div>
-      <div class="flex items-center gap-2 mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      <div class="flex items-center gap-2 mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
-        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Passageiros</h4>
+        <h4 class="eyebrow">Passageiros</h4>
       </div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-1.5">
         @for (passenger of reservation.passengers; track passenger) {
-        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border" [ngClass]="{
-              'bg-white text-emerald-900 border-emerald-200': isComplete,
-              'bg-slate-100 text-slate-900 border-slate-200': !isComplete
-            }">
-          {{ passenger }}
-        </span>
+          <span class="ct-pill" [ngClass]="isComplete ? 'ct-pill-brand' : ''">{{ passenger }}</span>
         }
       </div>
     </div>
 
     <!-- Operational Checklist -->
-    <div class="rounded-xl p-4 border transition-colors duration-500" [ngClass]="{
-        'bg-white/60 border-emerald-200/50': isComplete,
-        'bg-white/60 border-orange-200/50': !isComplete && alertStatus === 'critical',
-        'bg-white/60 border-yellow-200/50': !isComplete && alertStatus === 'warning',
-        'bg-indigo-50/50 border-indigo-100/50': !isComplete && alertStatus !== 'critical' && alertStatus !== 'warning'
-      }">
-      <div class="flex items-center gap-2 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-colors duration-300"
-          [ngClass]="isComplete ? 'text-emerald-500' : 'text-indigo-500'" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 11l3 3L22 4" />
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    <div class="rounded-xl p-3 border" style="background: rgba(255,255,255,0.55); border-color: rgba(19,19,16,0.07);">
+      <div class="flex items-center gap-2 mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" [style.color]="isComplete ? 'var(--brand-500)' : 'var(--info-500)'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
-        <h4 class="text-xs font-bold uppercase tracking-wider transition-colors duration-300"
-          [ngClass]="isComplete ? 'text-emerald-600' : 'text-indigo-600'">
-          Checklist Operacional
-        </h4>
+        <h4 class="eyebrow" [style.color]="isComplete ? 'var(--brand-600)' : 'var(--info-700)'">Checklist Operacional</h4>
       </div>
 
-      <!-- Group 1: Pré-venda -->
-      <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2 cursor-pointer group"
-          (click)="isPreVendaExpanded = !isPreVendaExpanded">
-          <h5
-            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
-            Pré-venda</h5>
-          <div class="h-px flex-grow bg-slate-300/30"></div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
-            [class.rotate-180]="isPreVendaExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+      <!-- Pré-venda -->
+      <div class="mb-2">
+        <div class="flex items-center gap-2 mb-1 cursor-pointer" (click)="isPreVendaExpanded = !isPreVendaExpanded">
+          <h5 class="eyebrow" style="color: var(--n-400);">Pré-venda</h5>
+          <div class="h-px flex-grow" style="background: var(--n-150);"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform" [class.rotate-180]="isPreVendaExpanded" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
         @if (isPreVendaExpanded) {
-        <div class="space-y-2">
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.contract"
-              (change)="onChecklistChange('contract', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.contract"
-              [class.opacity-60]="reservation.checklist.contract">Contrato enviado?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.contract_signed"
-              (change)="onChecklistChange('contract_signed', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.contract_signed"
-              [class.opacity-60]="reservation.checklist.contract_signed">Contrato assinado?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.payment"
-              (change)="onChecklistChange('payment', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.payment"
-              [class.opacity-60]="reservation.checklist.payment">Pagamento realizado?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.voucher_sent"
-              (change)="onChecklistChange('voucher_sent', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.voucher_sent"
-              [class.opacity-60]="reservation.checklist.voucher_sent">Voucher enviado?</span>
-          </label>
-        </div>
+          <div class="cl-list">
+            <label class="gap-2 cursor-pointer group">
+              <input type="checkbox" [checked]="reservation.checklist.contract" (change)="onChecklistChange('contract', $event)"
+                class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+              <span class="text-xs font-medium leading-none transition-colors" style="color: var(--n-700);"
+                [class.line-through]="reservation.checklist.contract" [class.opacity-50]="reservation.checklist.contract">Contrato enviado?</span>
+            </label>
+            <label class="gap-2 cursor-pointer group">
+              <input type="checkbox" [checked]="reservation.checklist.contract_signed" (change)="onChecklistChange('contract_signed', $event)"
+                class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+              <span class="text-xs font-medium leading-none transition-colors" style="color: var(--n-700);"
+                [class.line-through]="reservation.checklist.contract_signed" [class.opacity-50]="reservation.checklist.contract_signed">Contrato assinado?</span>
+            </label>
+            <label class="gap-2 cursor-pointer group">
+              <input type="checkbox" [checked]="reservation.checklist.payment" (change)="onChecklistChange('payment', $event)"
+                class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+              <span class="text-xs font-medium leading-none transition-colors" style="color: var(--n-700);"
+                [class.line-through]="reservation.checklist.payment" [class.opacity-50]="reservation.checklist.payment">Pagamento realizado?</span>
+            </label>
+            <label class="gap-2 cursor-pointer group">
+              <input type="checkbox" [checked]="reservation.checklist.voucher_sent" (change)="onChecklistChange('voucher_sent', $event)"
+                class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+              <span class="text-xs font-medium leading-none transition-colors" style="color: var(--n-700);"
+                [class.line-through]="reservation.checklist.voucher_sent" [class.opacity-50]="reservation.checklist.voucher_sent">Voucher enviado?</span>
+            </label>
+          </div>
         }
       </div>
 
-      <!-- Group 2: Hotel -->
+      <!-- Hotel -->
       @if (reservation.product_type !== 'VOO') {
-      <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2 cursor-pointer group" (click)="isHotelExpanded = !isHotelExpanded">
-          <h5
-            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
-            Hotel</h5>
-          <div class="h-px flex-grow bg-slate-300/30"></div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
-            [class.rotate-180]="isHotelExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+        <div class="mb-2">
+          <div class="flex items-center gap-2 mb-1 cursor-pointer" (click)="isHotelExpanded = !isHotelExpanded">
+            <h5 class="eyebrow" style="color: var(--n-400);">Hotel</h5>
+            <div class="h-px flex-grow" style="background: var(--n-150);"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform" [class.rotate-180]="isHotelExpanded" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          @if (isHotelExpanded) {
+            <div class="cl-list">
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.hotel_email" (change)="onChecklistChange('hotel_email', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.hotel_email" [class.opacity-50]="reservation.checklist.hotel_email">E-mail ao hotel?</span>
+              </label>
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.hotel_confirmed" (change)="onChecklistChange('hotel_confirmed', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.hotel_confirmed" [class.opacity-50]="reservation.checklist.hotel_confirmed">Hotel confirmado!</span>
+              </label>
+            </div>
+          }
         </div>
-        @if (isHotelExpanded) {
-        <div class="space-y-2">
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.hotel_email"
-              (change)="onChecklistChange('hotel_email', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.hotel_email"
-              [class.opacity-60]="reservation.checklist.hotel_email">E-mail ao hotel?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.hotel_confirmed"
-              (change)="onChecklistChange('hotel_confirmed', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.hotel_confirmed"
-              [class.opacity-60]="reservation.checklist.hotel_confirmed">Hotel confirmado!</span>
-          </label>
-        </div>
-        }
-      </div>
       }
 
-      <!-- Group 3: Voo -->
+      <!-- Voo -->
       @if (reservation.product_type !== 'HOSPEDAGEM') {
-      <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2 cursor-pointer group" (click)="isVooExpanded = !isVooExpanded">
-          <h5
-            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
-            Voo</h5>
-          <div class="h-px flex-grow bg-slate-300/30"></div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
-            [class.rotate-180]="isVooExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+        <div class="mb-2">
+          <div class="flex items-center gap-2 mb-1 cursor-pointer" (click)="isVooExpanded = !isVooExpanded">
+            <h5 class="eyebrow" style="color: var(--n-400);">Voo</h5>
+            <div class="h-px flex-grow" style="background: var(--n-150);"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform" [class.rotate-180]="isVooExpanded" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          @if (isVooExpanded) {
+            <div class="cl-list">
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.flight_registered" (change)="onChecklistChange('flight_registered', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.flight_registered" [class.opacity-50]="reservation.checklist.flight_registered">Voo no app Azul?</span>
+              </label>
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.seats_assigned" (change)="onChecklistChange('seats_assigned', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.seats_assigned" [class.opacity-50]="reservation.checklist.seats_assigned">Assentos marcados – IDA?</span>
+              </label>
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.seats_assigned_inbound" (change)="onChecklistChange('seats_assigned_inbound', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.seats_assigned_inbound" [class.opacity-50]="reservation.checklist.seats_assigned_inbound">Assentos marcados – VOLTA?</span>
+              </label>
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.checkin_outbound" (change)="onChecklistChange('checkin_outbound', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.checkin_outbound" [class.opacity-50]="reservation.checklist.checkin_outbound">Check-in IDA?</span>
+              </label>
+              <label class="gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="reservation.checklist.checkin_inbound" (change)="onChecklistChange('checkin_inbound', $event)"
+                  class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+                <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                  [class.line-through]="reservation.checklist.checkin_inbound" [class.opacity-50]="reservation.checklist.checkin_inbound">Check-in VOLTA?</span>
+              </label>
+            </div>
+          }
         </div>
-        @if (isVooExpanded) {
-        <div class="space-y-2">
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.flight_registered"
-              (change)="onChecklistChange('flight_registered', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.flight_registered"
-              [class.opacity-60]="reservation.checklist.flight_registered">Voo no app Azul?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.seats_assigned"
-              (change)="onChecklistChange('seats_assigned', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.seats_assigned"
-              [class.opacity-60]="reservation.checklist.seats_assigned">Assentos marcados - IDA?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.seats_assigned_inbound"
-              (change)="onChecklistChange('seats_assigned_inbound', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.seats_assigned_inbound"
-              [class.opacity-60]="reservation.checklist.seats_assigned_inbound">Assentos marcados - VOLTA?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.checkin_outbound"
-              (change)="onChecklistChange('checkin_outbound', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.checkin_outbound"
-              [class.opacity-60]="reservation.checklist.checkin_outbound">Check-in IDA?</span>
-          </label>
-
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.checkin_inbound"
-              (change)="onChecklistChange('checkin_inbound', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.checkin_inbound"
-              [class.opacity-60]="reservation.checklist.checkin_inbound">Check-in VOLTA?</span>
-          </label>
-        </div>
-        }
-      </div>
       }
 
-      <!-- Group 4: Pós-viagem (New) -->
+      <!-- Pós-viagem -->
       <div>
-        <div class="flex items-center gap-2 mb-2 cursor-pointer group"
-          (click)="isPosViagemExpanded = !isPosViagemExpanded">
-          <h5
-            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider opacity-80 group-hover:text-emerald-600 transition-colors">
-            Pós-viagem</h5>
-          <div class="h-px flex-grow bg-slate-300/30"></div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transform transition-transform"
-            [class.rotate-180]="isPosViagemExpanded" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+        <div class="flex items-center gap-2 mb-1 cursor-pointer" (click)="isPosViagemExpanded = !isPosViagemExpanded">
+          <h5 class="eyebrow" style="color: var(--n-400);">Pós-viagem</h5>
+          <div class="h-px flex-grow" style="background: var(--n-150);"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transform transition-transform" [class.rotate-180]="isPosViagemExpanded" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
         @if (isPosViagemExpanded) {
-        <div class="space-y-2">
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" [checked]="reservation.checklist.post_trip"
-              (change)="onChecklistChange('post_trip', $event)"
-              class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-            <span class="text-sm text-slate-900 font-medium group-hover:text-black transition-colors"
-              [class.line-through]="reservation.checklist.post_trip"
-              [class.opacity-60]="reservation.checklist.post_trip">Pós-viagem</span>
-          </label>
-        </div>
+          <div class="cl-list">
+            <label class="gap-2 cursor-pointer">
+              <input type="checkbox" [checked]="reservation.checklist.post_trip" (change)="onChecklistChange('post_trip', $event)"
+                class="w-3.5 h-3.5 rounded cursor-pointer flex-shrink-0" style="accent-color: var(--brand-500);">
+              <span class="text-xs font-medium leading-none" style="color: var(--n-700);"
+                [class.line-through]="reservation.checklist.post_trip" [class.opacity-50]="reservation.checklist.post_trip">Pós-viagem</span>
+            </label>
+          </div>
         }
       </div>
-
     </div>
 
     <!-- Notes -->
     <div>
-      <div class="flex items-center gap-2 mb-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 20h9" />
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+      <div class="flex items-center gap-2 mb-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
         </svg>
-        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Observações</h4>
+        <h4 class="eyebrow">Observações</h4>
       </div>
       <textarea [value]="reservation.notes || ''" (blur)="onNotesChange($event)" rows="3"
-        class="w-full text-sm text-slate-900 font-medium p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 resize-none transition-all placeholder-slate-400"
-        [ngClass]="isComplete ? 'bg-white border-emerald-200' : ''"
-        placeholder="Adicione anotações sobre esta reserva..."></textarea>
+        class="ct-textarea resize-none"
+        placeholder="Anotações sobre esta reserva..."></textarea>
     </div>
 
   </div>
 
-  <!-- Footer Actions -->
-  <div class="px-6 py-4 border-t mt-auto transition-colors duration-500"
-    [ngClass]="isComplete ? 'border-emerald-100' : 'border-slate-100'">
-    <!-- Author info (Discrete) -->
+  <!-- Footer -->
+  <div class="res-card__foot">
     @if (reservation.author_name) {
-    <div class="mb-4 text-[10px] font-medium text-slate-400 flex items-center gap-1.5">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-      Cadastrado por: {{ reservation.author_name }}
-    </div>
+      <div class="mb-3 flex items-center gap-1.5 eyebrow" style="color: var(--n-400);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        Cadastrado por: {{ reservation.author_name }}
+      </div>
     }
 
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-end gap-1.5">
       @if (reservation.product_type !== 'VOO') {
-      <button (click)="prepareHotelEmail.emit(reservation)"
-        class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5 active:scale-95 hover:-translate-y-0.5"
-        title="Preparar e-mail ao hotel"
-        [ngClass]="{
-          'bg-white/40 border-rose-200 text-rose-800 hover:bg-white/60': isComplete,
-          'bg-white border-slate-200 text-slate-600 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600': !isComplete
-        }">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        E-mail
-      </button>
+        <button (click)="prepareHotelEmail.emit(reservation)"
+          class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center"
+          title="Preparar e-mail ao hotel">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          E-mail
+        </button>
       }
 
       <button (click)="edit.emit(reservation.id)"
-        class="flex-1 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border flex items-center justify-center gap-1.5 active:scale-95 hover:-translate-y-0.5"
-        [ngClass]="{
-          'bg-white/40 border-emerald-200 text-emerald-800 hover:bg-white/60': isComplete,
-          'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-600': !isComplete
-        }">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-          <path d="m15 5 4 4" />
+        class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
         </svg>
         Editar
       </button>
 
       <button (click)="remove.emit(reservation.id)"
-        class="py-2 px-3 rounded-lg text-xs font-semibold border flex items-center justify-center transition-all duration-200 active:scale-90 hover:rotate-6"
-        [ngClass]="{
-          'text-red-800 bg-red-50/50 border-red-100 hover:bg-red-100': isComplete,
-          'text-red-400 border-transparent hover:text-red-600 hover:bg-red-50': !isComplete
-        }">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18" />
-          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+        class="ct-icon-btn transition-all active:scale-90 hover:rotate-6"
+        style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px; color: var(--danger-500);"
+        title="Remover reserva">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
         </svg>
       </button>
     </div>

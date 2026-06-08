@@ -14,6 +14,8 @@ import { HotelSubTab } from '../../layout/app-shell.types';
   templateUrl: './hotels-page.component.html'
 })
 export class HotelsPageComponent {
+  formOpen = false;
+
   @Input() activeSubTab: HotelSubTab = 'hoteis';
   @Input() isLoading = false;
   @Input() prefilledHotelName = '';

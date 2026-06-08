@@ -14,6 +14,8 @@ type QuoteSubTab = 'cadastro' | 'calculadora';
   templateUrl: './quotes-page.component.html'
 })
 export class QuotesPageComponent {
+  formOpen = false;
+
   @Input() activeSubTab: QuoteSubTab = 'cadastro';
   @Input() exchangeRate = 0;
   @Input() isSavingQuote = false;

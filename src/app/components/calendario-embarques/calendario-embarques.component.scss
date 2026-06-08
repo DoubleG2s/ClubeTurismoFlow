@@ -318,9 +318,13 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
   animation: fadeIn 0.3s ease-out forwards;
+
+  @media (min-width: 768px) {
+    top: 52px; /* don't dim the topbar on desktop */
+  }
 }
 
 .drawer {
@@ -564,16 +568,16 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn 0.3s ease backwards;
 }
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to { transform: none; opacity: 1; }
 }
 
 .animate-slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 
@@ -684,17 +688,17 @@
 
   /* Drawer / Side Panel for Desktop */
   .drawer {
-    top: 0;
+    top: 52px;
     right: 0;
     left: auto;
     bottom: auto;
     width: 420px;
-    height: 100vh;
+    height: calc(100vh - 52px);
     border-radius: 0;
     border-left: 1px solid #e2e8f0;
     transform: translateX(100%);
     box-shadow: -12px 0 40px rgba(15, 23, 42, 0.1);
-    
+
     &.drawer--open {
       transform: translateX(0);
     }

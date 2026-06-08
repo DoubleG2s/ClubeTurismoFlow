@@ -1,5 +1,6 @@
-﻿import { Component, inject, signal, computed, OnInit, OnDestroy, ViewChild, effect } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
 import { AdminMasterComponent } from '@components/admin-master/admin-master.component';
 import { AiChatComponent } from '@components/ai-chat/ai-chat.component';
@@ -55,6 +56,7 @@ import { expandCollapse, listStagger } from '@app/animations/reservation.animati
   standalone: true,
   imports: [
     CommonModule,
+    LucideAngularModule,
     FormsModule,
     FlightFormComponent,
     ReservationFormComponent,
@@ -91,6 +93,26 @@ export class AppComponent implements OnInit, OnDestroy {
   // ViewChild para controlar o formulÃ¡rio de cotaÃ§Ã£o
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
   @ViewChild(SubscriptionComponent) subscriptionView?: SubscriptionComponent;
+
+  // UI state
+  sidebarOpen = signal<boolean>(false);
+
+  toggleSidebar() { this.sidebarOpen.update(v => !v); }
+  closeSidebar()  { this.sidebarOpen.set(false); }
+
+  // Breadcrumb label for topbar
+  activeTabLabel = computed(() => {
+    const map: Record<AppTab, string> = {
+      voos: 'Voos',
+      reservas: 'Gestão de Reservas',
+      cotacoes: 'Cotações',
+      hotel: 'Hotel',
+      usuarios: 'Usuários',
+      admin: 'Administração',
+      assinatura: 'Assinatura',
+    };
+    return map[this.activeTab()] ?? this.activeTab();
+  });
 
   // State
   activeTab = signal<AppTab>('reservas');
@@ -145,6 +167,9 @@ export class AppComponent implements OnInit, OnDestroy {
   showConfirmDeleteModal = signal(false);
   itemToDelete = signal<{ type: 'hotel', id: string } | null>(null);
 
+  // Logout Modal State
+  showLogoutModal = signal(false);
+
   // --- FILTERS & SORTING STATE ---
   searchTerm = signal('');
   activeQuickFilter = signal<QuickFilter>(null);
@@ -167,7 +192,7 @@ export class AppComponent implements OnInit, OnDestroy {
   activeMissingPostTrip = signal(false);
 
   sortField = signal<ReservationSortField>('date');
-  sortDirection = signal<SortDirection>('desc');
+  sortDirection = signal<SortDirection>('asc');
 
   // --- List Animation State ---
   listAnimationClass = signal<string>('');
@@ -514,7 +539,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.activeMissingHotelEmail.set(false);
     this.activeMissingPostTrip.set(false);
     this.sortField.set('date');
-    this.sortDirection.set('desc');
+    this.sortDirection.set('asc');
     
     this.triggerListAnimation();
   }
@@ -546,6 +571,19 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   // --- Auth Actions ---
+  openLogoutModal() {
+    this.showLogoutModal.set(true);
+  }
+
+  closeLogoutModal() {
+    this.showLogoutModal.set(false);
+  }
+
+  confirmLogout() {
+    this.showLogoutModal.set(false);
+    this.onLogout();
+  }
+
   async onLogout() {
     await this.authService.signOut();
     this.activeTab.set('voos');

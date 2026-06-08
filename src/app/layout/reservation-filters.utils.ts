@@ -117,9 +117,13 @@ export function filterReservations(
   const direction = sortDirection === 'asc' ? 1 : -1;
 
   return [...result].sort((first, second) => {
+    if (sortField === 'created_at') {
+      const a = first.created_at ? new Date(first.created_at).getTime() : 0;
+      const b = second.created_at ? new Date(second.created_at).getTime() : 0;
+      return (a - b) * direction;
+    }
     const firstDate = sortField === 'date' ? parsePtBrDate(first.date) : parsePtBrDate(first.return_date);
     const secondDate = sortField === 'date' ? parsePtBrDate(second.date) : parsePtBrDate(second.return_date);
-
     return (firstDate - secondDate) * direction;
   });
 }

@@ -117,13 +117,11 @@
     </div>
   </section>
 
-  <!-- Backdrop -->
+  <!-- Backdrop & Drawer -->
   @if (drawerOpen) {
-    <div class="drawer-backdrop animate-fade-in" (click)="closeDrawer()"></div>
-  }
+    <div class="ct-drawer-back" (click)="closeDrawer()"></div>
 
-  <!-- Drawer / Bottom Sheet -->
-  <aside class="drawer" [class.drawer--open]="drawerOpen">
+    <aside class="ct-drawer">
     <!-- Mobile Drag Handle -->
     <div class="drawer__handle" (click)="closeDrawer()"></div>
     
@@ -199,39 +197,40 @@
       }
     </div>
   </aside>
+  }
 
   <!-- Passengers Modal -->
   @if (isPassengersModalOpen && selectedReservationForModal) {
-    <div class="fixed inset-0 z-[2000] flex items-center justify-center p-4" (click)="closePassengersModal()">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up" (click)="$event.stopPropagation()">
-        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <div>
-            <h3 class="font-bold text-slate-800 text-lg leading-tight">Lista de Passageiros</h3>
-            <span class="text-[11px] text-slate-500 font-bold tracking-widest uppercase">RESERVA: {{ selectedReservationForModal.reservationNumber }}</span>
+    <div class="ct-modal-back" style="z-index: 2000;" (click)="closePassengersModal()">
+      <div class="ct-modal max-w-sm" (click)="$event.stopPropagation()">
+        <div class="ct-modal-head">
+          <div class="flex-1">
+            <h3 class="text-[15px] font-bold text-n-900">Lista de Passageiros</h3>
+            <div class="text-[11px] text-n-500 font-bold tracking-widest uppercase mt-0.5">RESERVA: {{ selectedReservationForModal.reservationNumber }}</div>
           </div>
-          <button type="button" (click)="closePassengersModal()" class="text-slate-400 hover:text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl p-2 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          <button type="button" (click)="closePassengersModal()" class="ct-icon-btn ml-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
         
-        <div class="p-6 max-h-[50vh] overflow-y-auto">
+        <div class="p-4 max-h-[50vh] overflow-y-auto">
           <ul class="space-y-3">
             @for (pax of selectedReservationForModal.listaPassageiros; track $index) {
-              <li class="flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm shrink-0">
+              <li class="flex items-center gap-3 p-3 bg-white rounded-xl border border-n-100 shadow-sm">
+                <div class="w-7 h-7 rounded-full bg-n-50 text-n-600 flex items-center justify-center font-bold text-xs shrink-0">
                   {{ $index + 1 }}
                 </div>
-                <span class="font-medium text-slate-700 capitalize flex-1">{{ pax }}</span>
+                <span class="font-medium text-n-700 capitalize flex-1 text-sm">{{ pax }}</span>
               </li>
             }
             @if (!selectedReservationForModal.listaPassageiros || selectedReservationForModal.listaPassageiros.length === 0) {
-              <li class="text-slate-500 italic text-center text-sm py-4">Nenhum passageiro detalhado nesta reserva.</li>
+              <li class="text-n-500 italic text-center text-sm py-4">Nenhum passageiro detalhado.</li>
             }
           </ul>
         </div>
         
-        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-stretch">
-          <button type="button" (click)="closePassengersModal()" class="flex-1 py-3.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors focus:ring-4 focus:ring-slate-200 active:scale-[0.98] focus:outline-none">
+        <div class="px-6 py-4 border-t border-n-100 bg-n-50 rounded-b-[20px] flex justify-stretch">
+          <button type="button" (click)="closePassengersModal()" class="ct-btn ct-btn-primary w-full">
             Fechar Lista
           </button>
         </div>

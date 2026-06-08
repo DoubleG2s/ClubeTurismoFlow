@@ -3,7 +3,7 @@ export type ReservationSubTab = 'reservas' | 'creditos' | 'calendario';
 export type HotelSubTab = 'hoteis' | 'email';
 export type QuoteSubTab = 'cadastro' | 'calculadora';
 export type QuickFilter = 'hoje' | 'amanha' | 'em_viagem' | null;
-export type ReservationSortField = 'date' | 'return_date';
+export type ReservationSortField = 'date' | 'return_date' | 'created_at';
 export type SortDirection = 'asc' | 'desc';
 export type AccessGateState = 'open' | 'locked';
 

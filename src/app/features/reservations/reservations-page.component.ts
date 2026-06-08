@@ -31,6 +31,9 @@ import { formatInputDateToPtBr, formatPtBrDateToInputValue } from '../../shared/
   templateUrl: './reservations-page.component.html'
 })
 export class ReservationsPageComponent {
+  formOpen = false;
+  creditFormOpen = false;
+
   @Input() activeSubTab: ReservationSubTab = 'reservas';
   @Input() prefilledReservationData: Partial<Reservation> | null = null;
   @Input() filteredReservations: Reservation[] = [];
@@ -48,7 +51,7 @@ export class ReservationsPageComponent {
   @Input() draftMissingHotelEmail = false;
   @Input() draftMissingPostTrip = false;
   @Input() sortField: ReservationSortField = 'date';
-  @Input() sortDirection: SortDirection = 'desc';
+  @Input() sortDirection: SortDirection = 'asc';
   @Input() credits: Credit[] = [];
   @Input() isSavingCredit = false;
   @Input() prefilledCreditData: Partial<Credit> | null = null;
