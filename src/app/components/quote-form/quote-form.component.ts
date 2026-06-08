@@ -6,11 +6,12 @@ import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 import { LucideAngularModule, PlaneTakeoff } from 'lucide-angular';
+import { QuoteAiFillComponent, AiFillApplyEvent } from '../quote-ai-fill/quote-ai-fill.component';
 
 @Component({
   selector: 'app-quote-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent, LucideAngularModule, QuoteAiFillComponent],
   templateUrl: './quote-form.component.html',
 })
 export class QuoteFormComponent implements OnInit, OnChanges {
@@ -34,6 +35,12 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   // Image Upload Feedbacks
   uploadingStates = signal<Record<string, boolean>>({});
   uploadSuccessStates = signal<Record<string, boolean>>({});
+
+  // AI Fill
+  showAiFillModal = signal(false);
+  aiFillTargetIndex = signal(0);
+  aiHighlightedOption = signal<number | null>(null);
+  toastMessage = signal<{ text: string; type: 'success' | 'warning' | 'error' } | null>(null);
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -411,5 +418,96 @@ export class QuoteFormComponent implements OnInit, OnChanges {
 
   onCancel() {
     this.cancel.emit();
+  }
+
+  // --- PREENCHIMENTO INTELIGENTE (IA) ---
+
+  openAiFill(optionIndex: number) {
+    this.aiFillTargetIndex.set(optionIndex);
+    this.showAiFillModal.set(true);
+  }
+
+  getOptionHasData(optionIndex: number): boolean {
+    const opt = this.quoteOptions.at(optionIndex)?.value;
+    if (!opt) return false;
+    return !!(opt.check_in || opt.check_out ||
+      opt.flight_details?.outbound?.origin_city ||
+      opt.hotel_options?.[0]?.hotel_name);
+  }
+
+  onAiFillApply(event: AiFillApplyEvent) {
+    this.showAiFillModal.set(false);
+    const { optionIndex, data } = event;
+    const optControl = this.quoteOptions.at(optionIndex);
+    if (!optControl) return;
+
+    const topLevel: Record<string, any> = {};
+    if (data.check_in) topLevel['check_in'] = data.check_in;
+    if (data.check_out) topLevel['check_out'] = data.check_out;
+    if (data.adults != null) topLevel['adults'] = data.adults;
+    if (data.children != null) topLevel['children'] = data.children;
+    if (data.tour_details) topLevel['tour_details'] = data.tour_details;
+    if (data.has_transfer != null) topLevel['has_transfer'] = data.has_transfer;
+    if (Object.keys(topLevel).length) optControl.patchValue(topLevel);
+
+    const flightGroup = optControl.get('flight_details');
+    if (flightGroup && data.outbound) {
+      flightGroup.get('outbound')?.patchValue({
+        origin_city: data.outbound.origin_city ?? '',
+        destination_city: data.outbound.destination_city ?? '',
+        departure_time: data.outbound.departure_time ?? '',
+        arrival_time: data.outbound.arrival_time ?? '',
+        has_connection: data.outbound.has_connection ?? false,
+        connection_city: data.outbound.connection_city ?? '',
+        connection_time: data.outbound.connection_time ?? '',
+        seats_included: data.outbound.seats_included ?? false,
+        checked_baggage: data.outbound.checked_baggage ?? false,
+      });
+    }
+    if (flightGroup && data.inbound) {
+      flightGroup.get('inbound')?.patchValue({
+        origin_city: data.inbound.origin_city ?? '',
+        destination_city: data.inbound.destination_city ?? '',
+        departure_time: data.inbound.departure_time ?? '',
+        arrival_time: data.inbound.arrival_time ?? '',
+        has_connection: data.inbound.has_connection ?? false,
+        connection_city: data.inbound.connection_city ?? '',
+        connection_time: data.inbound.connection_time ?? '',
+        seats_included: data.inbound.seats_included ?? false,
+        checked_baggage: data.inbound.checked_baggage ?? false,
+      });
+    }
+
+    if (data.hotel) {
+      const hotelArr = this.getHotelOptions(optionIndex);
+      if (hotelArr.length > 0) {
+        const hotelPatch: Record<string, any> = {};
+        if (data.hotel.hotel_name) hotelPatch['hotel_name'] = data.hotel.hotel_name;
+        if (data.hotel.regime) hotelPatch['regime'] = data.hotel.regime;
+        if (data.hotel.accommodation) hotelPatch['accommodation'] = data.hotel.accommodation;
+        if (data.hotel.currency) hotelPatch['currency'] = data.hotel.currency;
+        if (data.hotel.amount != null) {
+          hotelPatch['amount'] = data.hotel.amount.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2, maximumFractionDigits: 2
+          });
+        }
+        hotelArr.at(0).patchValue(hotelPatch);
+      }
+    }
+
+    this.activeOptionIndex.set(optionIndex);
+    this.aiHighlightedOption.set(optionIndex);
+    setTimeout(() => this.aiHighlightedOption.set(null), 2500);
+
+    if (event.filledFields.length > 0) {
+      this.showToast(`✨ ${event.filledFields.length} campos preenchidos com sucesso!`, 'success');
+    } else {
+      this.showToast('Nenhum campo foi identificado no texto.', 'warning');
+    }
+  }
+
+  private showToast(text: string, type: 'success' | 'warning' | 'error') {
+    this.toastMessage.set({ text, type });
+    setTimeout(() => this.toastMessage.set(null), 3500);
   }
 }
