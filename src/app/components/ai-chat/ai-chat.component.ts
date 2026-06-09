@@ -55,6 +55,10 @@ export class AiChatComponent {
     setTimeout(() => this.scrollToBottom(), 100);
   }
 
+  public blockForTabConfirmation(action: AiAction) {
+    return this.aiInterpreter.blockForTabConfirmation(action);
+  }
+
   removeFile() {
     this.selectedFile.set(null);
   }

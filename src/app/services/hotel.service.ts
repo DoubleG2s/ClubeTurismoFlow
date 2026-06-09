@@ -48,7 +48,7 @@ export class HotelService {
 
             this._hotels.set((data as Hotel[]) || []);
         } catch (error) {
-            // Ignorando erro silenciosamente para não violar regra de clean console
+            console.error('Erro ao carregar hotéis:', error);
         } finally {
             this._isLoading.set(false);
         }
@@ -121,6 +121,7 @@ export class HotelService {
             await this.loadHotels();
             return true;
         } catch (error) {
+            console.error('Erro ao adicionar hotel:', error);
             return false;
         } finally {
             this._isLoading.set(false);
@@ -167,6 +168,7 @@ export class HotelService {
             await this.loadHotels();
             return true;
         } catch (e) {
+            console.error('Erro ao atualizar hotel:', e);
             return false;
         } finally {
             this._isLoading.set(false);
@@ -185,6 +187,7 @@ export class HotelService {
             this._hotels.update(hotels => hotels.filter(h => h.id !== id));
             return true;
         } catch (error) {
+            console.error('Erro ao remover hotel:', error);
             return false;
         } finally {
             this._isLoading.set(false);

@@ -91,7 +91,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly pendingEmbeddedCheckoutStorageKey = 'clube-turismo-flow:pending-embedded-checkout';
   private readonly accessGateStoragePrefix = 'clube-turismo-flow:access-gate';
 
-  // ViewChild para controlar o formulÃ¡rio de cotaÃ§Ã£o
+  // ViewChild para controlar o formulário de cotação
   @ViewChild(QuoteFormComponent) quoteFormComp!: QuoteFormComponent;
   @ViewChild(SubscriptionComponent) subscriptionView?: SubscriptionComponent;
   @ViewChild('sidebarEl') sidebarEl?: ElementRef<HTMLElement>;
@@ -238,7 +238,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   triggerListAnimation() {
     this.listAnimationClass.set('');
-    // ForÃ§a reflow para reiniciar a animaÃ§Ã£o
+    // Força reflow para reiniciar a animação
     setTimeout(() => this.listAnimationClass.set('animate-fade-in'), 10);
   }
 
@@ -369,7 +369,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor() {
-    // Escuta o status de autenticaÃ§Ã£o para checar regras da empresa ativa
+    // Escuta o status de autenticação para checar regras da empresa ativa
     effect(() => {
        const session = this.authService.session();
        const profile = this.authService.profile();
@@ -414,12 +414,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       const newHotelName = params.get('new');
       if (newHotelName) {
         this.prefilledHotelName.set(newHotelName);
-        // NÃ£o precisamos abrir o modal pois quando activeTab === 'hotel', 
-        // o app-hotel-form Ã© renderizado na listagem principal pela pÃ¡gina se activeHotelTab === 'hoteis'.
+        // Não precisamos abrir o modal pois quando activeTab === 'hotel', 
+        // o app-hotel-form é renderizado na listagem principal pela página se activeHotelTab === 'hoteis'.
         // Vamos garantir que a subTab de hoteis esteja ativa.
         this.activeHotelTab.set('hoteis');
         
-        // Timeout pequeno sÃ³ para rolar para o topo caso a div renderize atrasada
+        // Timeout pequeno só para rolar para o topo caso a div renderize atrasada
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
       }
     }
@@ -434,11 +434,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       const data = await response.json();
       if (data && data.USDBRL && data.USDBRL.ask) {
         const parsedRate = parseFloat(data.USDBRL.ask);
-        // Round to 2 decimal places to satisfy "duas casas decimais apÃ³s a vÃ­rgula"
+        // Round to 2 decimal places to satisfy "duas casas decimais após a vírgula"
         this.usdExchangeRate.set(parseFloat(parsedRate.toFixed(2)));
       }
     } catch (e) {
-      console.error('Falha ao buscar cotaÃ§Ã£o do dÃ³lar', e);
+      console.error('Falha ao buscar cotação do dólar', e);
     }
   }
 
@@ -589,7 +589,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.activeQuickFilter.set(filter);
       
-      // Sincronizar controle mensal para os filtros RÃ¡pidos
+      // Sincronizar controle mensal para os filtros Rápidos
       if (filter === 'hoje' || filter === 'amanha' || filter === 'em_viagem') {
         const targetDate = new Date();
         if (filter === 'amanha') {
@@ -696,7 +696,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onCopyReservationToFlight(reservation: Reservation) {
     if (!reservation.flight_voucher) {
-      alert('Esta reserva nÃ£o possui um voucher de voo.');
+      alert('Esta reserva não possui um voucher de voo.');
       return;
     }
 
@@ -734,7 +734,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.quoteFormComp.resetForm(); // Reset apenas se sucesso
       }
     } catch (e) {
-      console.error('Falha inesperada no app.component ao salvar cotaÃ§Ã£o', e);
+      console.error('Falha inesperada no app.component ao salvar cotação', e);
     } finally {
       this.isSavingQuote.set(false);
     }
@@ -764,6 +764,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // --- Hotel Actions ---
   async onSaveHotel(event: HotelFormSubmission) {
+    let success = false;
     if (this.editingHotel()) {
       const newEmails = event.emails
         .filter((email) => !email.id)
@@ -772,7 +773,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         .filter((phone) => !phone.id)
         .map((phone) => ({ phone: phone.phone, is_whatsapp: phone.is_whatsapp }));
 
-      await this.hotelService.updateHotel(
+      success = await this.hotelService.updateHotel(
         this.editingHotel()!.id,
         event.hotelData,
         newEmails,
@@ -783,7 +784,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         event.deletedImageIds
       );
     } else {
-      await this.hotelService.addHotel(event.hotelData, event.emails, event.phones, event.images);
+      success = await this.hotelService.addHotel(event.hotelData, event.emails, event.phones, event.images);
+    }
+
+    if (!success) {
+      // TODO (SEC-11): Substituir por um Toast global ou repassar erro via Input para o HotelFormComponent
+      alert('Ocorreu um erro ao salvar o hotel. Verifique os dados ou a sua conexão e tente novamente.');
+      return;
     }
 
     if (this.showHotelEditModal()) {
@@ -854,7 +861,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleAiAction(action: AiAction) {
     if (action.type !== 'CONFIRM_TAB_SWITCH' && this.isTabChanging(action) && this.isAnyFormDirty()) {
-      const response = this.aiChatComp['aiInterpreter'].blockForTabConfirmation(action);
+      const response = this.aiChatComp.blockForTabConfirmation(action);
       this.aiChatComp.addBotMessage(response.message);
       return;
     }
@@ -874,9 +881,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.prefilledFlightData.set({
         locator: p.locator || '',
         origin: p.origin || '',
-        date: p.date || p.flight_time || '',
-        destination: p.destination || ''
-      } as any);
+        date: p.date || p.flight_time || ''
+      } satisfies Partial<Flight>);
       // Wait for tab switch
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
     } else if (action.type === 'EDIT_FLIGHT') {
@@ -897,7 +903,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         reservation_number: p.reservation_number || '',
         flight_voucher: p.flight_voucher || '',
         notes: p.notes || ''
-      } as any);
+      } satisfies Partial<Reservation>);
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
     } else if (action.type === 'EDIT_RESERVATION') {
       this.activeTab.set('reservas');
@@ -911,10 +917,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.activeTab.set('cotacoes');
       this.activeCotacaoTab.set('cadastro');
       this.prefilledQuoteData.set({
-        title: p.title || (p.destination ? `CotaÃ§Ã£o para ${p.destination}` : ''),
+        title: p.title || (p.destination ? `Cotação para ${p.destination}` : ''),
         adults: p.adults || 2,
         children: p.children || 0
-      } as any);
+      } satisfies Partial<Quote>);
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
     } else if (action.type === 'EDIT_QUOTE') {
       this.activeTab.set('cotacoes');
@@ -946,7 +952,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         reservation_number: p.reservation_number || '',
         value: p.amount || p.value || 0,
         observations: p.notes || ''
-      } as any);
+      } satisfies Partial<Credit>);
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300);
     } else if (action.type === 'EDIT_CREDIT') {
       this.activeTab.set('reservas');
@@ -968,7 +974,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isAnyFormDirty(): boolean {
-    return false;
+    return this.showEditModal() || 
+           this.showReservationEditModal() || 
+           this.showQuoteEditModal() || 
+           this.showHotelEditModal() || 
+           this.showCreditEditModal();
   }
 
   // --- Credit Actions ---

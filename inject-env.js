@@ -77,7 +77,9 @@ function jsString(value) {
 
 function writeEnvironmentFile(path, environment) {
   const content =
-`export const environment = {
+`// ⚠️ AVISO: Este arquivo é auto-gerado pelo script inject-env.js.
+// Quaisquer alterações diretas aqui serão perdidas no próximo build.
+export const environment = {
   production: ${environment.production},
   supabaseUrl: '${jsString(environment.supabaseUrl)}',
   supabaseAnonKey: '${jsString(environment.supabaseAnonKey)}',

@@ -1,4 +1,4 @@
-﻿const {
+const {
   addCors,
   createStripeClient,
   createSupabaseAdmin,
@@ -26,7 +26,7 @@ module.exports = async function handler(req, res) {
     const { companyId } = await resolveAuthorizedCompanyContext(req, supabase, requestedCompanyId);
     let company = await getCompanyById(supabase, companyId);
 
-    const subscriptionId = company.stripe_subscription_id || company.asaas_subscription_id || null;
+    const subscriptionId = company.stripe_subscription_id || null;
 
     if (subscriptionId) {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
