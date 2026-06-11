@@ -23,12 +23,12 @@ export interface VoucherExtractionResult {
 export class AiVoucherService {
   private pdfExtractor = inject(PdfExtractorService);
   private genAI = new GoogleGenerativeAI(environment.geminiApiKey);
-  
+
   async processVoucher(file: File): Promise<VoucherExtractionResult> {
     try {
       // 1. Extrair texto no cliente
       const text = await this.pdfExtractor.extractText(file);
-      
+
       const extractFunctionDeclaration: FunctionDeclaration = {
         name: "extract_voucher",
         description: "Extrai dados estruturados de um voucher de viagem em PDF",
@@ -73,8 +73,8 @@ export class AiVoucherService {
         }
       };
 
-      const model = this.genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash",
+      const model = this.genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
         tools: [{ functionDeclarations: [extractFunctionDeclaration] }],
         toolConfig: { functionCallingConfig: { mode: FunctionCallingMode.ANY, allowedFunctionNames: ["extract_voucher"] } },
         systemInstruction: `
@@ -92,7 +92,7 @@ export class AiVoucherService {
       const chat = model.startChat();
       const result = await chat.sendMessage(`Arquivo: ${file.name}\n\nConteúdo:\n${text}`);
       const call = result.response.functionCalls()?.[0];
-      
+
       if (!call || call.name !== "extract_voucher") {
         throw new Error('A IA não retornou o formato estruturado esperado.');
       }
@@ -106,7 +106,7 @@ export class AiVoucherService {
 
   private normalizeData(data: any): VoucherExtractionResult {
     // Normalização extra do Frontend (defesa em profundidade)
-    
+
     // Garantir passageiros array limpo
     let px = Array.isArray(data.passageiros) ? data.passageiros : [];
     px = px.map((p: string) => p.trim()).filter((p: string) => p.length > 0);
@@ -116,7 +116,7 @@ export class AiVoucherService {
     // Códigos
     let reserva = (data.reserva_voucher || '').trim().toUpperCase();
     if (reserva.length !== 6) reserva = '';
-    
+
     let voo = (data.voo_voucher || '').trim().toUpperCase();
     if (voo.length !== 6) voo = '';
 
@@ -131,12 +131,12 @@ export class AiVoucherService {
     } else if (hotel_localizador) {
       notes_prefill = `Localizador do Hotel: ${hotel_localizador}`;
     }
-    
+
     let product_type = ProductType.PACOTE;
     if (voo && !hotel_nome) {
-       product_type = ProductType.VOO;
+      product_type = ProductType.VOO;
     } else if (hotel_nome && !voo) {
-       product_type = ProductType.HOSPEDAGEM;
+      product_type = ProductType.HOSPEDAGEM;
     }
 
     return {

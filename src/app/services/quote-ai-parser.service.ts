@@ -131,7 +131,7 @@ export class QuoteAiParserService {
 
   async parseRawText(text: string): Promise<QuoteParseResult> {
     const model = this.genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       generationConfig: { responseMimeType: 'application/json' },
       systemInstruction: SYSTEM_PROMPT,
     });
