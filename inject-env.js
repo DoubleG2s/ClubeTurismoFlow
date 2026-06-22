@@ -55,6 +55,10 @@ function toEnvironment(env, options) {
       options.production ? 'PROD_GEMINI_API_KEY' : 'DEV_GEMINI_API_KEY',
       'GEMINI_API_KEY'
     ]),
+    apiNinjasKey: pick(env, [
+      options.production ? 'PROD_API_NINJAS_KEY' : 'DEV_API_NINJAS_KEY',
+      'API_NINJAS_KEY'
+    ]),
     stripePublishableKey: pick(env, [
       options.production ? 'PROD_STRIPE_PUBLISHABLE_KEY' : 'DEV_STRIPE_PUBLISHABLE_KEY',
       'STRIPE_PUBLISHABLE_KEY',
@@ -84,6 +88,7 @@ export const environment = {
   supabaseUrl: '${jsString(environment.supabaseUrl)}',
   supabaseAnonKey: '${jsString(environment.supabaseAnonKey)}',
   geminiApiKey: '${jsString(environment.geminiApiKey)}',
+  apiNinjasKey: '${jsString(environment.apiNinjasKey)}',
   stripePublishableKey: '${jsString(environment.stripePublishableKey)}',
   apiBaseUrl: '${jsString(environment.apiBaseUrl)}',
   monthlyPrice: ${environment.monthlyPrice}
@@ -98,6 +103,7 @@ function logEnvironmentStatus(label, environment) {
   console.log(`[${label}] SUPABASE_URL:`, environment.supabaseUrl ? 'OK' : 'MISSING');
   console.log(`[${label}] SUPABASE_ANON_KEY:`, environment.supabaseAnonKey ? 'OK' : 'MISSING');
   console.log(`[${label}] GEMINI_API_KEY:`, environment.geminiApiKey ? 'OK' : 'MISSING');
+  console.log(`[${label}] API_NINJAS_KEY:`, environment.apiNinjasKey ? 'OK' : 'MISSING');
   console.log(`[${label}] STRIPE_PUBLISHABLE_KEY:`, environment.stripePublishableKey ? 'OK' : 'MISSING');
   console.log(`[${label}] API_BASE_URL:`, environment.apiBaseUrl || 'relative');
   console.log(`[${label}] ASAAS_MONTHLY_AMOUNT:`, environment.monthlyPrice);

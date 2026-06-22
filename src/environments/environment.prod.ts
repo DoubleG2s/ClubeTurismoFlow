@@ -5,6 +5,7 @@ export const environment = {
   supabaseUrl: '',
   supabaseAnonKey: '',
   geminiApiKey: '',
+  apiNinjasKey: '',
   stripePublishableKey: '',
   apiBaseUrl: '',
   monthlyPrice: 0
