@@ -7,11 +7,13 @@ import { Hotel } from '../../models/hotel';
 import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 import { LucideAngularModule, PlaneTakeoff } from 'lucide-angular';
 import { QuoteAiFillComponent, AiFillApplyEvent } from '../quote-ai-fill/quote-ai-fill.component';
+import { HotelFormComponent } from '../hotel-form/hotel-form.component';
+import { HotelFormSubmission } from '../hotel-form/hotel-form.types';
 
 @Component({
   selector: 'app-quote-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent, LucideAngularModule, QuoteAiFillComponent],
+  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent, LucideAngularModule, QuoteAiFillComponent, HotelFormComponent],
   templateUrl: './quote-form.component.html',
 })
 export class QuoteFormComponent implements OnInit, OnChanges {
@@ -41,6 +43,13 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   aiFillTargetIndex = signal(0);
   aiHighlightedOption = signal<number | null>(null);
   toastMessage = signal<{ text: string; type: 'success' | 'warning' | 'error' } | null>(null);
+
+  // Hotel Creation Modal
+  showHotelCreationModal = signal(false);
+  hotelCreationOptIndex = signal(0);
+  hotelCreationHotelIndex = signal(0);
+  hotelCreationPrefill = signal('');
+  isCreatingHotel = signal(false);
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -237,8 +246,39 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   }
 
   openHotelCreation(optionIndex: number, hotelIndex: number) {
-     const term = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_name')?.value || '';
-     window.open(`/?tab=hotel&new=${encodeURIComponent(term)}`, '_blank');
+    const term = this.getHotelOptions(optionIndex).at(hotelIndex).get('hotel_name')?.value || '';
+    this.hotelCreationOptIndex.set(optionIndex);
+    this.hotelCreationHotelIndex.set(hotelIndex);
+    this.hotelCreationPrefill.set(term);
+    this.activeHotelDropdownIndex.set(null);
+    this.showHotelCreationModal.set(true);
+  }
+
+  async onHotelCreationSave(submission: HotelFormSubmission) {
+    this.isCreatingHotel.set(true);
+    const newHotel = await this.hotelService.addHotel(
+      submission.hotelData,
+      submission.emails,
+      submission.phones,
+      submission.images
+    );
+    this.isCreatingHotel.set(false);
+
+    if (newHotel) {
+      this.showHotelCreationModal.set(false);
+      this.selectHotelFromSearch(
+        this.hotelCreationOptIndex(),
+        this.hotelCreationHotelIndex(),
+        newHotel
+      );
+      this.showToast('Hotel cadastrado e selecionado com sucesso!', 'success');
+    } else {
+      this.showToast('Erro ao cadastrar o hotel. Tente novamente.', 'error');
+    }
+  }
+
+  closeHotelCreationModal() {
+    this.showHotelCreationModal.set(false);
   }
 
   // --- IMAGENS PASTE/UPLOAD ---

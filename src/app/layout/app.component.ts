@@ -784,7 +784,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         event.deletedImageIds
       );
     } else {
-      success = await this.hotelService.addHotel(event.hotelData, event.emails, event.phones, event.images);
+      success = !!(await this.hotelService.addHotel(event.hotelData, event.emails, event.phones, event.images));
     }
 
     if (!success) {

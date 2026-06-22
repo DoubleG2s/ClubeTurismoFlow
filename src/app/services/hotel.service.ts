@@ -82,7 +82,7 @@ export class HotelService {
         emails: Omit<HotelEmail, 'id' | 'hotel_id' | 'created_at'>[],
         phones: Omit<HotelPhone, 'id' | 'hotel_id' | 'created_at'>[],
         images: Omit<HotelImage, 'id' | 'hotel_id' | 'created_at'>[]
-    ): Promise<boolean> {
+    ): Promise<Hotel | null> {
         this._isLoading.set(true);
         const companyPayload = this.tenantService.getCompanyPayload();
         try {
@@ -118,11 +118,19 @@ export class HotelService {
             }
 
             await Promise.all(promises);
+
+            // 3. Buscar hotel completo com relações para retornar ao chamador
+            const { data: fullHotel } = await supabase
+                .from('hotels')
+                .select('*, hotel_emails(*), hotel_phones(*), hotel_images(*)')
+                .eq('id', hotelId)
+                .single();
+
             await this.loadHotels();
-            return true;
+            return (fullHotel as Hotel) ?? null;
         } catch (error) {
             console.error('Erro ao adicionar hotel:', error);
-            return false;
+            return null;
         } finally {
             this._isLoading.set(false);
         }
