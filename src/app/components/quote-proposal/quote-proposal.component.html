@@ -754,6 +754,12 @@
               </div>
             </div>
 
+            <!-- Descrição do Hotel -->
+            @if (hotel.description) {
+            <p class="mt-4 text-sm text-slate-500 font-normal leading-relaxed whitespace-pre-wrap"
+               style="word-break: break-word; overflow-wrap: break-word;">{{ hotel.description }}</p>
+            }
+
             <!-- Link Externo -->
             @if (hotel.link) {
             <div class="mt-4">

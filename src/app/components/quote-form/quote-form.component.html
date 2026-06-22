@@ -360,8 +360,14 @@
                 </div>
                 <div class="flex flex-col group">
                   <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Regime</label>
-                  <input type="text" formControlName="regime" placeholder="Ex: Café da Manhã"
-                    class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400">
+                  <select formControlName="regime"
+                    class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500">
+                    <option value="Apenas quarto">Apenas quarto</option>
+                    <option value="Café da manhã">Café da manhã</option>
+                    <option value="Meia pensão">Meia pensão</option>
+                    <option value="Pensão completa">Pensão completa</option>
+                    <option value="All inclusive">All inclusive</option>
+                  </select>
                 </div>
                 <div class="flex flex-col group">
                   <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Acomodação</label>
@@ -388,7 +394,13 @@
                   <input type="text" formControlName="link" placeholder="https://..."
                     class="w-full p-2 bg-white text-blue-600 text-sm border border-slate-200 rounded-lg underline-offset-2 focus:outline-none focus:border-purple-500 placeholder-slate-400">
                 </div>
-                
+                <div class="flex flex-col group md:col-span-2">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                  <textarea formControlName="description" rows="3"
+                    placeholder="Descreva o hotel, diferenciais, localização..."
+                    class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400 resize-y"></textarea>
+                </div>
+
                 <!-- GALERIA DE FOTOS INLINE -->
                 <div class="flex flex-col group md:col-span-2 mt-2">
                   <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Fotos do Hotel (Arraste, Cole Ctrl+V ou Clique)</label>

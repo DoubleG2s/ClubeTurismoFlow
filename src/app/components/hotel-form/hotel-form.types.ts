@@ -10,6 +10,7 @@ export interface HotelFormDataPayload {
   location_country: string;
   default_checkin: string;
   default_checkout: string;
+  description?: string;
 }
 
 export interface HotelFormEmailPayload {

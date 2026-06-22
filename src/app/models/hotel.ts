@@ -12,6 +12,7 @@ export interface Hotel {
   location_country?: string;
   default_checkin?: string;
   default_checkout?: string;
+  description?: string;
   created_at?: string;
   updated_at?: string;
 

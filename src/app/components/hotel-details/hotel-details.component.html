@@ -222,8 +222,72 @@
                         </div>
                     </div>
 
-                    <!-- Footer / Close Action -->
+                    <!-- Descrição -->
                     <div class="mt-8 pt-6 border-t border-slate-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                                Descrição
+                            </h3>
+                            @if (!isEditingDescription()) {
+                            <button (click)="startEditDescription()"
+                                class="text-xs font-bold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 transition-all flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Editar
+                            </button>
+                            }
+                        </div>
+
+                        @if (isEditingDescription()) {
+                        <div class="space-y-2">
+                            <textarea [ngModel]="editedDescription()"
+                                (ngModelChange)="editedDescription.set($event)"
+                                rows="5" placeholder="Descreva o hotel, diferenciais, localização..."
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder-slate-400 resize-y"
+                                style="word-break: break-word; overflow-wrap: break-word;"></textarea>
+                            <div class="flex gap-2 justify-end">
+                                <button type="button" (click)="cancelEditDescription()"
+                                    class="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
+                                    Cancelar
+                                </button>
+                                <button type="button" (click)="saveDescription()" [disabled]="isSavingDescription()"
+                                    class="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50 flex items-center gap-1.5">
+                                    @if (isSavingDescription()) {
+                                    <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Salvando...
+                                    } @else {
+                                    Salvar
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                        } @else {
+                        @if (hotel.description) {
+                        <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"
+                           style="word-break: break-word; overflow-wrap: break-word;">{{ hotel.description }}</p>
+                        } @else {
+                        <p class="text-sm text-slate-400 italic">Nenhuma descrição cadastrada. Clique em "Editar" para adicionar.</p>
+                        }
+                        }
+                    </div>
+
+                    <!-- Footer / Close Action -->
+                    <div class="mt-6 pt-6 border-t border-slate-200">
                         <button (click)="close.emit()"
                             class="w-full flex justify-center py-2.5 px-4 border border-slate-300 shadow-sm text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 transition-colors uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                             style="border-radius: 2px;">

@@ -7,6 +7,7 @@ export interface HotelOption {
   amount: number;
   currency: 'BRL' | 'USD';
   link?: string;
+  description?: string;
 }
 
 export interface FlightSegment {

@@ -192,11 +192,12 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       hotel_id: [data?.hotel_id || ''],
       hotel_images: [data?.hotel_images || []],
       hotel_name: [data?.hotel_name || '', Validators.required],
-      regime: [data?.regime || '', Validators.required],
+      regime: [data?.regime || 'Café da manhã', Validators.required],
       accommodation: [data?.accommodation || '', Validators.required],
       amount: [data?.amount || '', Validators.required],
       currency: [data?.currency || 'BRL', Validators.required],
-      link: [data?.link || '']
+      link: [data?.link || ''],
+      description: [data?.description || '']
     });
   }
 
@@ -225,7 +226,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
     this.getHotelOptions(optionIndex).at(hotelIndex).patchValue({
       hotel_id: hotel.id,
       hotel_name: hotel.name,
-      hotel_images: images
+      hotel_images: images,
+      description: hotel.description || ''
     });
     this.activeHotelDropdownIndex.set(null);
   }
