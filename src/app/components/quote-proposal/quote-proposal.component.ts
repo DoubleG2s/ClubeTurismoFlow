@@ -82,6 +82,13 @@ export class QuoteProposalComponent implements OnInit {
     return this.formatCurrencyValue(this.mainHotel()!.amount, this.mainHotel()!.currency);
   });
 
+  installmentValue = computed(() => {
+    if (!this.mainHotel()) return '';
+    const total = this.mainHotel()!.amount;
+    const installment = Math.round(total / 10 * 100) / 100;
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: this.mainHotel()!.currency }).format(installment);
+  });
+
   ngOnInit() {
     if (this.quoteId || this.publicToken) {
       this.loadQuote();

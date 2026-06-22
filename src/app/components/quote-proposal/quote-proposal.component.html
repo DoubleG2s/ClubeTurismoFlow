@@ -799,10 +799,12 @@
         <!-- VALOR CARD (DESTAQUE) -->
         <div
           class="md:col-span-2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-2xl shadow-xl p-6 sm:p-8 text-white flex flex-col justify-center overflow-hidden min-w-0">
-          <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-2">Investimento Total</p>
-          <p class="whitespace-nowrap text-2xl sm:text-3xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tight drop-shadow-sm mb-3 sm:mb-4 transition-all duration-300"
+          <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Total</p>
+          <p class="text-sm font-semibold text-blue-300 mb-1">10x de</p>
+          <p class="whitespace-nowrap text-3xl sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight drop-shadow-sm transition-all duration-300"
             [class.scale-105]="isValueHighlighting()"
-            [class.text-emerald-300]="isValueHighlighting()">{{ totalValue() }}</p>
+            [class.text-emerald-300]="isValueHighlighting()">{{ installmentValue() }}</p>
+          <p class="text-sm font-medium text-blue-300/80 mt-2 mb-4">Total: {{ totalValue() }}</p>
           <div
             class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold backdrop-blur-sm self-start">
             <svg class="w-4 h-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -926,7 +928,7 @@
     </div>
     <div>
       <p class="font-bold text-xs sm:text-sm leading-tight text-white">Valor da Proposta Atualizado</p>
-      <p class="text-[10px] sm:text-[11px] font-medium text-emerald-100 opacity-90">{{ totalValue() }}</p>
+      <p class="text-[10px] sm:text-[11px] font-medium text-emerald-100 opacity-90">10x de {{ installmentValue() }}</p>
     </div>
   </div>
 </div>
