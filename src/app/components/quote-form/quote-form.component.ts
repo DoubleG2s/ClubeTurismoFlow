@@ -4,7 +4,6 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { Quote, QuoteOption } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
-import { CityAutocompleteComponent } from '../shared/city-autocomplete/city-autocomplete.component';
 import { IataAirportInputComponent } from '../shared/iata-airport-input/iata-airport-input.component';
 import { LucideAngularModule, PlaneTakeoff } from 'lucide-angular';
 import { QuoteAiFillComponent, AiFillApplyEvent } from '../quote-ai-fill/quote-ai-fill.component';
@@ -14,7 +13,7 @@ import { HotelFormSubmission } from '../hotel-form/hotel-form.types';
 @Component({
   selector: 'app-quote-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CityAutocompleteComponent, IataAirportInputComponent, LucideAngularModule, QuoteAiFillComponent, HotelFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, IataAirportInputComponent, LucideAngularModule, QuoteAiFillComponent, HotelFormComponent],
   templateUrl: './quote-form.component.html',
 })
 export class QuoteFormComponent implements OnInit, OnChanges {
