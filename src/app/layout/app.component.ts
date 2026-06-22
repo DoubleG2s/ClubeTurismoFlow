@@ -181,6 +181,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   usdExchangeRate = signal<number>(6.00);
   isSavingQuote = signal(false);
   prefilledQuoteData = signal<Partial<Quote> | null>(null);
+  duplicatingQuote = signal<Quote | null>(null);
 
   // Hotel State
   editingHotel = signal<Hotel | null>(null);
@@ -760,6 +761,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   closeQuoteEditModal() {
     this.showQuoteEditModal.set(false);
     this.editingQuote.set(null);
+  }
+
+  startDuplicateQuote(id: string) {
+    const quote = this.quotes().find(q => q.id === id);
+    if (!quote) return;
+    this.duplicatingQuote.set(null);
+    this.activeTab.set('cotacoes');
+    this.activeCotacaoTab.set('cadastro');
+    setTimeout(() => this.duplicatingQuote.set(quote), 0);
+  }
+
+  onDuplicateFilled() {
+    this.duplicatingQuote.set(null);
   }
 
   // --- Hotel Actions ---

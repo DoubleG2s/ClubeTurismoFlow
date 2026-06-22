@@ -20,10 +20,12 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   @Input() quoteToEdit: Quote | null = null;
   @Input() isLoading = false;
   @Input() prefillData: Partial<Quote> | null = null;
+  @Input() duplicateFrom: Quote | null = null;
 
   @Output() save = new EventEmitter<Omit<Quote, 'id' | 'created_at'>>();
   @Output() update = new EventEmitter<{ id: string, data: Partial<Quote> }>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() duplicateFilled = new EventEmitter<void>();
 
   quoteForm!: FormGroup;
   isEditMode = signal(false);
@@ -82,6 +84,9 @@ export class QuoteFormComponent implements OnInit, OnChanges {
          });
        }
     }
+    if (changes['duplicateFrom'] && this.duplicateFrom && !this.isEditMode()) {
+      this.fillFromDuplicate(this.duplicateFrom);
+    }
   }
 
   ngOnInit() {
@@ -114,6 +119,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
           hotel_options: this.quoteToEdit.hotel_options
         });
       }
+    } else if (this.duplicateFrom) {
+      this.fillFromDuplicate(this.duplicateFrom);
     } else {
       // New quote
       this.addQuoteOption();
@@ -377,6 +384,33 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   }
 
   // -------------------------
+
+  fillFromDuplicate(source: Quote) {
+    this.isEditMode.set(false);
+    this.quoteForm.patchValue({
+      title: 'Cópia de ' + source.title,
+      subtitle: source.subtitle || '',
+      supplier: source.supplier || '',
+    });
+    this.quoteOptions.clear();
+    if (source.options && source.options.length > 0) {
+      source.options.forEach(opt => this.addQuoteOption(opt));
+    } else {
+      this.addQuoteOption({
+        check_in: source.check_in,
+        check_out: source.check_out,
+        adults: source.adults,
+        children: source.children,
+        tour_details: source.tour_details,
+        has_transfer: source.has_transfer,
+        flight_details: source.flight_details,
+        hotel_options: source.hotel_options,
+      });
+    }
+    this.activeOptionIndex.set(0);
+    this.cdr.markForCheck();
+    this.duplicateFilled.emit();
+  }
 
   resetForm() {
     this.isEditMode.set(false);

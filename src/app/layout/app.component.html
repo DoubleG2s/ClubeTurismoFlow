@@ -325,8 +325,11 @@
             [quotes]="quotes()"
             (activeSubTabChange)="switchCotacaoTab($event)"
             (exchangeRateChange)="onExchangeRateInput($event)"
+            [duplicateFromQuote]="duplicatingQuote()"
             (addQuote)="onAddQuote($event)"
             (editQuote)="startEditQuote($event)"
+            (duplicateQuote)="startDuplicateQuote($event)"
+            (duplicateFilled)="onDuplicateFilled()"
             (removeQuote)="onRemoveQuote($event)"></app-quotes-page>
         }
 

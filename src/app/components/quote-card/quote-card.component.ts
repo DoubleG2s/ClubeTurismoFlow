@@ -15,6 +15,7 @@ export class QuoteCardComponent implements OnChanges {
   @Input({ required: true }) quote!: Quote;
   @Input({ required: true }) exchangeRate!: number;
   @Output() edit = new EventEmitter<string>();
+  @Output() duplicate = new EventEmitter<string>();
   @Output() remove = new EventEmitter<string>();
 
   private quoteService = inject(QuoteService);
@@ -92,6 +93,11 @@ export class QuoteCardComponent implements OnChanges {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+  }
+
+  onDuplicate(event: Event) {
+    event.stopPropagation();
+    this.duplicate.emit(this.quote.id);
   }
 
   onDelete(event: Event) {

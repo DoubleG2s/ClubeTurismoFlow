@@ -24,7 +24,7 @@
         <div class="ct-collapse" [class.open]="formOpen">
           <div>
             <div class="pb-1">
-              <app-quote-form (save)="addQuote.emit($event)" [isLoading]="isSavingQuote" [prefillData]="prefilledQuoteData"></app-quote-form>
+              <app-quote-form (save)="addQuote.emit($event)" [isLoading]="isSavingQuote" [prefillData]="prefilledQuoteData" [duplicateFrom]="duplicateFromQuote" (duplicateFilled)="duplicateFilled.emit()"></app-quote-form>
             </div>
           </div>
         </div>
@@ -56,7 +56,7 @@
         @if (quotes.length > 0) {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             @for (quote of quotes; track quote.id) {
-              <app-quote-card [quote]="quote" [exchangeRate]="exchangeRate" (edit)="editQuote.emit($event)" (remove)="removeQuote.emit($event)"></app-quote-card>
+              <app-quote-card [quote]="quote" [exchangeRate]="exchangeRate" (edit)="editQuote.emit($event)" (duplicate)="duplicateQuote.emit($event)" (remove)="removeQuote.emit($event)"></app-quote-card>
             }
           </div>
         } @else {
