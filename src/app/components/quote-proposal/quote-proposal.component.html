@@ -775,17 +775,6 @@
             </div>
             }
 
-            <!-- Valor do Hotel (inline em cada card) -->
-            <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-100">
-              <div class="flex items-center justify-between">
-                <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Valor Total do Pacote</p>
-                <p class="text-xl sm:text-2xl font-black tracking-tight"
-                  [class.text-blue-600]="selectedHotelIndex() === hotelIdx"
-                  [class.text-slate-700]="selectedHotelIndex() !== hotelIdx">
-                  {{ getHotelTotalValue(hotel) }}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
         }
