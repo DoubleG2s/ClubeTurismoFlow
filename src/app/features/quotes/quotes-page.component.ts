@@ -34,6 +34,7 @@ export class QuotesPageComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['duplicateFromQuote'] && this.duplicateFromQuote) {
       this.formOpen = true;
+      document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
