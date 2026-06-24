@@ -214,7 +214,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       amount: [data?.amount || '', Validators.required],
       currency: [data?.currency || 'BRL', Validators.required],
       link: [data?.link || ''],
-      description: [data?.description || '']
+      description: [data?.description || ''],
+      price_mode: [data?.price_mode || 'total']
     });
   }
 

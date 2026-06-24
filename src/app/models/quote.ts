@@ -8,6 +8,7 @@ export interface HotelOption {
   currency: 'BRL' | 'USD';
   link?: string;
   description?: string;
+  price_mode?: 'total' | 'per_person';
 }
 
 export interface FlightSegment {

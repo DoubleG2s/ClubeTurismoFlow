@@ -400,20 +400,35 @@
                 <input type="text" formControlName="accommodation" placeholder="Ex: Apto Standard"
                   class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 placeholder-slate-400">
               </div>
-              <div class="flex gap-2">
-                <div class="flex flex-col group w-24">
-                  <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Moeda</label>
-                  <select formControlName="currency"
-                    class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold">
-                    <option value="BRL">R$</option>
-                    <option value="USD">US$</option>
-                  </select>
+              <div class="flex flex-col gap-2">
+                <div class="flex flex-col group">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Modo de exibição</label>
+                  <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-1 text-xs font-medium text-slate-600 cursor-pointer">
+                      <input type="radio" formControlName="price_mode" value="total" class="accent-purple-600 w-3.5 h-3.5">
+                      Valor total
+                    </label>
+                    <label class="flex items-center gap-1 text-xs font-medium text-slate-600 cursor-pointer">
+                      <input type="radio" formControlName="price_mode" value="per_person" class="accent-purple-600 w-3.5 h-3.5">
+                      Valor por pessoa
+                    </label>
+                  </div>
                 </div>
-                <div class="flex flex-col group flex-grow">
-                  <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Total</label>
-                  <input type="text" formControlName="amount" (input)="onCurrencyInput($event, optIndex, hotelIndex)"
-                    placeholder="0,00"
-                    class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold focus:outline-none focus:border-purple-500 placeholder-slate-400">
+                <div class="flex gap-2">
+                  <div class="flex flex-col group w-24">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Moeda</label>
+                    <select formControlName="currency"
+                      class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold">
+                      <option value="BRL">R$</option>
+                      <option value="USD">US$</option>
+                    </select>
+                  </div>
+                  <div class="flex flex-col group flex-grow">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Total</label>
+                    <input type="text" formControlName="amount" (input)="onCurrencyInput($event, optIndex, hotelIndex)"
+                      placeholder="0,00"
+                      class="w-full p-2 bg-white text-slate-900 text-sm border border-slate-200 rounded-lg font-bold focus:outline-none focus:border-purple-500 placeholder-slate-400">
+                  </div>
                 </div>
               </div>
               <div class="flex flex-col group md:col-span-2">

@@ -90,6 +90,28 @@ export class QuoteProposalComponent implements OnInit {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: this.mainHotel()!.currency }).format(installment);
   });
 
+  priceMode = computed(() => this.mainHotel()?.price_mode ?? 'total');
+
+  perPersonTotalValue = computed(() => {
+    if (!this.mainHotel()) return '';
+    const hotel = this.mainHotel()!;
+    const adt = this.currentOption()?.adults ?? 0;
+    if (!adt) {
+      console.warn('ADT não definido, exibindo valor total');
+      return this.formatCurrencyValue(hotel.amount, hotel.currency);
+    }
+    return this.formatCurrencyValue(hotel.amount / adt, hotel.currency);
+  });
+
+  perPersonInstallmentValue = computed(() => {
+    if (!this.mainHotel()) return '';
+    const hotel = this.mainHotel()!;
+    const adt = this.currentOption()?.adults ?? 0;
+    const base = adt ? hotel.amount / adt : hotel.amount;
+    const installment = Math.round(base / 10 * 100) / 100;
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: hotel.currency }).format(installment);
+  });
+
   ngOnInit() {
     if (this.quoteId || this.publicToken) {
       this.loadQuote();

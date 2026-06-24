@@ -787,12 +787,21 @@
         <!-- VALOR CARD (DESTAQUE) -->
         <div
           class="md:col-span-2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-2xl shadow-xl p-6 sm:p-8 text-white flex flex-col justify-center items-center md:items-start overflow-hidden min-w-0">
-          <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Total</p>
-          <p class="text-sm font-semibold text-white mb-1">10x de</p>
-          <p class="whitespace-nowrap text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight drop-shadow-sm transition-all duration-300"
-            [class.scale-105]="isValueHighlighting()"
-            [class.text-emerald-300]="isValueHighlighting()">{{ installmentValue() }}</p>
-          <p class="text-sm sm:text-base font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left">Total: {{ totalValue() }}</p>
+          @if (priceMode() === 'per_person') {
+            <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Por Pessoa</p>
+            <p class="text-sm font-semibold text-white mb-1">10x de</p>
+            <p class="whitespace-nowrap text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight drop-shadow-sm transition-all duration-300"
+              [class.scale-105]="isValueHighlighting()"
+              [class.text-emerald-300]="isValueHighlighting()">{{ perPersonInstallmentValue() }}</p>
+            <p class="text-xs sm:text-sm font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left whitespace-nowrap">Total por pessoa: {{ perPersonTotalValue() }}</p>
+          } @else {
+            <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Total</p>
+            <p class="text-sm font-semibold text-white mb-1">10x de</p>
+            <p class="whitespace-nowrap text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight drop-shadow-sm transition-all duration-300"
+              [class.scale-105]="isValueHighlighting()"
+              [class.text-emerald-300]="isValueHighlighting()">{{ installmentValue() }}</p>
+            <p class="text-sm sm:text-base font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left">Total: {{ totalValue() }}</p>
+          }
           <div
             class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold backdrop-blur-sm self-center md:self-start">
             <svg class="w-4 h-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -916,7 +925,7 @@
     </div>
     <div>
       <p class="font-bold text-xs sm:text-sm leading-tight text-white">Valor da Proposta Atualizado</p>
-      <p class="text-[10px] sm:text-[11px] font-medium text-emerald-100 opacity-90">10x de {{ installmentValue() }}</p>
+      <p class="text-[10px] sm:text-[11px] font-medium text-emerald-100 opacity-90">10x de {{ priceMode() === 'per_person' ? perPersonInstallmentValue() : installmentValue() }}</p>
     </div>
   </div>
 </div>
