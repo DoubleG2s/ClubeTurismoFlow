@@ -11,6 +11,7 @@ export interface HotelFormDataPayload {
   default_checkin: string;
   default_checkout: string;
   description?: string;
+  photos_link?: string;
 }
 
 export interface HotelFormEmailPayload {

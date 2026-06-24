@@ -41,6 +41,7 @@ export class HotelFormComponent implements OnInit {
     checkin = signal('14:00');
     checkout = signal('12:00');
     description = signal('');
+    photosLink = signal('');
 
     // Arrays
     emails = signal<Array<Partial<HotelEmail> & { _tempId: string }>>([]);
@@ -78,6 +79,7 @@ export class HotelFormComponent implements OnInit {
             this.checkin.set(this.hotelToEdit.default_checkin || '');
             this.checkout.set(this.hotelToEdit.default_checkout || '');
             this.description.set(this.hotelToEdit.description || '');
+            this.photosLink.set(this.hotelToEdit.photos_link || '');
 
             if (this.hotelToEdit.hotel_emails) {
                 this.emails.set(this.hotelToEdit.hotel_emails.map(e => ({ ...e, _tempId: Math.random().toString() })));
@@ -183,7 +185,8 @@ export class HotelFormComponent implements OnInit {
             location_country: this.country(),
             default_checkin: this.checkin(),
             default_checkout: this.checkout(),
-            description: this.description()
+            description: this.description(),
+            photos_link: this.photosLink() || undefined
         };
 
         // New items do not have an ID yet
@@ -235,6 +238,7 @@ export class HotelFormComponent implements OnInit {
         this.checkin.set('14:00');
         this.checkout.set('12:00');
         this.description.set('');
+        this.photosLink.set('');
         this.emails.set([]);
         this.phones.set([]);
         this.images.set([]);

@@ -13,6 +13,7 @@ export interface Hotel {
   default_checkin?: string;
   default_checkout?: string;
   description?: string;
+  photos_link?: string;
   created_at?: string;
   updated_at?: string;
 

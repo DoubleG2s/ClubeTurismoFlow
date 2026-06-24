@@ -5,7 +5,7 @@ import { Quote, QuoteOption } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
 import { IataAirportInputComponent } from '../shared/iata-airport-input/iata-airport-input.component';
-import { LucideAngularModule, PlaneTakeoff } from 'lucide-angular';
+import { LucideAngularModule, PlaneTakeoff, ClipboardPaste } from 'lucide-angular';
 import { QuoteAiFillComponent, AiFillApplyEvent } from '../quote-ai-fill/quote-ai-fill.component';
 import { HotelFormComponent } from '../hotel-form/hotel-form.component';
 import { HotelFormSubmission } from '../hotel-form/hotel-form.types';
@@ -30,6 +30,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   quoteForm!: FormGroup;
   isEditMode = signal(false);
   readonly PlaneTakeoff = PlaneTakeoff;
+  readonly ClipboardPaste = ClipboardPaste;
 
   // States
   hotelService = inject(HotelService);
@@ -243,7 +244,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       hotel_id: hotel.id,
       hotel_name: hotel.name,
       hotel_images: images,
-      description: hotel.description || ''
+      description: hotel.description || '',
+      link: hotel.photos_link || ''
     });
     this.activeHotelDropdownIndex.set(null);
   }
@@ -301,6 +303,28 @@ export class QuoteFormComponent implements OnInit, OnChanges {
           await this.uploadAndSetImage(file, optionIndex, hotelIndex);
         }
       }
+    }
+  }
+
+  async pasteImageFromClipboard(optionIndex: number, hotelIndex: number) {
+    try {
+      const items = await navigator.clipboard.read();
+      let found = false;
+      for (const item of items) {
+        const imageType = item.types.find(t => t.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], 'pasted-image.png', { type: imageType });
+          await this.uploadAndSetImage(file, optionIndex, hotelIndex);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        this.showToast('Nenhuma imagem encontrada na área de transferência.', 'error');
+      }
+    } catch {
+      this.showToast('Não foi possível acessar a área de transferência. Tente Ctrl+V diretamente na área de fotos.', 'error');
     }
   }
 
