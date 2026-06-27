@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Injectable, inject } from '@angular/core';
+import { GeminiClientService } from './gemini-client.service';
 
 export interface ParsedFlightSegment {
   origin_city?: string;
@@ -123,20 +122,16 @@ REGRAS CRÍTICAS:
 
 @Injectable({ providedIn: 'root' })
 export class QuoteAiParserService {
-  private genAI: GoogleGenerativeAI;
-
-  constructor() {
-    this.genAI = new GoogleGenerativeAI(environment.geminiApiKey);
-  }
+  private gemini = inject(GeminiClientService);
 
   async parseRawText(text: string): Promise<QuoteParseResult> {
-    const model = this.genAI.getGenerativeModel({
+    const model = this.gemini.getModel({
       model: 'gemini-2.0-flash',
       generationConfig: { responseMimeType: 'application/json' },
       systemInstruction: SYSTEM_PROMPT,
     });
 
-    const result = await model.generateContent(text);
+    const result = await this.gemini.generateWithRetry(model, text);
     const responseText = result.response.text();
 
     let raw: any;

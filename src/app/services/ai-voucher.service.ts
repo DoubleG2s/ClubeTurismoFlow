@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { PdfExtractorService } from './pdf-extractor.service';
-import { environment } from '../../environments/environment';
-import { GoogleGenerativeAI, SchemaType, FunctionCallingMode, FunctionDeclaration } from '@google/generative-ai';
+import { GeminiClientService } from './gemini-client.service';
+import { SchemaType, FunctionCallingMode, FunctionDeclaration } from '@google/generative-ai';
 import { ProductType } from '../models/reservation';
 
 export interface VoucherExtractionResult {
@@ -22,7 +22,7 @@ export interface VoucherExtractionResult {
 })
 export class AiVoucherService {
   private pdfExtractor = inject(PdfExtractorService);
-  private genAI = new GoogleGenerativeAI(environment.geminiApiKey);
+  private gemini = inject(GeminiClientService);
 
   async processVoucher(file: File): Promise<VoucherExtractionResult> {
     try {
@@ -73,7 +73,7 @@ export class AiVoucherService {
         }
       };
 
-      const model = this.genAI.getGenerativeModel({
+      const model = this.gemini.getModel({
         model: "gemini-2.0-flash",
         tools: [{ functionDeclarations: [extractFunctionDeclaration] }],
         toolConfig: { functionCallingConfig: { mode: FunctionCallingMode.ANY, allowedFunctionNames: ["extract_voucher"] } },
@@ -90,7 +90,7 @@ export class AiVoucherService {
       });
 
       const chat = model.startChat();
-      const result = await chat.sendMessage(`Arquivo: ${file.name}\n\nConteúdo:\n${text}`);
+      const result = await this.gemini.sendMessageWithRetry(chat, `Arquivo: ${file.name}\n\nConteúdo:\n${text}`);
       const call = result.response.functionCalls()?.[0];
 
       if (!call || call.name !== "extract_voucher") {

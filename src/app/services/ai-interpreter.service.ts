@@ -1,6 +1,5 @@
-import { Injectable, signal } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Injectable, inject, signal } from '@angular/core';
+import { GeminiClientService } from './gemini-client.service';
 
 export type AiIntentType =
   | 'NONE'
@@ -63,14 +62,10 @@ const SYSTEM_PROMPT = [
   providedIn: 'root'
 })
 export class AiInterpreterService {
+  private gemini = inject(GeminiClientService);
   private currentState = signal<ConversationState>('IDLE');
   private pendingAction = signal<AiAction | null>(null);
   private chatHistory: HistoryRecord[] = [];
-  private genAI: GoogleGenerativeAI;
-
-  constructor() {
-    this.genAI = new GoogleGenerativeAI(environment.geminiApiKey);
-  }
 
   public blockForTabConfirmation(pendingReq: AiAction): AiResponse {
     this.currentState.set('AWAITING_TAB_SWITCH_CONFIRMATION');
@@ -99,7 +94,7 @@ export class AiInterpreterService {
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({
+      const model = this.gemini.getModel({
         model: 'gemini-2.0-flash',
         generationConfig: {
           responseMimeType: 'application/json',
@@ -127,10 +122,10 @@ export class AiInterpreterService {
       let responseText = '';
       if (this.chatHistory.length > 0) {
         const chat = model.startChat({ history: this.chatHistory });
-        const result = await chat.sendMessage(promptParts);
+        const result = await this.gemini.sendMessageWithRetry(chat, promptParts);
         responseText = result.response.text();
       } else {
-        const result = await model.generateContent(promptParts);
+        const result = await this.gemini.generateWithRetry(model, promptParts);
         responseText = result.response.text();
       }
 
