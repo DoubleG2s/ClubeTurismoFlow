@@ -55,6 +55,10 @@ function toEnvironment(env, options) {
       options.production ? 'PROD_GEMINI_API_KEY' : 'DEV_GEMINI_API_KEY',
       'GEMINI_API_KEY'
     ]),
+    groqApiKey: pick(env, [
+      options.production ? 'PROD_GROQ_API_KEY' : 'DEV_GROQ_API_KEY',
+      'GROQ_API_KEY'
+    ]),
     apiNinjasKey: pick(env, [
       options.production ? 'PROD_API_NINJAS_KEY' : 'DEV_API_NINJAS_KEY',
       'API_NINJAS_KEY'
@@ -88,6 +92,7 @@ export const environment = {
   supabaseUrl: '${jsString(environment.supabaseUrl)}',
   supabaseAnonKey: '${jsString(environment.supabaseAnonKey)}',
   geminiApiKey: '${jsString(environment.geminiApiKey)}',
+  groqApiKey: '${jsString(environment.groqApiKey)}',
   apiNinjasKey: '${jsString(environment.apiNinjasKey)}',
   stripePublishableKey: '${jsString(environment.stripePublishableKey)}',
   apiBaseUrl: '${jsString(environment.apiBaseUrl)}',
@@ -103,6 +108,7 @@ function logEnvironmentStatus(label, environment) {
   console.log(`[${label}] SUPABASE_URL:`, environment.supabaseUrl ? 'OK' : 'MISSING');
   console.log(`[${label}] SUPABASE_ANON_KEY:`, environment.supabaseAnonKey ? 'OK' : 'MISSING');
   console.log(`[${label}] GEMINI_API_KEY:`, environment.geminiApiKey ? 'OK' : 'MISSING');
+  console.log(`[${label}] GROQ_API_KEY:`, environment.groqApiKey ? 'OK' : 'MISSING');
   console.log(`[${label}] API_NINJAS_KEY:`, environment.apiNinjasKey ? 'OK' : 'MISSING');
   console.log(`[${label}] STRIPE_PUBLISHABLE_KEY:`, environment.stripePublishableKey ? 'OK' : 'MISSING');
   console.log(`[${label}] API_BASE_URL:`, environment.apiBaseUrl || 'relative');

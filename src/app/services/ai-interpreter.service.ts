@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { GeminiClientService } from './gemini-client.service';
+import { GeminiClientService, AiMessage } from './gemini-client.service';
 
 export type AiIntentType =
   | 'NONE'
@@ -22,11 +22,6 @@ export interface AiResponse {
 }
 
 type ConversationState = 'IDLE' | 'AWAITING_TAB_SWITCH_CONFIRMATION';
-
-interface HistoryRecord {
-  role: 'user' | 'model';
-  parts: { text: string }[];
-}
 
 const SYSTEM_PROMPT = [
   'Você é um assistente operacional moderno do "Clube Turismo Flow" (Copilot).',
@@ -65,7 +60,7 @@ export class AiInterpreterService {
   private gemini = inject(GeminiClientService);
   private currentState = signal<ConversationState>('IDLE');
   private pendingAction = signal<AiAction | null>(null);
-  private chatHistory: HistoryRecord[] = [];
+  private chatHistory: AiMessage[] = [];
 
   public blockForTabConfirmation(pendingReq: AiAction): AiResponse {
     this.currentState.set('AWAITING_TAB_SWITCH_CONFIRMATION');
@@ -94,55 +89,22 @@ export class AiInterpreterService {
     }
 
     try {
-      const model = this.gemini.getModel({
-        model: 'gemini-2.0-flash',
-        generationConfig: {
-          responseMimeType: 'application/json',
-        },
-        systemInstruction: SYSTEM_PROMPT
-      });
+      let userMessage = text || '';
+      if (pdfBase64) userMessage += '\n[Arquivo PDF anexado — conteúdo base64 não suportado diretamente, extraia o texto antes de enviar]';
 
-      const promptParts: any[] = [];
-      if (text) {
-        promptParts.push(text);
-      }
-      if (pdfBase64 && pdfMimeType) {
-        promptParts.push({
-          inlineData: {
-            data: pdfBase64,
-            mimeType: pdfMimeType
-          }
-        });
-      }
-
-      if (promptParts.length === 0) {
-        throw new Error('O prompt está vazio.');
-      }
-
-      let responseText = '';
-      if (this.chatHistory.length > 0) {
-        const chat = model.startChat({ history: this.chatHistory });
-        const result = await this.gemini.sendMessageWithRetry(chat, promptParts);
-        responseText = result.response.text();
-      } else {
-        const result = await this.gemini.generateWithRetry(model, promptParts);
-        responseText = result.response.text();
-      }
+      const responseText = await this.gemini.generateText(SYSTEM_PROMPT, userMessage, this.chatHistory, true);
 
       let data: AiResponse = { message: '' };
       try {
-        let cleanedResponse = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        cleanedResponse = cleanedResponse.replace(/""([^"]+)""\s*:/g, '"$1":');
-        data = JSON.parse(cleanedResponse) as AiResponse;
+        let cleaned = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        cleaned = cleaned.replace(/""([^"]+)""\s*:/g, '"$1":');
+        data = JSON.parse(cleaned) as AiResponse;
       } catch {
         throw new Error('Falha ao parsear o JSON retornado pela IA. Resposta crua: ' + responseText);
       }
 
-      let messageContent = text;
-      if (pdfBase64) messageContent += '\n[Arquivo PDF anexado]';
-
-      this.chatHistory.push({ role: 'user', parts: [{ text: messageContent }] });
-      this.chatHistory.push({ role: 'model', parts: [{ text: data.message || JSON.stringify(data.action) }] });
+      this.chatHistory.push({ role: 'user', content: userMessage });
+      this.chatHistory.push({ role: 'assistant', content: data.message || JSON.stringify(data.action) });
 
       if (this.chatHistory.length > 16) {
         this.chatHistory = this.chatHistory.slice(-16);

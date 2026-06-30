@@ -44,11 +44,13 @@ testem.log
 Thumbs.db
 
 # Environments (Security)
-# não ignore os environments
-# ignore apenas arquivos sensíveis se existirem
+# environment.ts e environment.prod.ts são auto-gerados pelo inject-env.js
+# e podem conter chaves de API reais — nunca commitar
 .env
 .env.*
 !.env.example
+src/environments/environment.ts
+src/environments/environment.prod.ts
 .agent
 .vercel
 /docs

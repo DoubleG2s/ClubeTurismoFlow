@@ -125,14 +125,7 @@ export class QuoteAiParserService {
   private gemini = inject(GeminiClientService);
 
   async parseRawText(text: string): Promise<QuoteParseResult> {
-    const model = this.gemini.getModel({
-      model: 'gemini-2.0-flash',
-      generationConfig: { responseMimeType: 'application/json' },
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
-    const result = await this.gemini.generateWithRetry(model, text);
-    const responseText = result.response.text();
+    const responseText = await this.gemini.generateText(SYSTEM_PROMPT, text, [], true);
 
     let raw: any;
     try {
