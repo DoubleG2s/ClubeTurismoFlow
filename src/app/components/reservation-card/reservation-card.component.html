@@ -95,7 +95,7 @@
           style="background: var(--n-50); border: 1px solid var(--n-150);">
           <div class="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-colors" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22v-6.57"/><path d="M14 22v-6.57"/><path d="M14 10.15V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v18h20V12.5a2 2 0 0 0-2-2h-6"/><path d="M8 22H2"/><path d="M22 22h-6"/></svg>
-            <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--n-600);">Hotel</span>
+            <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--n-600);">{{ reservation.nome_hotel }}</span>
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform transition-transform duration-300" [class.rotate-180]="isHotelInfoExpanded" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
@@ -104,13 +104,6 @@
              [ngClass]="isHotelInfoExpanded ? 'max-h-44 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'">
           <div class="p-3 rounded-lg text-sm flex flex-col gap-1.5 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px"
                style="background: var(--n-0); border: 1px solid var(--n-100); before-background: var(--n-200);">
-            @if (reservation.nome_hotel) {
-              <div class="flex items-start gap-2 pl-4 relative">
-                <div class="absolute left-[-2px] top-2 w-1.5 h-1.5 rounded-full" style="background: var(--brand-500);"></div>
-                <span class="font-medium min-w-16" style="color: var(--n-500);">Hotel:</span>
-                <span class="font-bold" style="color: var(--n-900);">{{ reservation.nome_hotel }}</span>
-              </div>
-            }
             @if (reservation.quarto) {
               <div class="flex items-start gap-2 pl-4 relative">
                 <div class="absolute left-[-2px] top-2 w-1.5 h-1.5 rounded-full" style="background: var(--n-300);"></div>

@@ -165,12 +165,7 @@ export class AiVoucherService {
 
     const notes_prefill = hotel_observacoes;
 
-    let product_type = ProductType.PACOTE;
-    if (voo && !hotel_nome) {
-      product_type = ProductType.VOO;
-    } else if (hotel_nome && !voo) {
-      product_type = ProductType.HOSPEDAGEM;
-    }
+    const product_type = ProductType.PACOTE;
 
     return {
       passageiros: px,
