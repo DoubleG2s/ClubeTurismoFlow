@@ -122,7 +122,13 @@
             </div>
             <div class="min-w-0">
               <div class="text-sm font-semibold truncate" style="color: var(--n-900);">{{ user.name || 'Sem nome' }}</div>
-              <div class="text-[11px] truncate" style="color: var(--n-400);">{{ $any(user).last || 'Nunca' }}</div>
+              <div class="text-[11px] truncate flex items-center gap-1"
+                   [style.color]="isOnline(user) ? 'var(--brand-600)' : 'var(--n-400)'">
+                @if (isOnline(user)) {
+                  <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style="background: var(--brand-500);"></span>
+                }
+                {{ formatLastSeen(user) }}
+              </div>
             </div>
           </div>
 

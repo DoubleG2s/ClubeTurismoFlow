@@ -12,6 +12,7 @@ export class AuthService {
   private userSignal = signal<User | null>(null);
   private profileSignal = signal<UserProfile | null>(null);
   private loadingSignal = signal<boolean>(true);
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
   // Public Selectors
   readonly session = computed(() => this.sessionSignal());
@@ -95,10 +96,31 @@ export class AuthService {
       this.syncCompanySlugInUrl(null);
     }
     this.userSignal.set(session.user);
-    
+    this.startHeartbeat(session.user.id);
+
     // CRITICAL: Set session LAST. This triggers the App Component to render the protected layout.
     // By now, profileSignal is already populated, so the Name/Role will render correctly.
     this.sessionSignal.set(session);
+  }
+
+  private async touchLastSeen(userId: string) {
+    await supabase
+      .from('profiles')
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq('id', userId);
+  }
+
+  private startHeartbeat(userId: string) {
+    this.stopHeartbeat();
+    void this.touchLastSeen(userId);
+    this.heartbeatInterval = setInterval(() => void this.touchLastSeen(userId), 5 * 60 * 1000);
+  }
+
+  private stopHeartbeat() {
+    if (this.heartbeatInterval !== null) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
   }
 
   // Helper: Just fetches data, does not set signals
@@ -149,6 +171,7 @@ export class AuthService {
   }
 
   async signOut() {
+    this.stopHeartbeat();
     // Clear local state immediately for instant UI feedback
     this.profileSignal.set(null);
     this.sessionSignal.set(null);

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -11,7 +11,7 @@ import { supabase } from '../../services/supabase';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './user-list.component.html'
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, OnDestroy {
   private fb: FormBuilder = inject(FormBuilder);
   public authService = inject(AuthService); // Public for HTML access to current user ID
 
@@ -65,8 +65,17 @@ export class UserListComponent implements OnInit {
 
   feedbackMessage = signal<{type: 'success' | 'error', text: string} | null>(null);
 
+  private refreshInterval: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit() {
     this.loadUsers();
+    this.refreshInterval = setInterval(() => this.loadUsers(), 60_000);
+  }
+
+  ngOnDestroy() {
+    if (this.refreshInterval !== null) {
+      clearInterval(this.refreshInterval);
+    }
   }
 
   async loadUsers() {
@@ -107,6 +116,26 @@ export class UserListComponent implements OnInit {
     let sum = 0;
     for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
     return colors[sum % colors.length];
+  }
+
+  isOnline(user: UserProfile): boolean {
+    const seen = user.last_seen_at;
+    if (!seen) return false;
+    return (Date.now() - new Date(seen).getTime()) < 10 * 60 * 1000;
+  }
+
+  formatLastSeen(user: UserProfile): string {
+    const seen = user.last_seen_at;
+    if (!seen) return 'Nunca';
+    const diffMs = Date.now() - new Date(seen).getTime();
+    const minutes = Math.floor(diffMs / 60_000);
+    if (minutes < 10) return 'Online agora';
+    if (minutes < 60) return `há ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `há ${hours}h`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return 'há 1 dia';
+    return `há ${days} dias`;
   }
 
   // --- Create ---

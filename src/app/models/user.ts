@@ -10,4 +10,5 @@ export interface UserProfile {
     slug?: string;
   } | null; // Join opcional com a empresa atual do usuario
   created_at: string;
+  last_seen_at?: string | null;
 }
