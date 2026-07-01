@@ -41,6 +41,7 @@ import { HotelsPageComponent } from '@features/hotels/hotels-page.component';
 import { QuotesPageComponent } from '@features/quotes/quotes-page.component';
 import { ReservationsPageComponent } from '@features/reservations/reservations-page.component';
 import { SubscriptionComponent } from '@features/subscription/subscription';
+import { SettingsPageComponent } from '@features/settings/settings-page.component';
 import { AiAction } from '@services/ai-interpreter.service';
 import { AuthService } from '@services/auth.service';
 import { CreditService } from '@services/credit.service';
@@ -75,7 +76,8 @@ import { animate } from 'motion';
     QuotesPageComponent,
     ReservationsPageComponent,
     SubscriptionComponent,
-    QuoteProposalComponent
+    QuoteProposalComponent,
+    SettingsPageComponent
   ],
   templateUrl: './app.component.html',
   animations: [expandCollapse, listStagger],
@@ -149,6 +151,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       usuarios: 'Usuários',
       admin: 'Administração',
       assinatura: 'Assinatura',
+      configuracoes: 'Configurações',
     };
     return map[this.activeTab()] ?? this.activeTab();
   });

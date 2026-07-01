@@ -1,0 +1,259 @@
+<div class="ct-page animate-fade-in">
+
+  <!-- Page Header -->
+  <div class="ct-page-header">
+    <div>
+      <h1 class="ct-page-title">
+        <strong>{{ authService.profile()?.name || 'Usuário' }}</strong>
+        <span class="text-[var(--n-400)] font-normal mx-1">·</span>
+        <span class="font-normal text-[var(--n-600)]">{{ authService.profile()?.companies?.name || 'Sem vínculo' }}</span>
+      </h1>
+    </div>
+  </div>
+
+  <div class="ct-page-body">
+    <div class="flex flex-col gap-5 max-w-3xl mx-auto">
+
+      <!-- ── Dados Pessoais ─────────────────────────────── -->
+      <section class="bg-white border border-[var(--n-150)] rounded-2xl shadow-[var(--sh-1)] overflow-hidden">
+
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-[var(--n-100)]">
+          <div class="w-9 h-9 rounded-[10px] bg-[var(--brand-50)] text-[var(--brand-600)] flex items-center justify-center flex-shrink-0">
+            <lucide-icon name="user" class="w-[17px] h-[17px]"></lucide-icon>
+          </div>
+          <div>
+            <h2 class="text-[16px] font-extrabold text-[var(--n-900)] leading-tight" style="letter-spacing:-.01em">Dados Pessoais</h2>
+            <p class="text-[12.5px] text-[var(--n-500)] mt-0.5">Seu nome de exibição no sistema</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-5 flex flex-col gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-1.5">
+              <label class="ct-label">Nome Completo <span class="text-[var(--danger-500)]">*</span></label>
+              <input
+                type="text"
+                class="ct-input"
+                [value]="authService.profile()?.name || ''"
+                placeholder="Ex.: Maria Silva"
+              />
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="ct-label">E-mail</label>
+              <input
+                type="email"
+                class="ct-input cursor-not-allowed"
+                [value]="authService.user()?.email || ''"
+                placeholder="email@agencia.com"
+                disabled
+              />
+              <span class="text-[11.5px] text-[var(--n-400)]">Gerenciado pela administração</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 px-6 py-3.5 border-t border-[var(--n-100)] bg-[var(--n-25)]">
+          <span></span>
+          <button class="ct-btn ct-btn-primary disabled:opacity-50" type="button" disabled>
+            <lucide-icon name="check" class="w-3.5 h-3.5"></lucide-icon>
+            Salvar alterações
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ── Dados da Agência ───────────────────────────── -->
+      <section class="bg-white border border-[var(--n-150)] rounded-2xl shadow-[var(--sh-1)] overflow-hidden">
+
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-[var(--n-100)]">
+          <div class="w-9 h-9 rounded-[10px] bg-[var(--brand-50)] text-[var(--brand-600)] flex items-center justify-center flex-shrink-0">
+            <lucide-icon name="building-2" class="w-[17px] h-[17px]"></lucide-icon>
+          </div>
+          <div>
+            <h2 class="text-[16px] font-extrabold text-[var(--n-900)] leading-tight" style="letter-spacing:-.01em">Dados da Agência</h2>
+            <p class="text-[12.5px] text-[var(--n-500)] mt-0.5">Identidade e cadastro da sua unidade</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-5 flex flex-col gap-5">
+
+          <!-- Logo upload -->
+          <div class="flex gap-4 items-start pb-5 border-b border-[var(--n-100)]">
+            <!-- Preview box -->
+            <div class="w-[92px] h-[92px] rounded-[14px] border border-[var(--n-200)] bg-[var(--n-25)] flex-shrink-0 flex flex-col items-center justify-center gap-1 overflow-hidden">
+              <lucide-icon name="image-up" class="w-6 h-6 text-[var(--brand-400)]"></lucide-icon>
+              <span class="text-[10px] font-bold text-[var(--n-400)] uppercase tracking-[.08em]">Prévia</span>
+            </div>
+
+            <!-- Drop zone -->
+            <div class="flex-1 min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-[.04em] text-[var(--n-500)] mb-2">Logo da agência</p>
+              <div class="border-[1.5px] border-dashed border-[var(--n-300)] rounded-[11px] p-4 bg-[var(--n-25)]
+                          flex flex-col items-center gap-1.5 text-center cursor-pointer
+                          hover:border-[var(--brand-400)] hover:bg-[var(--brand-50)] transition-colors">
+                <lucide-icon name="upload" class="w-[18px] h-[18px] text-[var(--n-400)]"></lucide-icon>
+                <div class="text-[12.5px] text-[var(--n-600)] leading-snug">
+                  <span class="font-bold text-[var(--n-800)]">Clique para enviar</span> ou arraste a imagem
+                </div>
+                <div class="text-[11px] text-[var(--n-400)]">PNG, JPG ou WebP · até 2 MB</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agency fields -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-1.5">
+              <label class="ct-label">Nome da agência</label>
+              <input
+                type="text"
+                class="ct-input cursor-not-allowed"
+                [value]="authService.profile()?.companies?.name || ''"
+                placeholder="—"
+                disabled
+              />
+              <span class="text-[11.5px] text-[var(--n-400)]">Gerenciado pela administração</span>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="ct-label">CNPJ <span class="text-[var(--danger-500)]">*</span></label>
+              <input
+                type="text"
+                class="ct-input"
+                placeholder="00.000.000/0000-00"
+                inputmode="numeric"
+              />
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="flex items-center justify-between gap-3 px-6 py-3.5 border-t border-[var(--n-100)] bg-[var(--n-25)]">
+          <span class="inline-flex items-center gap-1.5 text-[11.5px] text-[var(--n-500)] font-semibold">
+            <lucide-icon name="shield" class="w-3 h-3"></lucide-icon>
+            Aplica-se apenas a esta agência
+          </span>
+          <button class="ct-btn ct-btn-primary disabled:opacity-50" type="button" disabled>
+            <lucide-icon name="check" class="w-3.5 h-3.5"></lucide-icon>
+            Salvar alterações
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ── Segurança ──────────────────────────────────── -->
+      <section class="bg-white border border-[var(--n-150)] rounded-2xl shadow-[var(--sh-1)] overflow-hidden">
+
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-[var(--n-100)]">
+          <div class="w-9 h-9 rounded-[10px] bg-[var(--warn-50)] text-[var(--warn-600)] flex items-center justify-center flex-shrink-0">
+            <lucide-icon name="lock" class="w-4 h-4"></lucide-icon>
+          </div>
+          <div>
+            <h2 class="text-[16px] font-extrabold text-[var(--n-900)] leading-tight" style="letter-spacing:-.01em">Segurança</h2>
+            <p class="text-[12.5px] text-[var(--n-500)] mt-0.5">Altere sua senha de acesso</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-5 flex flex-col gap-4">
+
+          <!-- Current password -->
+          <div class="flex flex-col gap-1.5">
+            <label class="ct-label">Senha atual <span class="text-[var(--danger-500)]">*</span></label>
+            <div class="relative">
+              <input
+                [type]="showCurrentPassword ? 'text' : 'password'"
+                class="ct-input pr-10"
+                placeholder="Sua senha atual"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-md text-[var(--n-400)] hover:text-[var(--n-700)] hover:bg-[var(--n-100)] transition-colors"
+                (click)="showCurrentPassword = !showCurrentPassword"
+                tabindex="-1"
+              >
+                @if (showCurrentPassword) {
+                  <lucide-icon name="eye-off" class="w-4 h-4"></lucide-icon>
+                } @else {
+                  <lucide-icon name="eye" class="w-4 h-4"></lucide-icon>
+                }
+              </button>
+            </div>
+          </div>
+
+          <!-- New + Confirm passwords -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-1.5">
+              <label class="ct-label">Nova senha <span class="text-[var(--danger-500)]">*</span></label>
+              <div class="relative">
+                <input
+                  [type]="showNewPassword ? 'text' : 'password'"
+                  class="ct-input pr-10"
+                  placeholder="Crie uma nova senha"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-md text-[var(--n-400)] hover:text-[var(--n-700)] hover:bg-[var(--n-100)] transition-colors"
+                  (click)="showNewPassword = !showNewPassword"
+                  tabindex="-1"
+                >
+                  @if (showNewPassword) {
+                    <lucide-icon name="eye-off" class="w-4 h-4"></lucide-icon>
+                  } @else {
+                    <lucide-icon name="eye" class="w-4 h-4"></lucide-icon>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="ct-label">Confirmar nova senha <span class="text-[var(--danger-500)]">*</span></label>
+              <div class="relative">
+                <input
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  class="ct-input pr-10"
+                  placeholder="Repita a nova senha"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-md text-[var(--n-400)] hover:text-[var(--n-700)] hover:bg-[var(--n-100)] transition-colors"
+                  (click)="showConfirmPassword = !showConfirmPassword"
+                  tabindex="-1"
+                >
+                  @if (showConfirmPassword) {
+                    <lucide-icon name="eye-off" class="w-4 h-4"></lucide-icon>
+                  } @else {
+                    <lucide-icon name="eye" class="w-4 h-4"></lucide-icon>
+                  }
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="flex items-center justify-between gap-3 px-6 py-3.5 border-t border-[var(--n-100)] bg-[var(--n-25)]">
+          <span class="inline-flex items-center gap-1.5 text-[11.5px] text-[var(--n-500)] font-semibold">
+            <lucide-icon name="shield" class="w-3 h-3"></lucide-icon>
+            Ação independente das demais seções
+          </span>
+          <button class="ct-btn ct-btn-primary disabled:opacity-50" type="button" disabled>
+            <lucide-icon name="check" class="w-3.5 h-3.5"></lucide-icon>
+            Alterar senha
+          </button>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+
+</div>
