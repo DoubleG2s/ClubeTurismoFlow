@@ -9,7 +9,8 @@ module.exports = async function handler(req, res) {
 
   try {
     await requireAuthToken(req);
-  } catch {
+  } catch (err) {
+    console.error('[groq] auth error:', err?.message ?? err);
     return res.status(401).json({ error: 'Não autorizado.' });
   }
 

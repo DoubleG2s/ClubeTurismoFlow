@@ -3,6 +3,16 @@
 require('dotenv').config({ path: '.env.local' });
 require('dotenv').config({ path: '.env' });
 
+// Map DEV_* frontend vars to the server-side names used by _lib.js when the
+// unprefixed names are absent. This ensures token validation hits the same
+// Supabase project the Angular app is authenticated against.
+if (!process.env.SUPABASE_URL && process.env.DEV_SUPABASE_URL) {
+  process.env.SUPABASE_URL = process.env.DEV_SUPABASE_URL;
+}
+if (!process.env.SUPABASE_ANON_KEY && process.env.DEV_SUPABASE_ANON_KEY) {
+  process.env.SUPABASE_ANON_KEY = process.env.DEV_SUPABASE_ANON_KEY;
+}
+
 const http = require('http');
 
 const groqHandler = require('./api/groq');
