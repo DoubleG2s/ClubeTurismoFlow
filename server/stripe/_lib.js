@@ -85,17 +85,19 @@ function createSupabaseAdmin() {
 }
 
 function createSupabaseAuthClient() {
-  const supabaseUrl =
-    process.env.SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL ||
-    process.env.PROD_SUPABASE_URL ||
-    process.env.DEV_SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.VITE_SUPABASE_ANON_KEY ||
-    process.env.PROD_SUPABASE_ANON_KEY ||
-    process.env.DEV_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const isProduction =
+    process.env.VERCEL_ENV === 'production' ||
+    process.env.NODE_ENV === 'production';
+
+  // Mirror inject-env.js: prefer PROD_* in production, DEV_* otherwise,
+  // falling back to the unprefixed names for backward compat.
+  const supabaseUrl = isProduction
+    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)
+    : (process.env.DEV_SUPABASE_URL  || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL);
+
+  const supabaseKey = isProduction
+    ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
+    : (process.env.DEV_SUPABASE_ANON_KEY  || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('Faltam variaveis do Supabase para validar a sessao autenticada.');
