@@ -77,30 +77,30 @@ Retorne SEMPRE um JSON com esta estrutura exata:
   "adults": número ou null,
   "children": número ou null,
   "outbound": {
-    "origin_city": "nome da cidade (não IATA) ou null",
-    "destination_city": "nome da cidade (não IATA) ou null",
+    "origin_city": "código IATA exatamente como aparece no texto, ou null",
+    "destination_city": "código IATA exatamente como aparece no texto, ou null",
     "departure_time": "HH:mm ou null",
     "arrival_time": "HH:mm ou null",
     "has_connection": true ou false,
-    "connection_city": "nome da cidade ou null",
+    "connection_city": "código IATA exatamente como aparece no texto, ou null",
     "connection_time": "HH:mm ou null",
     "seats_included": true ou false,
     "checked_baggage": true ou false
   },
   "inbound": {
-    "origin_city": "nome da cidade ou null",
-    "destination_city": "nome da cidade ou null",
+    "origin_city": "código IATA exatamente como aparece no texto, ou null",
+    "destination_city": "código IATA exatamente como aparece no texto, ou null",
     "departure_time": "HH:mm ou null",
     "arrival_time": "HH:mm ou null",
     "has_connection": true ou false,
-    "connection_city": "nome da cidade ou null",
+    "connection_city": "código IATA exatamente como aparece no texto, ou null",
     "connection_time": "HH:mm ou null",
     "seats_included": true ou false,
     "checked_baggage": true ou false
   },
   "hotel": {
     "hotel_name": "nome completo do hotel ou null",
-    "regime": "regime de alimentação (ex: Café da Manhã, All Inclusive) ou null",
+    "regime": "valor mapeado conforme regra 10, ou null",
     "accommodation": "tipo de acomodação (ex: Apto Standard, Suite) ou null",
     "amount": número sem formatação ou null,
     "currency": "BRL" ou "USD"
@@ -110,7 +110,7 @@ Retorne SEMPRE um JSON com esta estrutura exata:
 }
 
 REGRAS CRÍTICAS:
-1. NUNCA use códigos IATA como GRU, GIG, CUN — converta para nome da cidade (GRU→São Paulo, CUN→Cancún, GIG→Rio de Janeiro, MIA→Miami).
+1. Para origin_city, destination_city e connection_city: retorne o código IATA EXATAMENTE como aparece no texto (ex: RAO, GRU, CUN, MIA). NÃO converta para nome de cidade, NÃO infira hub regional ou aeroporto alternativo. Se o texto diz RAO, retorne "RAO" — mesmo que RAO não seja um hub principal. Se não houver código IATA explícito no texto, retorne null.
 2. Datas SEMPRE no formato dd/mm/aaaa. Se vier como 22-JAN-2025, 2025-01-22, 22 de janeiro, converta.
 3. Horários SEMPRE no formato HH:mm (24h). Ex: 8h30→08:30, 2:45pm→14:45.
 4. Para valores monetários, retorne apenas o número (R$ 3.450,00→3450, USD 1200→1200).
@@ -118,7 +118,15 @@ REGRAS CRÍTICAS:
 6. "bagagem despachada", "checked baggage", "bagagem inclusa" = checked_baggage: true.
 7. "assento marcado", "seat selection", "assento incluso" = seats_included: true.
 8. "traslado", "transfer", "translado" = has_transfer: true.
-9. Retorne null para campos não encontrados. Nunca invente dados.`;
+9. "passeio", "city tour", "tour", "excursão", "roteiro", "passeio facultativo", "tour opcional", "passeio incluído", "shore excursion" = extraia a descrição do passeio para tour_details (ex: "City Tour em Cancún", "Excursão às Cataratas"). Se houver mais de um, junte em uma string separada por vírgula.
+10. Para o campo regime, reconheça os seguintes termos (comparação case-insensitive) e retorne o valor mapeado exato:
+    - "Café da manhã", "Café", "Somente café", "Bed and Breakfast", "BB", "B&B" → retorne: "Café da manhã"
+    - "Meia pensão", "Meia-pensão", "Half board", "HB" → retorne: "Meia pensão"
+    - "Pensão completa", "Full board", "FB" → retorne: "Pensão completa"
+    - "All inclusive", "All-inclusive", "AI" → retorne: "All inclusive"
+    - "Somente pernoite", "Sem refeição", "Room only", "RO" → retorne: "Apenas quarto"
+    Se nenhum desses termos for identificado no texto, retorne null para regime. Nunca retorne string vazia.
+11. Retorne null para campos não encontrados. Nunca invente dados.`;
 
 @Injectable({ providedIn: 'root' })
 export class QuoteAiParserService {
@@ -211,6 +219,7 @@ export class QuoteAiParserService {
     check(!!data.hotel?.regime, 'Regime');
     check(!!data.hotel?.accommodation, 'Acomodação');
     check(data.hotel?.amount != null, 'Valor');
+    check(!!data.tour_details, 'Passeio');
 
     return { filledFields: filled, missingFields: missing };
   }
@@ -220,7 +229,7 @@ export class QuoteAiParserService {
       'Data Ida', 'Data Volta', 'Adultos', 'Crianças',
       'Origem (Ida)', 'Destino (Ida)', 'Saída (Ida)', 'Chegada (Ida)',
       'Origem (Volta)', 'Destino (Volta)', 'Saída (Volta)', 'Chegada (Volta)',
-      'Hotel', 'Regime', 'Acomodação', 'Valor',
+      'Hotel', 'Regime', 'Acomodação', 'Valor', 'Passeio',
     ];
   }
 }

@@ -235,8 +235,11 @@ export class ReservationFormComponent implements OnInit {
         flight_voucher: extracted.voo_voucher || this.reservationForm.get('flight_voucher')?.value,
         supplier: extracted.fornecedor,
         airline: extracted.voo_companhia,
+        origin: extracted.voo_origem || this.reservationForm.get('origin')?.value,
         nome_hotel: extracted.hotel_nome || this.reservationForm.get('nome_hotel')?.value,
         localizador_hotel: extracted.hotel_localizador || this.reservationForm.get('localizador_hotel')?.value,
+        quarto: extracted.hotel_quarto || this.reservationForm.get('quarto')?.value,
+        regime_alimentacao: extracted.hotel_regime || this.reservationForm.get('regime_alimentacao')?.value,
         notes: extracted.notes_prefill || this.reservationForm.get('notes')?.value
       });
 

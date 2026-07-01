@@ -16,6 +16,8 @@ export interface VoucherExtractionResult {
   fornecedor: string;
   hotel_nome: string;
   hotel_localizador: string;
+  hotel_quarto: string;
+  hotel_regime: string;
   hotel_observacoes: string;
   notes_prefill: string;
   product_type: ProductType;
@@ -50,6 +52,12 @@ Localize a seção identificada como "Voucher de Hotel" no PDF e extraia:
   PRIORIDADE 1 — Se existir um campo "Localizador externo" no documento, use ESSE valor (pode ter letras e números, qualquer tamanho).
   PRIORIDADE 2 — Se não houver "Localizador externo", use o valor de "Nº da reserva", "Nº reserva", "Reservation ID", "Booking ID" ou equivalente.
   Se nenhum dos dois existir, retorne vazio.
+
+- HOTEL_QUARTO: tipo do quarto/acomodação exatamente como aparece no documento (ex: "Apto Standard", "Suíte Luxo", "Triple Room").
+  Geralmente aparece na mesma linha ou bloco da quantidade de hóspedes e do regime alimentar.
+
+- HOTEL_REGIME: regime alimentar exatamente como aparece no documento (ex: "Café da Manhã", "All Inclusive", "Meia Pensão", "Só Hospedagem").
+  Geralmente aparece na mesma linha ou bloco do tipo de quarto e da quantidade de hóspedes.
 
 - HOTEL_OBSERVACOES: extraia a quantidade de hóspedes e formate EXATAMENTE assim: "X adulto(s), Y criança(s)".
   Essa informação geralmente aparece após o tipo de quarto e o regime alimentar (ex: "2 adultos, 0 crianças").
@@ -123,6 +131,14 @@ export class AiVoucherService {
                 type: 'string',
                 description: 'Localizador do hotel com prioridade estrita: (1) valor de "Localizador externo" se existir; (2) senão, valor de "Nº da reserva", "Reservation ID", "Booking ID" ou equivalente. Retorne vazio se nenhum existir.'
               },
+              hotel_quarto: {
+                type: 'string',
+                description: 'Tipo do quarto/acomodação conforme aparece no documento (ex: "Apto Standard", "Suíte Luxo", "Triple Room"). Geralmente aparece na mesma linha da quantidade de hóspedes e do regime alimentar. Vazio se não houver hotel.'
+              },
+              hotel_regime: {
+                type: 'string',
+                description: 'Regime alimentar conforme aparece no documento (ex: "Café da Manhã", "All Inclusive", "Meia Pensão", "Só Hospedagem"). Geralmente aparece na mesma linha do tipo de quarto e da quantidade de hóspedes. Vazio se não houver hotel.'
+              },
               hotel_observacoes: {
                 type: 'string',
                 description: 'Quantidade de hóspedes formatada como "X adulto(s), Y criança(s)". Ex: "2 adultos, 1 criança", "3 adultos, 0 crianças". Se crianças não forem mencionadas, use 0. Vazio se não houver hotel.'
@@ -131,7 +147,7 @@ export class AiVoucherService {
             required: [
               'passageiros', 'destino', 'data_ida', 'data_volta',
               'reserva_voucher', 'voo_voucher', 'voo_origem', 'voo_destino',
-              'hotel_nome', 'hotel_localizador', 'hotel_observacoes'
+              'hotel_nome', 'hotel_localizador', 'hotel_quarto', 'hotel_regime', 'hotel_observacoes'
             ]
           }
         }
@@ -161,6 +177,8 @@ export class AiVoucherService {
 
     const hotel_nome = (data.hotel_nome || '').trim();
     const hotel_localizador = (data.hotel_localizador || '').trim() || reserva;
+    const hotel_quarto = (data.hotel_quarto || '').trim();
+    const hotel_regime = (data.hotel_regime || '').trim();
     const hotel_observacoes = (data.hotel_observacoes || '').trim();
 
     const notes_prefill = hotel_observacoes;
@@ -180,6 +198,8 @@ export class AiVoucherService {
       fornecedor,
       hotel_nome,
       hotel_localizador,
+      hotel_quarto,
+      hotel_regime,
       hotel_observacoes,
       notes_prefill,
       product_type
