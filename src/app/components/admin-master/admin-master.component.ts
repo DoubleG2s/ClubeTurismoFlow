@@ -4,17 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
 import { Company } from '../../models/company';
 import { UserProfile } from '../../models/user';
+import { UserListComponent } from '@components/user-management/user-list.component';
 
 @Component({
   selector: 'app-admin-master',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserListComponent],
   templateUrl: './admin-master.component.html'
 })
 export class AdminMasterComponent implements OnInit {
   adminService = inject(AdminService);
   
-  activeAdminTab = signal<'empresas' | 'usuarios'>('empresas');
+  activeAdminTab = signal<'usuarios' | 'empresas' | 'vinculos'>('usuarios');
 
   // Computed data
   companies = this.adminService.companies;
@@ -52,7 +53,7 @@ export class AdminMasterComponent implements OnInit {
   }
 
   // --- Abas ---
-  setTab(tab: 'empresas' | 'usuarios') {
+  setTab(tab: 'usuarios' | 'empresas' | 'vinculos') {
     this.activeAdminTab.set(tab);
   }
 

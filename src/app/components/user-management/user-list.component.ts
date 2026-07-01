@@ -117,8 +117,7 @@ export class UserListComponent implements OnInit {
     this.feedbackMessage.set(null);
     const { email, password, name, company_id } = this.createForm.getRawValue();
 
-    // Creates user and sends confirmation email via Supabase logic
-    const result = await this.authService.createAgent(email!, password!, name!);
+    const result = await this.authService.createAgent(email!, password!, name!, company_id || undefined);
 
     if (result.success) {
       this.feedbackMessage.set({

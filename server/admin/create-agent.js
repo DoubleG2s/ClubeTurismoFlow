@@ -15,10 +15,13 @@ module.exports = async function handler(req, res) {
     return res.status(err.statusCode || 401).json({ error: err.message });
   }
 
-  const { email, password, name } = req.body;
+  const { email, password, name, company_id } = req.body;
   if (!email || !password || !name) {
     return res.status(400).json({ error: 'Os campos email, password e name são obrigatórios.' });
   }
+
+  // Admin pode criar usuário em qualquer empresa; se não informar, usa a própria
+  const targetCompanyId = company_id || adminProfile.profile.company_id;
 
   try {
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
@@ -37,7 +40,7 @@ module.exports = async function handler(req, res) {
       .upsert({
         id: data.user.id,
         name,
-        company_id: adminProfile.profile.company_id,
+        company_id: targetCompanyId,
         role: 'agent',
         updated_at: new Date().toISOString()
       });

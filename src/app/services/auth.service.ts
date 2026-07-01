@@ -180,9 +180,9 @@ export class AuthService {
   }
 
   // Admin Action: Create a new user
-  async createAgent(email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> {
+  async createAgent(email: string, password: string, name: string, company_id?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.isAdmin()) return { success: false, error: 'Acesso negado.' };
-    return this.callAdminApi('create-agent', { email, password, name });
+    return this.callAdminApi('create-agent', { email, password, name, ...(company_id ? { company_id } : {}) });
   }
 
   async getAllUsers() {

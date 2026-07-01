@@ -21,18 +21,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Enforce same-company: ensure target belongs to admin's company before deleting
-    const { data: targetProfile, error: targetError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, company_id')
-      .eq('id', id)
-      .eq('company_id', adminProfile.profile.company_id)
-      .maybeSingle();
-
-    if (targetError || !targetProfile) {
-      return res.status(403).json({ error: 'Acesso negado.' });
-    }
-
     // Deletes the auth user; the profiles row is removed by FK cascade
     const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
 

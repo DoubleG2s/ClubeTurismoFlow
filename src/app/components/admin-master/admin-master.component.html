@@ -2,13 +2,17 @@
 
   <!-- Context Tabs -->
   <div class="ct-context">
-    <button (click)="setTab('empresas')"
-      class="ct-tab" [class.active]="activeAdminTab() === 'empresas'">
-      Gestão de Empresas
-    </button>
     <button (click)="setTab('usuarios')"
       class="ct-tab" [class.active]="activeAdminTab() === 'usuarios'">
-      Usuários x Empresas
+      Usuários
+    </button>
+    <button (click)="setTab('empresas')"
+      class="ct-tab" [class.active]="activeAdminTab() === 'empresas'">
+      Empresas
+    </button>
+    <button (click)="setTab('vinculos')"
+      class="ct-tab" [class.active]="activeAdminTab() === 'vinculos'">
+      Vínculos
     </button>
   </div>
 
@@ -22,6 +26,13 @@
         </svg>
       </div>
     } @else {
+
+      <!-- USUARIOS TAB -->
+      @if (activeAdminTab() === 'usuarios') {
+        <div class="animate-fade-in">
+          <app-user-list></app-user-list>
+        </div>
+      }
 
       <!-- EMPRESAS TAB -->
       @if (activeAdminTab() === 'empresas') {
@@ -86,8 +97,8 @@
         </div>
       }
 
-      <!-- USUARIOS TAB -->
-      @if (activeAdminTab() === 'usuarios') {
+      <!-- VINCULOS TAB -->
+      @if (activeAdminTab() === 'vinculos') {
         <div class="space-y-6 animate-fade-in">
           <p class="text-sm" style="color: var(--n-500);">Vincule os usuários do sistema às empresas. Um usuário só pode acessar dados da empresa vinculada.</p>
 

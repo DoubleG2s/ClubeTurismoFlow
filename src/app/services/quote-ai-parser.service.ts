@@ -42,7 +42,10 @@ export interface QuoteParseResult {
   rawMessage?: string;
 }
 
+// Fallback usado quando a IA retorna um código IATA em vez do nome da cidade.
+// A instrução principal no SYSTEM_PROMPT já pede o nome da cidade diretamente.
 const IATA_MAP: Record<string, string> = {
+  // Brasil — principais hubs
   GRU: 'São Paulo', CGH: 'São Paulo', VCP: 'Campinas',
   GIG: 'Rio de Janeiro', SDU: 'Rio de Janeiro',
   BSB: 'Brasília', SSA: 'Salvador', FOR: 'Fortaleza',
@@ -53,19 +56,34 @@ const IATA_MAP: Record<string, string> = {
   AJU: 'Aracaju', PMW: 'Palmas', CGR: 'Campo Grande',
   CGB: 'Cuiabá', PVH: 'Porto Velho', RBR: 'Rio Branco',
   MCP: 'Macapá', BVB: 'Boa Vista',
+  CNF: 'Belo Horizonte', PLU: 'Belo Horizonte',
+  GYN: 'Goiânia', IGU: 'Foz do Iguaçu',
+  // Brasil — regionais
+  BPS: 'Porto Seguro', RAO: 'Ribeirão Preto', CFB: 'Cabo Frio',
+  IOS: 'Ilhéus', FEN: 'Fernando de Noronha', LEC: 'Lençóis',
+  JDO: 'Juazeiro do Norte', PNZ: 'Petrolina', STM: 'Santarém',
+  UDI: 'Uberlândia', LDB: 'Londrina', MGF: 'Maringá',
+  JOI: 'Joinville', NVT: 'Navegantes', IPN: 'Ipatinga',
+  PPB: 'Presidente Prudente', JTC: 'Bauru', VAG: 'Varginha',
+  PFB: 'Passo Fundo', RIA: 'Santa Maria', MAB: 'Marabá',
+  // América do Norte
   MIA: 'Miami', MCO: 'Orlando', JFK: 'Nova York', EWR: 'Nova York', LGA: 'Nova York',
   LAX: 'Los Angeles', ORD: 'Chicago', ATL: 'Atlanta', DFW: 'Dallas',
+  // Europa
   LIS: 'Lisboa', OPO: 'Porto', MAD: 'Madrid', BCN: 'Barcelona',
   CDG: 'Paris', ORY: 'Paris', LHR: 'Londres', LGW: 'Londres',
   FCO: 'Roma', MXP: 'Milão', LIN: 'Milão',
   AMS: 'Amsterdã', FRA: 'Frankfurt', DUB: 'Dublin',
   PMI: 'Palma de Mallorca', VCE: 'Veneza', NCE: 'Nice',
+  // América Latina
   CUN: 'Cancún', MEX: 'Cidade do México', BOG: 'Bogotá',
   LIM: 'Lima', SCL: 'Santiago', EZE: 'Buenos Aires', AEP: 'Buenos Aires',
+  PUJ: 'Punta Cana', SJO: 'San José',
+  // Ásia / Oriente Médio / Oceania
   DXB: 'Dubai', DOH: 'Doha', SIN: 'Singapura', HKG: 'Hong Kong',
   BKK: 'Bangkok', NRT: 'Tóquio', HND: 'Tóquio', PEK: 'Pequim', PVG: 'Xangai',
   ICN: 'Seul', SYD: 'Sydney', MEL: 'Melbourne',
-  MLE: 'Maldivas', CMB: 'Colombo', PUJ: 'Punta Cana', SJO: 'San José',
+  MLE: 'Maldivas', CMB: 'Colombo',
 };
 
 const SYSTEM_PROMPT = `Você é um extrator de dados de viagem especializado. Analise o texto bruto fornecido (pode ser de operadoras, consolidadoras, GDS, WhatsApp, e-mail) e extraia as informações de uma cotação de pacote turístico.
@@ -77,23 +95,23 @@ Retorne SEMPRE um JSON com esta estrutura exata:
   "adults": número ou null,
   "children": número ou null,
   "outbound": {
-    "origin_city": "código IATA exatamente como aparece no texto, ou null",
-    "destination_city": "código IATA exatamente como aparece no texto, ou null",
+    "origin_city": "nome da cidade de origem (ex: Porto Seguro, São Paulo), ou null",
+    "destination_city": "nome da cidade de destino (ex: Cancún, Rio de Janeiro), ou null",
     "departure_time": "HH:mm ou null",
     "arrival_time": "HH:mm ou null",
     "has_connection": true ou false,
-    "connection_city": "código IATA exatamente como aparece no texto, ou null",
+    "connection_city": "nome da cidade de conexão, ou null",
     "connection_time": "HH:mm ou null",
     "seats_included": true ou false,
     "checked_baggage": true ou false
   },
   "inbound": {
-    "origin_city": "código IATA exatamente como aparece no texto, ou null",
-    "destination_city": "código IATA exatamente como aparece no texto, ou null",
+    "origin_city": "nome da cidade de origem, ou null",
+    "destination_city": "nome da cidade de destino, ou null",
     "departure_time": "HH:mm ou null",
     "arrival_time": "HH:mm ou null",
     "has_connection": true ou false,
-    "connection_city": "código IATA exatamente como aparece no texto, ou null",
+    "connection_city": "nome da cidade de conexão, ou null",
     "connection_time": "HH:mm ou null",
     "seats_included": true ou false,
     "checked_baggage": true ou false
@@ -110,7 +128,7 @@ Retorne SEMPRE um JSON com esta estrutura exata:
 }
 
 REGRAS CRÍTICAS:
-1. Para origin_city, destination_city e connection_city: retorne o código IATA EXATAMENTE como aparece no texto (ex: RAO, GRU, CUN, MIA). NÃO converta para nome de cidade, NÃO infira hub regional ou aeroporto alternativo. Se o texto diz RAO, retorne "RAO" — mesmo que RAO não seja um hub principal. Se não houver código IATA explícito no texto, retorne null.
+1. Para origin_city, destination_city e connection_city: retorne SEMPRE o nome da cidade em português (ex: "Porto Seguro", "Ribeirão Preto", "São Paulo", "Cancún"). Se o texto contiver um código IATA (ex: BPS, RAO, GRU, CUN), converta-o para o nome da cidade correspondente. NÃO retorne códigos IATA nos campos de cidade. Se não houver informação de origem ou destino no texto, retorne null.
 2. Datas SEMPRE no formato dd/mm/aaaa. Se vier como 22-JAN-2025, 2025-01-22, 22 de janeiro, converta.
 3. Horários SEMPRE no formato HH:mm (24h). Ex: 8h30→08:30, 2:45pm→14:45.
 4. Para valores monetários, retorne apenas o número (R$ 3.450,00→3450, USD 1200→1200).
@@ -119,13 +137,13 @@ REGRAS CRÍTICAS:
 7. "assento marcado", "seat selection", "assento incluso" = seats_included: true.
 8. "traslado", "transfer", "translado" = has_transfer: true.
 9. "passeio", "city tour", "tour", "excursão", "roteiro", "passeio facultativo", "tour opcional", "passeio incluído", "shore excursion" = extraia a descrição do passeio para tour_details (ex: "City Tour em Cancún", "Excursão às Cataratas"). Se houver mais de um, junte em uma string separada por vírgula.
-10. Para o campo regime, reconheça os seguintes termos (comparação case-insensitive) e retorne o valor mapeado exato:
-    - "Café da manhã", "Café", "Somente café", "Bed and Breakfast", "BB", "B&B" → retorne: "Café da manhã"
-    - "Meia pensão", "Meia-pensão", "Half board", "HB" → retorne: "Meia pensão"
-    - "Pensão completa", "Full board", "FB" → retorne: "Pensão completa"
-    - "All inclusive", "All-inclusive", "AI" → retorne: "All inclusive"
-    - "Somente pernoite", "Sem refeição", "Room only", "RO" → retorne: "Apenas quarto"
-    Se nenhum desses termos for identificado no texto, retorne null para regime. Nunca retorne string vazia.
+10. Para o campo regime, leia TODO o texto em busca de qualquer indicação de alimentação/refeição inclusa e retorne o valor mapeado exato. Reconheça as seguintes variações (comparação case-insensitive), incluindo abreviações comuns de operadoras brasileiras:
+    - "Café da manhã" → termos: "café da manhã", "café da manha", "café", "somente café", "café incluso", "café incluído", "com café", "inclui café", "bed and breakfast", "BB", "B&B", "CP" (café e pernoite)
+    - "Meia pensão" → termos: "meia pensão", "meia-pensão", "meia pensao", "half board", "HB", "MP", "JA" (jantar e café), "café e jantar", "jantar incluso", "jantar incluído"
+    - "Pensão completa" → termos: "pensão completa", "pensao completa", "full board", "FB", "PC", "todas as refeições", "todas refeições inclusas", "café almoço e jantar"
+    - "All inclusive" → termos: "all inclusive", "all-inclusive", "all in", "tudo incluso", "tudo incluído", "AI", "UAI", "ultra all inclusive"
+    - "Apenas quarto" → termos: "somente pernoite", "sem refeição", "sem refeições", "sem café", "sem alimentação", "room only", "RO", "SD" (sem desjejum), "SP" (somente pernoite), "SQ", "FA" (fora de alimentação), "apenas pernoite", "só pernoite"
+    Se nenhum desses termos for identificado no texto mas houver hotel, retorne "Apenas quarto" como padrão. Retorne null apenas se não houver hotel algum na cotação.
 11. Retorne null para campos não encontrados. Nunca invente dados.`;
 
 @Injectable({ providedIn: 'root' })

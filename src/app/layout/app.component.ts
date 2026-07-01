@@ -14,7 +14,6 @@ import { QuoteFormComponent } from '@components/quote-form/quote-form.component'
 import { QuoteProposalComponent } from '@components/quote-proposal/quote-proposal.component';
 import { ReservationFormComponent } from '@components/reservation-form/reservation-form.component';
 import { ConfirmModalComponent } from '@components/shared/confirm-modal/confirm-modal.component';
-import { UserListComponent } from '@components/user-management/user-list.component';
 import {
   AccessGateState,
   AppTab,
@@ -67,7 +66,6 @@ import { animate } from 'motion';
     HotelDetailsComponent,
     ConfirmModalComponent,
     LoginComponent,
-    UserListComponent,
     CreditFormComponent,
     AiChatComponent,
     AdminMasterComponent,
@@ -148,7 +146,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       reservas: 'Gestão de Reservas',
       cotacoes: 'Cotações',
       hotel: 'Hotel',
-      usuarios: 'Usuários',
       admin: 'Administração',
       assinatura: 'Assinatura',
       configuracoes: 'Configurações',
