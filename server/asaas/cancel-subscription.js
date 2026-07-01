@@ -1,10 +1,8 @@
 ﻿const { createClient } = require('@supabase/supabase-js');
+const { addCors } = require('../stripe/_lib');
 
 module.exports = async function handler(req, res) {
-  // Configurando CORS bÃ¡sico
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  addCors(res);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();

@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "inject": "node inject-env.js",
-    "dev": "npm run inject && ng serve",
-    "vercel:dev": "npm run inject && npx --yes vercel dev",
+    "dev": "npm run inject && node dev-start.js",
+    "dev:vercel": "npm run inject && npx --yes vercel dev",
     "build": "npm run inject && ng build",
     "preview": "npm run inject && ng serve --configuration=production"
   },

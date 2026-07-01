@@ -215,21 +215,19 @@ function validateAsaasWebhookToken(req) {
   const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN;
 
   if (!expectedToken) {
-    return true;
+    throw new Error('[Asaas] ASAAS_WEBHOOK_TOKEN não configurado. Configure a variável de ambiente na Vercel.');
   }
 
-  const headerToken =
+  const receivedToken =
     req.headers['asaas-access-token'] ||
     req.headers['authorization'] ||
-    req.body?.token ||
-    req.body?.webhookToken ||
     null;
 
-  if (!headerToken) {
-    return false;
-  }
+  const normalized = receivedToken ? String(receivedToken).replace(/^Bearer\s+/i, '') : null;
 
-  return String(headerToken).replace(/^Bearer\s+/i, '') === expectedToken;
+  if (!normalized || normalized !== expectedToken) {
+    throw new Error('[Asaas] Token de webhook inválido.');
+  }
 }
 
 module.exports = {

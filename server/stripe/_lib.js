@@ -127,9 +127,18 @@ function createSupabaseUserClient(accessToken) {
   });
 }
 
+function getAllowedOrigin() {
+  if (process.env.ALLOWED_ORIGIN) return process.env.ALLOWED_ORIGIN;
+  // VERCEL_URL is set automatically on every Vercel deployment (unique deployment URL).
+  // Safe fallback for preview environments; for production with a custom/main domain,
+  // set ALLOWED_ORIGIN explicitly. For same-Vercel-origin requests CORS is a no-op anyway.
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
+
 function addCors(res, methods = 'OPTIONS,POST') {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', getAllowedOrigin());
   res.setHeader('Access-Control-Allow-Methods', methods);
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -145,6 +154,45 @@ function getBearerToken(req) {
   }
 
   return String(header).slice('Bearer '.length).trim();
+}
+
+async function requireAuthToken(req) {
+  const token = getBearerToken(req);
+
+  if (!token) {
+    const err = new Error('Não autorizado.');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  const supabaseAuth = createSupabaseAuthClient();
+  const { data, error } = await supabaseAuth.auth.getUser(token);
+
+  if (error || !data?.user) {
+    const err = new Error('Não autorizado.');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  return data.user;
+}
+
+async function requireAdminProfile(req, supabaseAdmin) {
+  const user = await requireAuthToken(req);
+
+  const { data: profile, error } = await supabaseAdmin
+    .from('profiles')
+    .select('id, role, company_id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (error || !profile || profile.role !== 'admin') {
+    const err = new Error('Acesso negado.');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  return { user, profile };
 }
 
 async function resolveAuthorizedCompanyContext(req, supabaseAdmin, requestedCompanyId = null) {
@@ -843,7 +891,9 @@ module.exports = {
   createSupabaseAdmin,
   ensurePortalConfiguration,
   ensureStripeCustomerForCompany,
+  getAllowedOrigin,
   getBaseUrl,
+  getBearerToken,
   getCompanyByAsaasPaymentId,
   getCompanyByCustomerId,
   getCompanyById,
@@ -856,6 +906,8 @@ module.exports = {
   normalizePostalCode,
   normalizeTaxId,
   readRawBody,
+  requireAdminProfile,
+  requireAuthToken,
   resolveAuthorizedCompanyContext,
   syncCompanyFromSubscription,
   toDateOnly,

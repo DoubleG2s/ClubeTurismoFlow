@@ -58,3 +58,7 @@ src/environments/environment.prod.ts
 .angular/
 .claude/
 CLAUDE.md
+
+# Arquivos locais de dev e documentação interna (não versionar)
+.dev/
+.mcp.json

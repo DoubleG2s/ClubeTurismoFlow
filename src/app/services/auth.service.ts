@@ -162,80 +162,55 @@ export class AuthService {
     }
   }
 
-  // Admin Action: Create a new user
-  async createAgent(email: string, password: string, name: string, company_id?: string): Promise<{ success: boolean; error?: string }> {
-    if (!this.isAdmin()) {
-      return { success: false, error: 'Acesso negado.' };
-    }
+  private async callAdminApi(endpoint: string, body: Record<string, unknown>): Promise<{ success: boolean; error?: string; [key: string]: unknown }> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name: name
-        }
-      }
+    if (!token) return { success: false, error: 'Sessão expirada. Faça login novamente.' };
+
+    const res = await fetch(`/api/admin/${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(body)
     });
 
-    if (error) {
-      return { success: false, error: error.message };
-    }
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) return { success: false, error: json?.error || `Erro ${res.status}` };
+    return { success: true, ...json };
+  }
 
-    if (data.user) {
-      setTimeout(async () => {
-        const payload: any = { name: name };
-        if (company_id) payload.company_id = company_id;
-
-        await supabase
-          .from('profiles')
-          .update(payload)
-          .eq('id', data.user!.id);
-      }, 1000); 
-    }
-
-    return { success: true }; 
+  // Admin Action: Create a new user
+  async createAgent(email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.isAdmin()) return { success: false, error: 'Acesso negado.' };
+    return this.callAdminApi('create-agent', { email, password, name });
   }
 
   async getAllUsers() {
     if (!this.isAdmin()) return [];
-    
+
     const { data } = await supabase
       .from('profiles')
       .select('*, companies(name)')
       .order('created_at', { ascending: false });
-      
+
     return data as UserProfile[] || [];
   }
 
   async updateAgent(id: string, updates: Partial<UserProfile>): Promise<{ success: boolean; error?: string }> {
     if (!this.isAdmin()) return { success: false, error: 'Acesso negado.' };
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', id);
+    const result = await this.callAdminApi('update-agent', { id, ...updates });
 
-    if (error) return { success: false, error: error.message };
-    
-    // Update local profile if admin updated themselves
-    if (id === this.user()?.id) {
+    if (result.success && id === this.user()?.id) {
       const updatedProfile = await this.fetchProfileData(id);
       if (updatedProfile) this.profileSignal.set(updatedProfile);
     }
-    
-    return { success: true };
+
+    return result;
   }
 
   async deleteAgent(id: string): Promise<{ success: boolean; error?: string }> {
     if (!this.isAdmin()) return { success: false, error: 'Acesso negado.' };
-
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', id);
-
-    if (error) return { success: false, error: error.message };
-    return { success: true };
+    return this.callAdminApi('delete-agent', { id });
   }
 }

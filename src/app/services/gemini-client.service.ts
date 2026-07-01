@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import Groq from 'groq-sdk';
 import { environment } from '../../environments/environment';
+import { supabase } from './supabase';
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 2000;
@@ -19,10 +19,6 @@ export interface AiToolDefinition {
 
 @Injectable({ providedIn: 'root' })
 export class GeminiClientService {
-  private client = new Groq({
-    apiKey: environment.groqApiKey,
-    dangerouslyAllowBrowser: true
-  });
 
   async generateText(
     systemPrompt: string,
@@ -30,20 +26,17 @@ export class GeminiClientService {
     history: AiMessage[] = [],
     jsonMode = false
   ): Promise<string> {
-    const messages: Groq.Chat.ChatCompletionMessageParam[] = [
+    const messages = [
       { role: 'system', content: systemPrompt },
-      ...history.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      ...history.map(m => ({ role: m.role, content: m.content })),
       { role: 'user', content: userMessage }
     ];
 
-    return this.callWithRetry(async () => {
-      const response = await this.client.chat.completions.create({
-        model: MODEL,
-        messages,
-        ...(jsonMode ? { response_format: { type: 'json_object' } } : {})
-      });
-      return response.choices[0].message.content ?? '';
-    });
+    const data = await this.callWithRetry(() =>
+      this.fetchGroq({ messages, model: MODEL, json_mode: jsonMode })
+    );
+
+    return data.content ?? '';
   }
 
   async generateWithTools(
@@ -51,15 +44,15 @@ export class GeminiClientService {
     userMessage: string,
     tool: AiToolDefinition
   ): Promise<Record<string, any>> {
-    const messages: Groq.Chat.ChatCompletionMessageParam[] = [
+    const messages = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userMessage }
     ];
 
-    return this.callWithRetry(async () => {
-      const response = await this.client.chat.completions.create({
-        model: MODEL,
+    const data = await this.callWithRetry(() =>
+      this.fetchGroq({
         messages,
+        model: MODEL,
         tools: [{
           type: 'function',
           function: {
@@ -69,14 +62,46 @@ export class GeminiClientService {
           }
         }],
         tool_choice: { type: 'function', function: { name: tool.name } }
-      });
+      })
+    );
 
-      const toolCall = response.choices[0].message.tool_calls?.[0];
-      if (!toolCall || toolCall.type !== 'function') {
-        throw new Error('A IA não retornou o formato estruturado esperado.');
-      }
-      return JSON.parse(toolCall.function.arguments);
+    const toolCall = data.tool_calls?.[0];
+    if (!toolCall || toolCall.type !== 'function') {
+      throw new Error('A IA não retornou o formato estruturado esperado.');
+    }
+    return JSON.parse(toolCall.function.arguments);
+  }
+
+  private async fetchGroq(body: Record<string, any>): Promise<any> {
+    const baseUrl = environment.apiBaseUrl || '';
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${baseUrl}/api/groq`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
     });
+
+    if (response.status === 401) {
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
+
+    if (response.status === 429) {
+      const err: any = new Error('Rate limit');
+      err.status = 429;
+      throw err;
+    }
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.error || `Erro na API de IA: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   private async callWithRetry<T>(fn: () => Promise<T>, attempt = 0): Promise<T> {

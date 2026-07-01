@@ -75,9 +75,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    if (!validateAsaasWebhookToken(req)) {
-      return res.status(401).json({ error: 'Webhook Asaas sem token valido.' });
-    }
+    validateAsaasWebhookToken(req);
 
     const supabase = createSupabaseAdmin();
     const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;

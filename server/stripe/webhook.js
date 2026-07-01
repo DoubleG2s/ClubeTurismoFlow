@@ -22,23 +22,17 @@ const config = {
 async function buildVerifiedEvent(stripe, req) {
   const signature = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    throw new Error('[Stripe] STRIPE_WEBHOOK_SECRET não configurado. Configure a variável de ambiente na Vercel.');
+  }
+
+  if (!signature) {
+    throw new Error('[Stripe] Header stripe-signature ausente na requisição.');
+  }
+
   const rawBody = await readRawBody(req);
-
-  if (signature && webhookSecret) {
-    return stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-  }
-
-  const body = rawBody?.length
-    ? JSON.parse(rawBody.toString('utf8'))
-    : typeof req.body === 'string'
-      ? JSON.parse(req.body)
-      : req.body;
-
-  if (!body?.id) {
-    throw new Error('Evento Stripe invalido.');
-  }
-
-  return stripe.events.retrieve(body.id);
+  return stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
 }
 
 async function persistStripeInvoice(supabase, companyId, invoice, paymentMethod = 'credit_card') {
