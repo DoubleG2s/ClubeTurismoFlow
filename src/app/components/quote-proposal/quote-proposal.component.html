@@ -61,18 +61,19 @@
 
   <!-- SIDEBAR MOBILE -->
   <div class="fixed inset-0 z-[60] sm:hidden transition-all duration-300"
-    [style.opacity]="isMobileMenuOpen() ? '1' : '0'"
-    [style.pointer-events]="isMobileMenuOpen() ? 'auto' : 'none'">
+    [style.opacity]="isMobileMenuOpen() ? '1' : '0'" [style.pointer-events]="isMobileMenuOpen() ? 'auto' : 'none'">
 
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeMobileMenu()"></div>
 
     <!-- Painel lateral -->
-    <div class="absolute top-0 left-0 h-full w-72 bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out"
+    <div
+      class="absolute top-0 left-0 h-full w-72 bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out"
       [style.transform]="isMobileMenuOpen() ? 'translateX(0)' : 'translateX(-100%)'">
 
       <!-- Cabeçalho com gradiente -->
-      <div class="bg-gradient-to-br from-blue-600 to-blue-800 px-5 pt-8 pb-6 flex items-center justify-between shrink-0">
+      <div
+        class="bg-gradient-to-br from-blue-600 to-blue-800 px-5 pt-8 pb-6 flex items-center justify-between shrink-0">
         <div>
           <img src="assets/logo-clube-turismo.png" alt="Clube Turismo" class="h-8 w-auto brightness-0 invert mb-1">
           <p class="text-blue-200 text-[11px] font-semibold tracking-wide">Sua proposta de viagem</p>
@@ -98,9 +99,11 @@
 
         <a href="#destino" (click)="closeMobileMenu()"
           class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
-          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
-            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <span
+            class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
@@ -110,17 +113,21 @@
 
         <a href="#voo" (click)="closeMobileMenu()"
           class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
-          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
-            <lucide-icon [img]="Plane" class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors block"></lucide-icon>
+          <span
+            class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <lucide-icon [img]="Plane"
+              class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors block"></lucide-icon>
           </span>
           <span>Voo</span>
         </a>
 
         <a href="#servicos" (click)="closeMobileMenu()"
           class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
-          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
-            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <span
+            class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
           </span>
@@ -129,14 +136,18 @@
 
         <a href="#hotel" (click)="closeMobileMenu()"
           class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
-          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
-            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <span
+            class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"></path>
               <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"></path>
               <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"></path>
-              <path d="M10 6h4"></path><path d="M10 10h4"></path>
-              <path d="M10 14h4"></path><path d="M10 18h4"></path>
+              <path d="M10 6h4"></path>
+              <path d="M10 10h4"></path>
+              <path d="M10 14h4"></path>
+              <path d="M10 18h4"></path>
             </svg>
           </span>
           <span>Hotel</span>
@@ -144,9 +155,11 @@
 
         <a href="#valores" (click)="closeMobileMenu()"
           class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-700 font-semibold hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 transition-all group">
-          <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
-            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <span
+            class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors shrink-0">
+            <svg class="w-[18px] h-[18px] text-slate-500 group-hover:text-blue-600 transition-colors"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
               <line x1="1" y1="10" x2="23" y2="10"></line>
             </svg>
@@ -179,14 +192,10 @@
         @for (opt of normalizedOptions(); track $index) {
         <button (click)="selectOption($index)"
           class="px-4 sm:px-5 py-2 sm:py-2.5 text-sm font-bold rounded-lg transition-all duration-300 transform active:scale-95 focus:outline-none whitespace-nowrap relative overflow-hidden"
-          [class.bg-white]="activeOptionIndex() === $index"
-          [class.text-blue-600]="activeOptionIndex() === $index"
-          [class.shadow-md]="activeOptionIndex() === $index"
-          [class.ring-1]="activeOptionIndex() === $index"
-          [class.ring-blue-100]="activeOptionIndex() === $index"
-          [class.scale-[1.02]]="activeOptionIndex() === $index"
-          [class.z-10]="activeOptionIndex() === $index"
-          [class.bg-transparent]="activeOptionIndex() !== $index"
+          [class.bg-white]="activeOptionIndex() === $index" [class.text-blue-600]="activeOptionIndex() === $index"
+          [class.shadow-md]="activeOptionIndex() === $index" [class.ring-1]="activeOptionIndex() === $index"
+          [class.ring-blue-100]="activeOptionIndex() === $index" [class.scale-[1.02]]="activeOptionIndex() === $index"
+          [class.z-10]="activeOptionIndex() === $index" [class.bg-transparent]="activeOptionIndex() !== $index"
           [class.text-slate-500]="activeOptionIndex() !== $index"
           [class.hover:bg-slate-300/40]="activeOptionIndex() !== $index"
           [class.hover:text-slate-700]="activeOptionIndex() !== $index">
@@ -199,680 +208,756 @@
 
     <!-- CONTEÚDO ANIMADO DA OPÇÃO -->
     <div class="transition-all duration-300 ease-in-out transform origin-top space-y-10 sm:space-y-14"
-         [class.opacity-0]="isSwitchingOption()"
-         [class.translate-y-4]="isSwitchingOption()"
-         [class.blur-sm]="isSwitchingOption()"
-         [class.opacity-100]="!isSwitchingOption()"
-         [class.translate-y-0]="!isSwitchingOption()"
-         [class.blur-0]="!isSwitchingOption()">
+      [class.opacity-0]="isSwitchingOption()" [class.translate-y-4]="isSwitchingOption()"
+      [class.blur-sm]="isSwitchingOption()" [class.opacity-100]="!isSwitchingOption()"
+      [class.translate-y-0]="!isSwitchingOption()" [class.blur-0]="!isSwitchingOption()">
 
-    <section id="destino" class="text-center pt-6 sm:pt-8 pb-4 qp-slide-up">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">{{ quote()?.title }}</h1>
-      @if (quote()?.subtitle) {
-      <p class="text-lg sm:text-xl text-slate-500 mt-2 font-medium">{{ quote()?.subtitle }}</p>
-      }
-      <div class="mt-5 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-slate-600">
-        <div class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
-          <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          {{ q.check_in }} a {{ q.check_out }}
-        </div>
-        <div class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          {{ durationDays() }} dias, {{ durationNights() }} noites
-        </div>
-        <div class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
-          <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          {{ q.adults }} Adultos @if(q.children){ , {{ q.children }} Crianças }
-        </div>
-      </div>
-    </section>
-
-    <!-- DIVISOR -->
-    <hr class="border-slate-200/60 !my-0" />
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 1. VOO                                  -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="voo" class="scroll-mt-24 qp-slide-up-d1">
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
-        <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
-          <lucide-icon [img]="Plane" class="w-5 h-5" [strokeWidth]="2"></lucide-icon>
-        </span>
-        Logística de Voos
-        <span
-          class="text-xs sm:text-sm font-semibold text-slate-400 ml-auto bg-white px-3 py-1 rounded-full border border-slate-200">Operado
-          por {{ quote()?.supplier }}</span>
-      </h2>
-
-      <div
-        class="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-4 sm:p-6 relative">
-
-        <!-- Voo Ida -->
-        <div class="relative">
-          <div class="flex items-center gap-3 sm:gap-4 mb-4">
-            <span
-              class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-black uppercase rounded shadow-sm tracking-wider">IDA</span>
-            <span class="text-slate-400 font-semibold text-sm">{{ q.check_in }}</span>
+      <section id="destino" class="text-center pt-6 sm:pt-8 pb-4 qp-slide-up">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">{{
+          quote()?.title }}</h1>
+        @if (quote()?.subtitle) {
+        <p class="text-lg sm:text-xl text-slate-500 mt-2 font-medium">{{ quote()?.subtitle }}</p>
+        }
+        <div
+          class="mt-5 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold text-slate-600">
+          <div
+            class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            {{ q.check_in }} a {{ q.check_out }}
           </div>
+          <div
+            class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {{ durationDays() }} dias, {{ durationNights() }} noites
+          </div>
+          <div
+            class="bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            {{ q.adults }} Adultos @if(q.children){ , {{ q.children }} Crianças }
+          </div>
+        </div>
+      </section>
 
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-8 relative z-10">
-            <!-- Origem -->
-            <div class="text-center sm:text-left flex-1">
-              <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.outbound.departure_time }}</p>
-              <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.outbound.origin_city }}</p>
+      <!-- DIVISOR -->
+      <hr class="border-slate-200/60 !my-0" />
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 1. VOO                                  -->
+      <!-- ═══════════════════════════════════════ -->
+      <section id="voo" class="scroll-mt-24 qp-slide-up-d1">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
+          <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+            <lucide-icon [img]="Plane" class="w-5 h-5" [strokeWidth]="2"></lucide-icon>
+          </span>
+          Logística de Voos
+          <span
+            class="text-xs sm:text-sm font-semibold text-slate-400 ml-auto bg-white px-3 py-1 rounded-full border border-slate-200">Operado
+            por {{ quote()?.supplier }}</span>
+        </h2>
+
+        <div
+          class="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden p-4 sm:p-6 relative">
+
+          <!-- Voo Ida -->
+          <div class="relative">
+            <div class="flex items-center gap-3 sm:gap-4 mb-4">
+              <span
+                class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-black uppercase rounded shadow-sm tracking-wider">IDA</span>
+              <span class="text-slate-400 font-semibold text-sm">{{ q.check_in }}</span>
             </div>
 
-            <!-- Trajeto -->
-            <div class="flex-1 w-full flex flex-col items-center justify-center relative px-2 sm:px-4">
-              <div
-                class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
-              </div>
-              <div class="bg-white z-10 px-3 sm:px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
-                <lucide-icon [img]="PlaneTakeoff" class="w-5 h-5 text-blue-500" [strokeWidth]="2"></lucide-icon>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-8 relative z-10">
+              <!-- Origem -->
+              <div class="text-center sm:text-left flex-1">
+                <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.outbound.departure_time }}
+                </p>
+                <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{
+                  q.flight_details.outbound.origin_city }}</p>
               </div>
 
-              <!-- Connection Info (Interactive) -->
-              @if (q.flight_details.outbound.has_connection && q.flight_details.outbound.connection_city) {
-              <button (click)="toggleConnection('outbound')"
-                class="text-xs font-bold mt-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200 flex items-center gap-1.5 hover:bg-amber-100 active:scale-[0.97] transition-all cursor-pointer z-10">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="16"></line>
-                  <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-                1 Conexão
-                <svg class="w-3 h-3 transition-transform duration-200"
-                  [class.rotate-180]="expandedConnections().outbound" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2.5">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
+              <!-- Trajeto -->
+              <div class="flex-1 w-full flex flex-col items-center justify-center relative px-2 sm:px-4">
+                <div
+                  class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
+                </div>
+                <div
+                  class="bg-white z-10 px-3 sm:px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
+                  <lucide-icon [img]="PlaneTakeoff" class="w-5 h-5 text-blue-500" [strokeWidth]="2"></lucide-icon>
+                </div>
 
-              <!-- Accordion Content -->
-              <div class="qp-accordion w-full" [class.is-open]="expandedConnections().outbound">
-                <div>
-                  <div class="mt-2 bg-amber-50/60 border border-amber-100 rounded-lg p-3 text-center">
-                    <p class="text-xs font-bold text-amber-800">
-                      <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                      </svg>
-                      {{ q.flight_details.outbound.connection_city }}
-                    </p>
-                    @if (q.flight_details.outbound.connection_time) {
-                    <p class="text-xs text-amber-600 mt-1">
-                      <svg class="w-3 h-3 inline mr-0.5 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      Horário: {{ q.flight_details.outbound.connection_time }}
-                    </p>
-                    }
+                <!-- Connection Info (Interactive) -->
+                @if (q.flight_details.outbound.has_connection && q.flight_details.outbound.connection_city) {
+                <button (click)="toggleConnection('outbound')"
+                  class="text-xs font-bold mt-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200 flex items-center gap-1.5 hover:bg-amber-100 active:scale-[0.97] transition-all cursor-pointer z-10">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                  </svg>
+                  1 Conexão
+                  <svg class="w-3 h-3 transition-transform duration-200"
+                    [class.rotate-180]="expandedConnections().outbound" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+
+                <!-- Accordion Content -->
+                <div class="qp-accordion w-full" [class.is-open]="expandedConnections().outbound">
+                  <div>
+                    <div class="mt-2 bg-amber-50/60 border border-amber-100 rounded-lg p-3 text-center">
+                      <p class="text-xs font-bold text-amber-800">
+                        <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {{ q.flight_details.outbound.connection_city }}
+                      </p>
+                      @if (q.flight_details.outbound.connection_time) {
+                      <p class="text-xs text-amber-600 mt-1">
+                        <svg class="w-3 h-3 inline mr-0.5 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Horário: {{ q.flight_details.outbound.connection_time }}
+                      </p>
+                      }
+                    </div>
                   </div>
                 </div>
+                } @else {
+                <p class="text-xs font-bold text-emerald-500 mt-2 bg-white px-2 z-10">Voo Direto</p>
+                }
               </div>
-              } @else {
-              <p class="text-xs font-bold text-emerald-500 mt-2 bg-white px-2 z-10">Voo Direto</p>
+
+              <!-- Destino -->
+              <div class="text-center sm:text-right flex-1">
+                <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.outbound.arrival_time }}
+                </p>
+                <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{
+                  q.flight_details.outbound.destination_city }}</p>
+              </div>
+            </div>
+            @if (q.flight_details.outbound.seats_included || q.flight_details.outbound.checked_baggage) {
+            <div class="flex items-center gap-2 mt-3 flex-wrap">
+              @if (q.flight_details.outbound.seats_included) {
+              <span
+                class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3" />
+                  <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z" />
+                </svg>
+                Assentos incluídos
+              </span>
+              }
+              @if (q.flight_details.outbound.checked_baggage) {
+              <span
+                class="text-[11px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 flex items-center gap-1">
+                <lucide-icon [img]="Luggage" class="w-3 h-3" [strokeWidth]="2"></lucide-icon>
+                Bagagem despachada
+              </span>
               }
             </div>
-
-            <!-- Destino -->
-            <div class="text-center sm:text-right flex-1">
-              <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.outbound.arrival_time }}</p>
-              <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.outbound.destination_city }}</p>
-            </div>
-          </div>
-          @if (q.flight_details.outbound.seats_included || q.flight_details.outbound.checked_baggage) {
-          <div class="flex items-center gap-2 mt-3 flex-wrap">
-            @if (q.flight_details.outbound.seats_included) {
-            <span class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/></svg>
-              Assentos incluídos
-            </span>
-            }
-            @if (q.flight_details.outbound.checked_baggage) {
-            <span class="text-[11px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 flex items-center gap-1">
-              <lucide-icon [img]="Luggage" class="w-3 h-3" [strokeWidth]="2"></lucide-icon>
-              Bagagem despachada
-            </span>
             }
           </div>
-          }
-        </div>
 
-        <hr class="my-5 sm:my-6 border-slate-100" />
+          <hr class="my-5 sm:my-6 border-slate-100" />
 
-        <!-- Voo Volta -->
-        <div class="relative">
-          <div class="flex items-center gap-3 sm:gap-4 mb-4">
-            <span
-              class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-black uppercase rounded shadow-sm tracking-wider">VOLTA</span>
-            <span class="text-slate-400 font-semibold text-sm">{{ q.check_out }}</span>
-          </div>
-
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-8 relative z-10">
-            <!-- Origem -->
-            <div class="text-center sm:text-left flex-1">
-              <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.inbound.departure_time }}</p>
-              <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.inbound.origin_city }}</p>
+          <!-- Voo Volta -->
+          <div class="relative">
+            <div class="flex items-center gap-3 sm:gap-4 mb-4">
+              <span
+                class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-black uppercase rounded shadow-sm tracking-wider">VOLTA</span>
+              <span class="text-slate-400 font-semibold text-sm">{{ q.check_out }}</span>
             </div>
 
-            <!-- Trajeto -->
-            <div class="flex-1 w-full flex flex-col items-center justify-center relative px-2 sm:px-4">
-              <div
-                class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
-              </div>
-              <div class="bg-white z-10 px-3 sm:px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
-                <lucide-icon [img]="PlaneLanding" class="w-5 h-5 text-orange-500" [strokeWidth]="2"></lucide-icon>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-8 relative z-10">
+              <!-- Origem -->
+              <div class="text-center sm:text-left flex-1">
+                <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.inbound.departure_time }}
+                </p>
+                <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{
+                  q.flight_details.inbound.origin_city }}</p>
               </div>
 
-              <!-- Connection Info (Interactive) -->
-              @if (q.flight_details.inbound.has_connection && q.flight_details.inbound.connection_city) {
-              <button (click)="toggleConnection('inbound')"
-                class="text-xs font-bold mt-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200 flex items-center gap-1.5 hover:bg-amber-100 active:scale-[0.97] transition-all cursor-pointer z-10">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="16"></line>
-                  <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-                1 Conexão
-                <svg class="w-3 h-3 transition-transform duration-200"
-                  [class.rotate-180]="expandedConnections().inbound" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2.5">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
+              <!-- Trajeto -->
+              <div class="flex-1 w-full flex flex-col items-center justify-center relative px-2 sm:px-4">
+                <div
+                  class="w-full h-0.5 bg-slate-200 absolute top-1/2 -translate-y-1/2 left-0 z-0 border-t-2 border-dashed border-slate-300">
+                </div>
+                <div
+                  class="bg-white z-10 px-3 sm:px-4 py-1 rounded-full border border-slate-200 flex flex-col items-center">
+                  <lucide-icon [img]="PlaneLanding" class="w-5 h-5 text-orange-500" [strokeWidth]="2"></lucide-icon>
+                </div>
 
-              <!-- Accordion Content -->
-              <div class="qp-accordion w-full" [class.is-open]="expandedConnections().inbound">
-                <div>
-                  <div class="mt-2 bg-amber-50/60 border border-amber-100 rounded-lg p-3 text-center">
-                    <p class="text-xs font-bold text-amber-800">
-                      <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                      </svg>
-                      {{ q.flight_details.inbound.connection_city }}
-                    </p>
-                    @if (q.flight_details.inbound.connection_time) {
-                    <p class="text-xs text-amber-600 mt-1">
-                      <svg class="w-3 h-3 inline mr-0.5 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      Horário: {{ q.flight_details.inbound.connection_time }}
-                    </p>
-                    }
+                <!-- Connection Info (Interactive) -->
+                @if (q.flight_details.inbound.has_connection && q.flight_details.inbound.connection_city) {
+                <button (click)="toggleConnection('inbound')"
+                  class="text-xs font-bold mt-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200 flex items-center gap-1.5 hover:bg-amber-100 active:scale-[0.97] transition-all cursor-pointer z-10">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                  </svg>
+                  1 Conexão
+                  <svg class="w-3 h-3 transition-transform duration-200"
+                    [class.rotate-180]="expandedConnections().inbound" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+
+                <!-- Accordion Content -->
+                <div class="qp-accordion w-full" [class.is-open]="expandedConnections().inbound">
+                  <div>
+                    <div class="mt-2 bg-amber-50/60 border border-amber-100 rounded-lg p-3 text-center">
+                      <p class="text-xs font-bold text-amber-800">
+                        <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {{ q.flight_details.inbound.connection_city }}
+                      </p>
+                      @if (q.flight_details.inbound.connection_time) {
+                      <p class="text-xs text-amber-600 mt-1">
+                        <svg class="w-3 h-3 inline mr-0.5 -mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Horário: {{ q.flight_details.inbound.connection_time }}
+                      </p>
+                      }
+                    </div>
                   </div>
                 </div>
+                } @else {
+                <p class="text-xs font-bold text-emerald-500 mt-2 bg-white px-2 z-10">Voo Direto</p>
+                }
               </div>
-              } @else {
-              <p class="text-xs font-bold text-emerald-500 mt-2 bg-white px-2 z-10">Voo Direto</p>
+
+              <!-- Destino -->
+              <div class="text-center sm:text-right flex-1">
+                <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.inbound.arrival_time }}
+                </p>
+                <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{
+                  q.flight_details.inbound.destination_city }}
+                </p>
+              </div>
+            </div>
+            @if (q.flight_details.inbound.seats_included || q.flight_details.inbound.checked_baggage) {
+            <div class="flex items-center gap-2 mt-3 flex-wrap">
+              @if (q.flight_details.inbound.seats_included) {
+              <span
+                class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3" />
+                  <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z" />
+                </svg>
+                Assentos incluídos
+              </span>
+              }
+              @if (q.flight_details.inbound.checked_baggage) {
+              <span
+                class="text-[11px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 flex items-center gap-1">
+                <lucide-icon [img]="Luggage" class="w-3 h-3" [strokeWidth]="2"></lucide-icon>
+                Bagagem despachada
+              </span>
               }
             </div>
-
-            <!-- Destino -->
-            <div class="text-center sm:text-right flex-1">
-              <p class="text-2xl sm:text-3xl font-black text-slate-800">{{ q.flight_details.inbound.arrival_time }}</p>
-              <p class="text-xs sm:text-sm font-bold text-slate-500 mt-1 uppercase">{{ q.flight_details.inbound.destination_city }}
-              </p>
-            </div>
-          </div>
-          @if (q.flight_details.inbound.seats_included || q.flight_details.inbound.checked_baggage) {
-          <div class="flex items-center gap-2 mt-3 flex-wrap">
-            @if (q.flight_details.inbound.seats_included) {
-            <span class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/></svg>
-              Assentos incluídos
-            </span>
-            }
-            @if (q.flight_details.inbound.checked_baggage) {
-            <span class="text-[11px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 flex items-center gap-1">
-              <lucide-icon [img]="Luggage" class="w-3 h-3" [strokeWidth]="2"></lucide-icon>
-              Bagagem despachada
-            </span>
             }
           </div>
-          }
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 2. SERVIÇOS (antes do Hotel)            -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="servicos" class="scroll-mt-24 qp-slide-up-d2">
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
-        <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-        </span>
-        Serviços Inclusos
-      </h2>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        <!-- Transfer -->
-        @if (q.has_transfer) {
-        <div
-          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
-          <div class="bg-blue-50 text-blue-600 p-2 sm:p-2.5 rounded-lg shrink-0">
-            <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 2. SERVIÇOS (antes do Hotel)            -->
+      <!-- ═══════════════════════════════════════ -->
+      <section id="servicos" class="scroll-mt-24 qp-slide-up-d2">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
+          <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="8" rx="2" ry="2"></rect>
-              <path d="M3 11v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path>
-              <path d="M7 19v2"></path>
-              <path d="M17 19v2"></path>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Transfer Regular</h4>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Transporte Aeroporto ➔ Hotel ➔ Aeroporto no destino.</p>
-          </div>
-        </div>
-        }
+          </span>
+          Serviços Inclusos
+        </h2>
 
-        <!-- Seguro -->
-        <div
-          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
-          <div class="bg-red-50 text-red-600 p-2 sm:p-2.5 rounded-lg shrink-0">
-            <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Seguro Viagem</h4>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Cobertura médica hospitalar durante todo o período da
-              viagem.</p>
-          </div>
-        </div>
-
-        <!-- Bagagem -->
-        <div
-          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
-          <div class="bg-amber-50 text-amber-600 p-2 sm:p-2.5 rounded-lg shrink-0">
-            <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M20 7h-3V4c0-1.1-.9-2-2-2h-6c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-9-3h2v3h-2V4zM4 9h16v11H4V9z">
-              </path>
-            </svg>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Bagagem de Mão</h4>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Franquia de 1 mochila/bolsa pessoal (até 5kg) + 1 mala
-              de mão (até 10kg).</p>
-          </div>
-        </div>
-
-        <!-- Assentos Incluídos -->
-        @if (q.flight_details?.outbound?.seats_included || q.flight_details?.inbound?.seats_included) {
-        <div
-          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
-          <div class="bg-emerald-50 text-emerald-600 p-2 sm:p-2.5 rounded-lg shrink-0">
-            <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
-              <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/>
-            </svg>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Assentos Incluídos</h4>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Seleção de assentos já inclusa no pacote, sem custo adicional.</p>
-          </div>
-        </div>
-        }
-
-        <!-- Bagagem Despachada -->
-        @if (q.flight_details?.outbound?.checked_baggage || q.flight_details?.inbound?.checked_baggage) {
-        <div
-          class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
-          <div class="bg-sky-50 text-sky-600 p-2 sm:p-2.5 rounded-lg shrink-0">
-            <lucide-icon [img]="Luggage" class="w-5 sm:w-6 h-5 sm:h-6" [strokeWidth]="2"></lucide-icon>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Bagagem Despachada</h4>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Franquia de bagagem despachada inclusa no pacote.</p>
-          </div>
-        </div>
-        }
-
-        <!-- Passeio Extra -->
-        @if (q.tour_details) {
-        <div
-          class="qp-service-card bg-white rounded-xl border-2 border-teal-300 p-4 sm:p-6 flex items-start gap-3 sm:gap-4 shadow-sm sm:col-span-2 lg:col-span-3 min-h-[5rem] sm:min-h-[6rem]">
-          <div class="bg-teal-50 text-teal-600 p-2 sm:p-3 rounded-lg shrink-0">
-            <lucide-icon [img]="TreePalm" class="w-5 sm:w-6 h-5 sm:h-6 block"></lucide-icon>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Passeios e Atividades</h4>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug font-medium">{{ q.tour_details }}</p>
-          </div>
-        </div>
-        }
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 3. HOTEL (após Serviços)                -->
-    <!-- ═══════════════════════════════════════ -->
-    @if (q.hotel_options.length > 0) {
-    <section id="hotel" class="scroll-mt-24 qp-slide-up-d3">
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
-        <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"></path>
-            <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"></path>
-            <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"></path>
-            <path d="M10 6h4"></path>
-            <path d="M10 10h4"></path>
-            <path d="M10 14h4"></path>
-            <path d="M10 18h4"></path>
-          </svg>
-        </span>
-        Hospedagem
-        @if (q.hotel_options.length > 1) {
-        <span class="text-xs font-semibold text-slate-400 ml-auto bg-white px-3 py-1 rounded-full border border-slate-200">
-          {{ q.hotel_options.length }} opções disponíveis
-        </span>
-        }
-      </h2>
-
-      <div class="grid grid-cols-1 gap-4 sm:gap-6">
-        @for (hotel of q.hotel_options; track hotelIdx; let hotelIdx = $index) {
-        <div (click)="selectHotel(hotelIdx)"
-          class="qp-hotel-card bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row cursor-pointer border-2"
-          [class.border-blue-500]="selectedHotelIndex() === hotelIdx"
-          [class.border-transparent]="selectedHotelIndex() !== hotelIdx"
-          [class.shadow-lg]="selectedHotelIndex() === hotelIdx"
-          [class.shadow-blue-500/10]="selectedHotelIndex() === hotelIdx">
-
-          <!-- Imagem do Hotel -->
-          <div class="h-56 sm:h-64 md:h-auto md:w-5/12 bg-slate-200 relative">
-            <!-- Badge Selecionada -->
-            @if (selectedHotelIndex() === hotelIdx) {
-            <div
-              class="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 qp-pulse-ring">
-              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <!-- Transfer -->
+          @if (q.has_transfer) {
+          <div
+            class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+            <div class="bg-blue-50 text-blue-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+              <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
+                <rect x="3" y="11" width="18" height="8" rx="2" ry="2"></rect>
+                <path d="M3 11v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path>
+                <path d="M7 19v2"></path>
+                <path d="M17 19v2"></path>
               </svg>
-              Selecionada
             </div>
-            }
-            @if (hotel.hotel_images && hotel.hotel_images.length > 0) {
-            <img [src]="getHotelImage(hotelIdx, hotel.hotel_images)" alt="{{ hotel.hotel_name }}"
-              (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
-              class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03] cursor-pointer">
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none">
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">Transfer Regular</h4>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Transporte Aeroporto ➔ Hotel ➔ Aeroporto no
+                destino.</p>
             </div>
+          </div>
+          }
 
-            @if (hotel.hotel_images.length > 1) {
-            <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, -1)"
-              class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          <!-- Seguro -->
+          <div
+            class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+            <div class="bg-red-50 text-red-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+              <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               </svg>
-            </button>
-            <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, 1)"
-              class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            }
-
-            <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white pointer-events-none">
-              <p class="font-bold text-base sm:text-lg leading-tight truncate drop-shadow-md">{{ hotel.hotel_name }}</p>
             </div>
-
-            @if (hotel.hotel_images.length > 1) {
-            <div (click)="$event.stopPropagation()"
-              class="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-1 sm:gap-1.5 bg-black/40 backdrop-blur-sm p-1 sm:p-1.5 rounded-lg shadow-lg z-10">
-              @for (img of hotel.hotel_images | slice:0:4; track imgIndex; let imgIndex = $index) {
-              <img [src]="img" (click)="setHotelImage($event, hotelIdx, imgIndex)"
-                class="w-9 h-9 sm:w-12 sm:h-12 object-cover rounded-md border-2 cursor-pointer transition-all hover:opacity-80"
-                [class.border-blue-500]="(activeImageIndexPerHotel()[hotelIdx] || 0) === imgIndex"
-                [class.border-white/20]="(activeImageIndexPerHotel()[hotelIdx] || 0) !== imgIndex">
-              }
-              @if (hotel.hotel_images.length > 4) {
-              <div (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
-                class="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center text-xs font-bold text-white bg-black/70 cursor-pointer hover:bg-black/80 rounded-md border border-white/10 transition-colors">
-                +{{ hotel.hotel_images.length - 4 }}
-              </div>
-              }
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">Seguro Viagem</h4>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Cobertura médica hospitalar durante todo o
+                período da
+                viagem.</p>
             </div>
-            }
-            } @else {
-            <!-- Fallback Gradient Placeholder -->
-            <div class="absolute inset-0 bg-gradient-to-tr from-blue-500 to-blue-400 opacity-90"></div>
-            <div class="absolute inset-0 flex items-center justify-center p-6 text-center shadow-inner">
-              <div>
-                <svg class="w-12 sm:w-16 h-12 sm:h-16 text-white/50 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
-                  <path d="M9 7h6"></path>
-                  <path d="M9 11h6"></path>
-                  <path d="M9 15h6"></path>
-                </svg>
-                <p class="text-white font-bold text-base sm:text-lg leading-tight">{{ hotel.hotel_name }}</p>
-              </div>
-            </div>
-            }
           </div>
 
-          <!-- Detalhes Hotel -->
-          <div class="p-5 sm:p-6 md:p-8 flex-1 flex flex-col justify-between relative">
+          <!-- Bagagem -->
+          <div
+            class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+            <div class="bg-amber-50 text-amber-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+              <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M20 7h-3V4c0-1.1-.9-2-2-2h-6c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-9-3h2v3h-2V4zM4 9h16v11H4V9z">
+                </path>
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">Bagagem de Mão</h4>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Franquia de 1 mochila/bolsa pessoal (até
+                5kg) + 1 mala
+                de mão (até 10kg).</p>
+            </div>
+          </div>
 
-            <!-- Radio/Check indicator -->
-            <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
-              <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shadow-sm"
-                [class.border-blue-600]="selectedHotelIndex() === hotelIdx"
-                [class.bg-blue-600]="selectedHotelIndex() === hotelIdx"
-                [class.border-slate-300]="selectedHotelIndex() !== hotelIdx">
-                @if (selectedHotelIndex() === hotelIdx) {
-                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+          <!-- Assentos Incluídos -->
+          @if (q.flight_details?.outbound?.seats_included || q.flight_details?.inbound?.seats_included) {
+          <div
+            class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+            <div class="bg-emerald-50 text-emerald-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+              <svg class="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3" />
+                <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">Assentos Incluídos</h4>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Seleção de assentos já inclusa no pacote,
+                sem custo adicional.</p>
+            </div>
+          </div>
+          }
+
+          <!-- Bagagem Despachada -->
+          @if (q.flight_details?.outbound?.checked_baggage || q.flight_details?.inbound?.checked_baggage) {
+          <div
+            class="qp-service-card bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 shadow-sm">
+            <div class="bg-sky-50 text-sky-600 p-2 sm:p-2.5 rounded-lg shrink-0">
+              <lucide-icon [img]="Luggage" class="w-5 sm:w-6 h-5 sm:h-6" [strokeWidth]="2"></lucide-icon>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">Bagagem Despachada</h4>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug">Franquia de bagagem despachada inclusa no
+                pacote.</p>
+            </div>
+          </div>
+          }
+
+          <!-- Passeio Extra -->
+          @if (q.tour_details) {
+          <div
+            class="qp-service-card bg-white rounded-xl border-2 border-teal-300 p-4 sm:p-6 flex items-start gap-3 sm:gap-4 shadow-sm sm:col-span-2 lg:col-span-3 min-h-[5rem] sm:min-h-[6rem]">
+            <div class="bg-teal-50 text-teal-600 p-2 sm:p-3 rounded-lg shrink-0">
+              <lucide-icon [img]="TreePalm" class="w-5 sm:w-6 h-5 sm:h-6 block"></lucide-icon>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">Passeios e Atividades</h4>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-snug font-medium">{{ q.tour_details }}</p>
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 3. HOTEL (após Serviços)                -->
+      <!-- ═══════════════════════════════════════ -->
+      @if (q.hotel_options.length > 0) {
+      <section id="hotel" class="scroll-mt-24 qp-slide-up-d3">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6 flex items-center gap-2">
+          <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 22V4c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v18"></path>
+              <path d="M6 12H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h2"></path>
+              <path d="M18 12h2a2 2 0 0 1 2 2v6c0 1.1-.9 2-2 2h-2"></path>
+              <path d="M10 6h4"></path>
+              <path d="M10 10h4"></path>
+              <path d="M10 14h4"></path>
+              <path d="M10 18h4"></path>
+            </svg>
+          </span>
+          Hospedagem
+          @if (q.hotel_options.length > 1) {
+          <span
+            class="text-xs font-semibold text-slate-400 ml-auto bg-white px-3 py-1 rounded-full border border-slate-200">
+            {{ q.hotel_options.length }} opções disponíveis
+          </span>
+          }
+        </h2>
+
+        <div class="grid grid-cols-1 gap-4 sm:gap-6">
+          @for (hotel of q.hotel_options; track hotelIdx; let hotelIdx = $index) {
+          <div (click)="selectHotel(hotelIdx)"
+            class="qp-hotel-card bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row cursor-pointer border-2"
+            [class.border-blue-500]="selectedHotelIndex() === hotelIdx"
+            [class.border-transparent]="selectedHotelIndex() !== hotelIdx"
+            [class.shadow-lg]="selectedHotelIndex() === hotelIdx"
+            [class.shadow-blue-500/10]="selectedHotelIndex() === hotelIdx">
+
+            <!-- Imagem do Hotel -->
+            <div class="h-56 sm:h-64 md:h-auto md:w-5/12 bg-slate-200 relative">
+              <!-- Badge Selecionada -->
+              @if (selectedHotelIndex() === hotelIdx) {
+              <div
+                class="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 qp-pulse-ring">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                   stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
+                Selecionada
+              </div>
+              }
+              @if (hotel.hotel_images && hotel.hotel_images.length > 0) {
+              <img [src]="getHotelImage(hotelIdx, hotel.hotel_images)" alt="{{ hotel.hotel_name }}"
+                (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
+                class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03] cursor-pointer">
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none">
+              </div>
+
+              @if (hotel.hotel_images.length > 1) {
+              <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, -1)"
+                class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button (click)="navigateHotelImage($event, hotelIdx, hotel.hotel_images, 1)"
+                class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/75 text-white rounded-full p-1.5 sm:p-2 transition-all opacity-70 hover:opacity-100 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              }
+
+              <div
+                class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white pointer-events-none">
+                <p class="font-bold text-base sm:text-lg leading-tight truncate drop-shadow-md">{{ hotel.hotel_name }}
+                </p>
+              </div>
+
+              @if (hotel.hotel_images.length > 1) {
+              <div (click)="$event.stopPropagation()"
+                class="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-1 sm:gap-1.5 bg-black/40 backdrop-blur-sm p-1 sm:p-1.5 rounded-lg shadow-lg z-10">
+                @for (img of hotel.hotel_images | slice:0:4; track imgIndex; let imgIndex = $index) {
+                <img [src]="img" (click)="setHotelImage($event, hotelIdx, imgIndex)"
+                  class="w-9 h-9 sm:w-12 sm:h-12 object-cover rounded-md border-2 cursor-pointer transition-all hover:opacity-80"
+                  [class.border-blue-500]="(activeImageIndexPerHotel()[hotelIdx] || 0) === imgIndex"
+                  [class.border-white/20]="(activeImageIndexPerHotel()[hotelIdx] || 0) !== imgIndex">
+                }
+                @if (hotel.hotel_images.length > 4) {
+                <div (click)="openExpandedImage($event, hotelIdx, hotel.hotel_images)"
+                  class="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center text-xs font-bold text-white bg-black/70 cursor-pointer hover:bg-black/80 rounded-md border border-white/10 transition-colors">
+                  +{{ hotel.hotel_images.length - 4 }}
+                </div>
                 }
               </div>
-            </div>
-
-            <div>
-              <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-2 pr-8">{{ hotel.hotel_name }}</h3>
-              <div class="flex items-center gap-1 text-yellow-400 mb-4">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                  </path>
-                </svg>
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                  </path>
-                </svg>
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                  </path>
-                </svg>
-                <svg class="w-4 h-4 fill-current text-yellow-400/30" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                  </path>
-                </svg>
-              </div>
-
-              <div class="grid grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-4 sm:gap-x-6">
+              }
+              } @else {
+              <!-- Fallback Gradient Placeholder -->
+              <div class="absolute inset-0 bg-gradient-to-tr from-blue-500 to-blue-400 opacity-90"></div>
+              <div class="absolute inset-0 flex items-center justify-center p-6 text-center shadow-inner">
                 <div>
-                  <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Acomodação</p>
-                  <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ hotel.accommodation }}</p>
-                </div>
-                <div>
-                  <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Regime</p>
-                  <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ hotel.regime }}</p>
-                </div>
-                <div>
-                  <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Check-in</p>
-                  <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base"><span
-                      class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1"></span>{{ q.check_in }}</p>
-                </div>
-                <div>
-                  <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Check-out</p>
-                  <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base"><span
-                      class="w-2 h-2 rounded-full bg-red-400 inline-block mr-1"></span>{{ q.check_out }}</p>
+                  <svg class="w-12 sm:w-16 h-12 sm:h-16 text-white/50 mx-auto mb-2" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"></path>
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                    <path d="M9 7h6"></path>
+                    <path d="M9 11h6"></path>
+                    <path d="M9 15h6"></path>
+                  </svg>
+                  <p class="text-white font-bold text-base sm:text-lg leading-tight">{{ hotel.hotel_name }}</p>
                 </div>
               </div>
+              }
             </div>
 
-            <!-- Descrição do Hotel -->
-            @if (hotel.description) {
-            <p class="mt-4 text-sm text-slate-500 font-normal leading-relaxed whitespace-pre-wrap"
-               style="word-break: break-word; overflow-wrap: break-word;">{{ hotel.description }}</p>
-            }
+            <!-- Detalhes Hotel -->
+            <div class="p-5 sm:p-6 md:p-8 flex-1 flex flex-col justify-between relative">
 
-            <!-- Link Externo -->
-            @if (hotel.link) {
-            <div class="mt-4">
-              <a [href]="hotel.link" target="_blank" rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-                Ver Mais Fotos e Detalhes
-              </a>
+              <!-- Radio/Check indicator -->
+              <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
+                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shadow-sm"
+                  [class.border-blue-600]="selectedHotelIndex() === hotelIdx"
+                  [class.bg-blue-600]="selectedHotelIndex() === hotelIdx"
+                  [class.border-slate-300]="selectedHotelIndex() !== hotelIdx">
+                  @if (selectedHotelIndex() === hotelIdx) {
+                  <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-2 pr-8">{{ hotel.hotel_name }}</h3>
+                <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                    </path>
+                  </svg>
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                    </path>
+                  </svg>
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                    </path>
+                  </svg>
+                  <svg class="w-4 h-4 fill-current text-yellow-400/30" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                    </path>
+                  </svg>
+                </div>
+
+                <div class="grid grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-4 sm:gap-x-6">
+                  <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Acomodação</p>
+                    <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ hotel.accommodation
+                      }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Regime</p>
+                    <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base">{{ hotel.regime }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Check-in</p>
+                    <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base"><span
+                        class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1"></span>{{ q.check_in }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Check-out</p>
+                    <p class="font-semibold text-slate-700 mt-0.5 sm:mt-1 text-sm sm:text-base"><span
+                        class="w-2 h-2 rounded-full bg-red-400 inline-block mr-1"></span>{{ q.check_out }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Descrição do Hotel -->
+              @if (hotel.description) {
+              <p class="mt-4 text-sm text-slate-500 font-normal leading-relaxed whitespace-pre-wrap"
+                style="word-break: break-word; overflow-wrap: break-word;">{{ hotel.description }}</p>
+              }
+
+              <!-- Link Externo -->
+              @if (hotel.link) {
+              <div class="mt-4">
+                <a [href]="hotel.link" target="_blank" rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                  Ver Mais Fotos e Detalhes
+                </a>
+              </div>
+              }
+
             </div>
-            }
-
           </div>
+          }
         </div>
-        }
-      </div>
-    </section>
-    }
+      </section>
+      }
 
-    <!-- DIVISOR -->
-    <hr class="border-slate-200/60 !my-0" />
+      <!-- DIVISOR -->
+      <hr class="border-slate-200/60 !my-0" />
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 4. VALORES E FORMAS DE PAGAMENTO        -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="valores" class="scroll-mt-24 qp-slide-up-d4">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 sm:gap-6">
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 4. VALORES E FORMAS DE PAGAMENTO        -->
+      <!-- ═══════════════════════════════════════ -->
+      <section id="valores" class="scroll-mt-24 qp-slide-up-d4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 sm:gap-6">
 
-        <!-- VALOR CARD (DESTAQUE) -->
-        <div
-          class="md:col-span-2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-2xl shadow-xl p-6 sm:p-8 text-white flex flex-col justify-center items-center md:items-start overflow-hidden min-w-0">
-          @if (priceMode() === 'per_person') {
-            <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Por Pessoa</p>
+          <!-- VALOR CARD (DESTAQUE) -->
+          <div
+            class="md:col-span-2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 rounded-2xl shadow-xl p-6 sm:p-8 text-white flex flex-col justify-center items-center md:items-start overflow-hidden min-w-0">
+            @if (priceMode() === 'per_person') {
+            <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Por Pessoa
+            </p>
             <p class="text-sm font-semibold text-white mb-1">10x de</p>
             <p class="whitespace-nowrap text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight drop-shadow-sm transition-all duration-300"
-              [class.scale-105]="isValueHighlighting()"
-              [class.text-emerald-300]="isValueHighlighting()">{{ perPersonInstallmentValue() }}</p>
-            <p class="text-xs sm:text-sm font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left whitespace-nowrap">Total por pessoa: {{ perPersonTotalValue() }}</p>
-          } @else {
+              [class.scale-105]="isValueHighlighting()" [class.text-emerald-300]="isValueHighlighting()">{{
+              perPersonInstallmentValue() }}</p>
+            <p
+              class="text-xs sm:text-sm font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left whitespace-nowrap">
+              Total por pessoa: {{ perPersonTotalValue() }}</p>
+            } @else {
             <p class="text-blue-200 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Investimento Total</p>
             <p class="text-sm font-semibold text-white mb-1">10x de</p>
             <p class="whitespace-nowrap text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight drop-shadow-sm transition-all duration-300"
-              [class.scale-105]="isValueHighlighting()"
-              [class.text-emerald-300]="isValueHighlighting()">{{ installmentValue() }}</p>
-            <p class="text-sm sm:text-base font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left">Total: {{ totalValue() }}</p>
-          }
+              [class.scale-105]="isValueHighlighting()" [class.text-emerald-300]="isValueHighlighting()">{{
+              installmentValue() }}</p>
+            <p
+              class="text-sm sm:text-base font-extrabold text-white mt-3 mb-4 border border-white/25 rounded-xl px-3 py-1.5 bg-white/10 shadow-md backdrop-blur-sm text-center md:text-left">
+              Total: {{ totalValue() }}</p>
+            }
+            <div
+              class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-sm font-semibold backdrop-blur-sm self-center md:self-start">
+              <svg class="w-4 h-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Valor sujeito a alterações e disponibilidade
+            </div>
+          </div>
+
+          <!-- DESCONTO VÁLIDO ATÉ: mobile=acima do pagamento, desktop=abaixo do grid (order-last) -->
+          @if (quote()?.discount_valid_until) {
           <div
-            class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold backdrop-blur-sm self-center md:self-start">
-            <svg class="w-4 h-4 text-blue-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            Valor sujeito a alterações
+            class="md:order-last md:col-span-5 bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 sm:p-6 flex items-center gap-4 shadow-sm discount-pulse">
+            <div class="bg-amber-100 text-amber-600 p-3 rounded-xl shrink-0">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-lg sm:text-xl font-black text-amber-900">⚠️ Desconto aplicado válido até {{
+                quote()?.discount_valid_until }}</p>
+              <p class="text-sm text-amber-700 mt-1 font-medium">Após essa data, o valor poderá ser retarifado.</p>
+            </div>
+          </div>
+          }
+
+          <!-- FORMAS DE PAGAMENTO -->
+          <div class="md:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-8">
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                <line x1="1" y1="10" x2="23" y2="10"></line>
+              </svg>
+              Formas de Pagamento
+            </h3>
+
+            <div class="space-y-5 sm:space-y-6">
+              <div class="flex gap-3 sm:gap-4">
+                <div class="mt-0.5 sm:mt-1">
+                  <div
+                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">
+                    1
+                  </div>
+                </div>
+                <div>
+                  <p class="font-bold text-slate-800 mb-1 text-sm sm:text-base">Cartão de Crédito</p>
+                  <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Em até <span
+                      class="font-bold text-blue-600">10x sem
+                      juros</span> no cartão de crédito. É possível utilizar mais de um cartão ou cartão de terceiros
+                    (mediante foto de documento).</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 sm:gap-4">
+                <div class="mt-0.5 sm:mt-1">
+                  <div
+                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">
+                    2
+                  </div>
+                </div>
+                <div>
+                  <p class="font-bold text-slate-800 mb-1 text-sm sm:text-base">Boleto Bancário</p>
+                  <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Parcelado em até <span
+                      class="font-bold text-blue-600">12x no boleto sem juros</span>
+                    (Sujeito à aprovação bancária e análise de score do CPF do titular da compra e viagem).</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <!-- FORMAS DE PAGAMENTO -->
-        <div class="md:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-8">
-          <h3 class="text-lg sm:text-xl font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      <!-- FOOTER / CONTATO -->
+      <footer class="mt-10 sm:mt-16 pt-6 sm:pt-8 pb-8 sm:pb-12 border-t border-slate-200 text-center">
+        <div class="max-w-md mx-auto">
+          <div
+            class="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 text-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 transform -rotate-3">
+            <svg class="w-7 sm:w-8 h-7 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-              <line x1="1" y1="10" x2="23" y2="10"></line>
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+              </path>
             </svg>
-            Formas de Pagamento
-          </h3>
-
-          <div class="space-y-5 sm:space-y-6">
-            <div class="flex gap-3 sm:gap-4">
-              <div class="mt-0.5 sm:mt-1">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">1
-                </div>
-              </div>
-              <div>
-                <p class="font-bold text-slate-800 mb-1 text-sm sm:text-base">Cartão de Crédito</p>
-                <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Em até <span class="font-bold text-blue-600">10x sem
-                    juros</span> no cartão de crédito. É possível utilizar mais de um cartão ou cartão de terceiros
-                  (mediante foto de documento).</p>
-              </div>
-            </div>
-
-            <div class="flex gap-3 sm:gap-4">
-              <div class="mt-0.5 sm:mt-1">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">2
-                </div>
-              </div>
-              <div>
-                <p class="font-bold text-slate-800 mb-1 text-sm sm:text-base">Boleto Bancário</p>
-                <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Parcelado em até <span class="font-bold text-blue-600">12x no boleto sem juros</span>
-                  (Sujeito à aprovação bancária e análise de score do CPF do titular da compra e viagem).</p>
-              </div>
-            </div>
           </div>
+          <p class="font-black text-slate-800 text-base sm:text-lg mb-1">Clube Turismo - Jardinópolis</p>
+          <p class="text-slate-500 text-xs sm:text-sm mb-4">Converse com seu agente para fechar os últimos detalhes
+            desta viagem
+            inesquecível.</p>
+          <p class="text-[10px] sm:text-[11px] text-red-500 font-bold uppercase tracking-wider">Atenção: Este documento
+            é um orçamento e
+            não garante reserva ou bloqueio de lugares.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- FOOTER / CONTATO -->
-    <footer class="mt-10 sm:mt-16 pt-6 sm:pt-8 pb-8 sm:pb-12 border-t border-slate-200 text-center">
-      <div class="max-w-md mx-auto">
-        <div
-          class="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 text-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 transform -rotate-3">
-          <svg class="w-7 sm:w-8 h-7 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-            </path>
-          </svg>
-        </div>
-        <p class="font-black text-slate-800 text-base sm:text-lg mb-1">Clube Turismo - Jardinópolis</p>
-        <p class="text-slate-500 text-xs sm:text-sm mb-4">Converse com seu agente para fechar os últimos detalhes desta viagem
-          inesquecível.</p>
-        <p class="text-[10px] sm:text-[11px] text-red-500 font-bold uppercase tracking-wider">Atenção: Este documento é um orçamento e
-          não garante reserva ou bloqueio de lugares.</p>
-      </div>
-    </footer>
+      </footer>
 
     </div> <!-- FIM DO CONTEÚDO ANIMADO -->
 
@@ -887,24 +972,28 @@
   (click)="closeExpandedImage()">
   <button (click)="closeExpandedImage()"
     class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-slate-300 transition-colors p-2 bg-black/50 rounded-full z-10">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
+      stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
     </svg>
   </button>
   @if (imgCtx && imgCtx.images.length > 1) {
   <button (click)="navigateExpandedImage($event, -1)"
     class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-white hover:text-slate-300 transition-all p-2.5 sm:p-3 bg-black/50 hover:bg-black/75 rounded-full z-10 shadow-lg opacity-80 hover:opacity-100">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
+      stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
     </svg>
   </button>
   <button (click)="navigateExpandedImage($event, 1)"
     class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-white hover:text-slate-300 transition-all p-2.5 sm:p-3 bg-black/50 hover:bg-black/75 rounded-full z-10 shadow-lg opacity-80 hover:opacity-100">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24"
+      stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
     </svg>
   </button>
-  <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium bg-black/40 px-3 py-1 rounded-full z-10">
+  <div
+    class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium bg-black/40 px-3 py-1 rounded-full z-10">
     {{ imgCtx.currentIndex + 1 }} / {{ imgCtx.images.length }}
   </div>
   }
@@ -916,16 +1005,19 @@
 <!-- Price Update Toast Notification -->
 @if (isValueHighlighting()) {
 <div class="fixed bottom-6 left-1/2 z-[100] qp-toast pointer-events-none">
-  <div class="bg-emerald-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-2xl flex items-center gap-2.5 sm:gap-3 border border-emerald-500/50">
+  <div
+    class="bg-emerald-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-2xl flex items-center gap-2.5 sm:gap-3 border border-emerald-500/50">
     <div class="bg-white/20 p-1 sm:p-1.5 rounded-full">
-      <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-4 sm:w-5 h-4 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2v20"></path>
         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
       </svg>
     </div>
     <div>
       <p class="font-bold text-xs sm:text-sm leading-tight text-white">Valor da Proposta Atualizado</p>
-      <p class="text-[10px] sm:text-[11px] font-medium text-emerald-100 opacity-90">10x de {{ priceMode() === 'per_person' ? perPersonInstallmentValue() : installmentValue() }}</p>
+      <p class="text-[10px] sm:text-[11px] font-medium text-emerald-100 opacity-90">10x de {{ priceMode() ===
+        'per_person' ? perPersonInstallmentValue() : installmentValue() }}</p>
     </div>
   </div>
 </div>

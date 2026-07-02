@@ -26,6 +26,35 @@
         <span class="text-[10px] text-red-500 mt-1 font-bold">Obrigatório</span>
         }
       </div>
+
+      <!-- DESCONTO VÁLIDO ATÉ -->
+      <div class="md:col-span-2">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <span class="text-sm font-semibold text-slate-700 whitespace-nowrap shrink-0">Desconto válido até</span>
+          <div class="relative w-full sm:max-w-[200px]">
+            <input type="text" formControlName="discount_valid_until"
+              (input)="onRootDateInput($event, 'discount_valid_until')"
+              placeholder="dd/mm/aaaa"
+              class="w-full px-4 py-2.5 bg-white border border-amber-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder-slate-400">
+            <input type="date" (change)="onNativeDateSelectRoot($event, 'discount_valid_until')"
+              class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 opacity-0 cursor-pointer z-10"
+              title="Escolher data no calendário">
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        @if (quoteForm.get('discount_valid_until')?.touched && quoteForm.get('discount_valid_until')?.hasError('pastDate')) {
+        <span class="text-[10px] text-red-500 mt-1 font-bold block">A data não pode ser anterior a hoje</span>
+        }
+      </div>
+
     </div>
   </div>
 

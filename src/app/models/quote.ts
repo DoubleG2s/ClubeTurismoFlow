@@ -86,6 +86,9 @@ export interface Quote {
   city?: string;
   notes?: string;
 
+  // Validade do desconto (dd/mm/yyyy)
+  discount_valid_until?: string;
+
   // Compartilhamento
   public_token?: string;
   is_public?: boolean;

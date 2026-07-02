@@ -9,7 +9,34 @@ import { LucideAngularModule, Luggage, Plane, PlaneTakeoff, PlaneLanding, TreePa
   selector: 'app-quote-proposal',
   standalone: true,
   imports: [CommonModule, LucideAngularModule],
-  templateUrl: './quote-proposal.component.html'
+  templateUrl: './quote-proposal.component.html',
+  styles: [`
+    @keyframes discount-glow {
+      0%, 100% {
+        border-color: rgb(253, 230, 138);
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        transform: scale(1);
+        background-color: rgb(255, 251, 235);
+      }
+      40% {
+        border-color: rgb(180, 83, 9);
+        box-shadow: 0 8px 40px rgba(245, 158, 11, 0.65), 0 0 0 5px rgba(245, 158, 11, 0.2);
+        transform: scale(1.016);
+        background-color: rgb(254, 243, 199);
+      }
+      60% {
+        border-color: rgb(180, 83, 9);
+        box-shadow: 0 8px 40px rgba(245, 158, 11, 0.65), 0 0 0 5px rgba(245, 158, 11, 0.2);
+        transform: scale(1.016);
+        background-color: rgb(254, 243, 199);
+      }
+    }
+    .discount-pulse {
+      animation: discount-glow 1.9s ease-in-out infinite;
+      transform-origin: center;
+      will-change: transform, box-shadow, border-color;
+    }
+  `]
 })
 export class QuoteProposalComponent implements OnInit {
   @Input() quoteId: string = '';

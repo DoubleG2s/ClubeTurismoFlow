@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, OnInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Quote, QuoteOption } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
@@ -65,8 +65,30 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       title: ['', Validators.required],
       subtitle: [''],
       supplier: ['', Validators.required],
+      discount_valid_until: [this.getDefaultDiscountDate(), [Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/), this.pastDateValidator()]],
       options: this.fb.array([])
     });
+  }
+
+  private getDefaultDiscountDate(): string {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    return `${day}/${month}/${d.getFullYear()}`;
+  }
+
+  private pastDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      const parts = (control.value as string).split('/');
+      if (parts.length !== 3 || parts[2].length !== 4) return null;
+      const [day, month, year] = parts;
+      const date = new Date(+year, +month - 1, +day);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date < today ? { pastDate: true } : null;
+    };
   }
 
   get quoteOptions() {
@@ -98,6 +120,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         title: this.quoteToEdit.title,
         subtitle: this.quoteToEdit.subtitle,
         supplier: this.quoteToEdit.supplier,
+        discount_valid_until: this.quoteToEdit.discount_valid_until || '',
       });
 
       this.quoteOptions.clear();
@@ -416,6 +439,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       title: 'Cópia de ' + source.title,
       subtitle: source.subtitle || '',
       supplier: source.supplier || '',
+      discount_valid_until: this.getDefaultDiscountDate(),
     });
     this.quoteOptions.clear();
     if (source.options && source.options.length > 0) {
@@ -460,12 +484,34 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   onNativeDateSelect(event: Event, optionIndex: number, controlName: string) {
     const input = event.target as HTMLInputElement;
     if (!input.value) return;
-    
+
     // input.value from type="date" is always YYYY-MM-DD
     const [year, month, day] = input.value.split('-');
     if (year && month && day) {
       const formattedDate = `${day}/${month}/${year}`;
       this.quoteOptions.at(optionIndex).get(controlName)?.setValue(formattedDate);
+    }
+  }
+
+  onRootDateInput(event: Event, controlName: string) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 8) value = value.slice(0, 8);
+    if (value.length >= 5) {
+      value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4);
+    } else if (value.length >= 3) {
+      value = value.slice(0, 2) + '/' + value.slice(2);
+    }
+    input.value = value;
+    this.quoteForm.get(controlName)?.setValue(value);
+  }
+
+  onNativeDateSelectRoot(event: Event, controlName: string) {
+    const input = event.target as HTMLInputElement;
+    if (!input.value) return;
+    const [year, month, day] = input.value.split('-');
+    if (year && month && day) {
+      this.quoteForm.get(controlName)?.setValue(`${day}/${month}/${year}`);
     }
   }
 
@@ -500,6 +546,7 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         title: formValue.title,
         subtitle: formValue.subtitle,
         supplier: formValue.supplier,
+        discount_valid_until: formValue.discount_valid_until || null,
         options: processedOptions
       };
 
