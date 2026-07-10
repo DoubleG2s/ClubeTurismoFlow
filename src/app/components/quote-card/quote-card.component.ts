@@ -14,6 +14,7 @@ import { parsePtBrDate } from '../../shared/utils/date.utils';
 export class QuoteCardComponent implements OnChanges {
   @Input({ required: true }) quote!: Quote;
   @Input({ required: true }) exchangeRate!: number;
+  @Input() displayMode: 'grid' | 'list' = 'grid';
   @Output() edit = new EventEmitter<string>();
   @Output() duplicate = new EventEmitter<string>();
   @Output() remove = new EventEmitter<string>();
@@ -83,6 +84,12 @@ export class QuoteCardComponent implements OnChanges {
     });
     return Array.from(names).slice(0, 3);
   });
+
+  formatCreatedAt(isoDate?: string): string {
+    if (!isoDate) return '—';
+    const d = new Date(isoDate);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
 
   // Helpers de formatação segura para garantir 9.999,99 independente do locale global
   formatCurrencyValue(value: number, currency: string = 'BRL'): string {

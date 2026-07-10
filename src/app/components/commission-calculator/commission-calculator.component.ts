@@ -1,9 +1,10 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, effect, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommissionCalculationService } from '../../services/commission-calculation.service';
 import { CommissionCalculatorEngine, CommissionCalculationResult } from '../../services/commission-calculator.engine';
-import { CommissionCalculation } from '../../models/commission-calculation';
+import { CommissionCalculation, CommissionCalculationData } from '../../models/commission-calculation';
+import { animateMini } from 'motion';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -15,10 +16,19 @@ import { AuthService } from '../../services/auth.service';
 export class CommissionCalculatorComponent implements OnInit {
   calcForm!: FormGroup;
   metaForm!: FormGroup;
-  
+
+  @ViewChild('gridEl') gridEl?: ElementRef<HTMLElement>;
+
   private calcService = inject(CommissionCalculationService);
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
+
+  constructor() {
+    effect(() => {
+      this.filteredCalculations(); // rastreia o signal
+      setTimeout(() => this.animateCards(), 0);
+    });
+  }
 
   // States
   currentResult = signal<CommissionCalculationResult | null>(null);
@@ -27,6 +37,23 @@ export class CommissionCalculatorComponent implements OnInit {
 
   // Expose signal from service
   calculations = this.calcService.calculations;
+
+  // Filtros do histórico
+  filterSearch = signal('');
+
+  hasActiveFilters = computed(() => !!this.filterSearch());
+
+  filteredCalculations = computed(() => {
+    const search = this.filterSearch().toLowerCase().trim();
+    if (!search) return this.calculations();
+    return this.calculations().filter(calc => {
+      const title = calc.title.toLowerCase();
+      const hotel = (calc.calculation_data.hospedagem || '').toLowerCase();
+      const nome = (calc.calculation_data.nome || '').toLowerCase();
+      return title.includes(search) || hotel.includes(search) || nome.includes(search);
+    });
+  });
+
 
   ngOnInit() {
     this.initForm();
@@ -79,50 +106,8 @@ export class CommissionCalculatorComponent implements OnInit {
         criancas: [0, [Validators.min(0)]]
       });
 
-      this.metaForm.valueChanges.subscribe(val => {
-        this.updateSimulationName(val);
-      });
     } else {
       this.metaForm.reset({ adultos: 2, criancas: 0 });
-    }
-  }
-
-  updateSimulationName(val: any) {
-    const hosp = val.hospedagem ? val.hospedagem.trim() : '';
-    const ida = this.formatDate(val.dataIda);
-    const volta = this.formatDate(val.dataVolta);
-    const adt = val.adultos || 0;
-    const chd = val.criancas || 0;
-    const nome = val.nome ? val.nome.trim() : '';
-
-    let parts = [];
-    if (nome) parts.push(nome);
-    if (hosp) parts.push(hosp);
-    
-    let hospPart = parts.join(' - ');
-
-    let dates = '';
-    if (ida && volta) dates = `${ida} a ${volta}`;
-    else if (ida) dates = ida;
-    else if (volta) dates = volta;
-    
-    let finalParts = [];
-    if (hospPart) finalParts.push(hospPart);
-    if (dates) finalParts.push(dates);
-
-    let title = finalParts.join(', ');
-
-    let pax = '';
-    if (adt > 0) pax += `${adt} ADT`;
-    if (chd > 0) pax += (pax ? ' / ' : '') + `${chd} CHD`;
-    
-    if (pax) {
-      if (title) title += ' - ' + pax;
-      else title = pax;
-    }
-
-    if (title) {
-       this.simulationName.set(title);
     }
   }
 
@@ -183,7 +168,7 @@ export class CommissionCalculatorComponent implements OnInit {
     this.isSaving.set(true);
     const success = await this.calcService.addCalculation({
       title: title,
-      calculation_data: this.calcForm.value
+      calculation_data: { ...this.calcForm.value, ...this.metaForm.value }
     });
 
     if (success) {
@@ -199,8 +184,33 @@ export class CommissionCalculatorComponent implements OnInit {
 
   loadSimulation(calc: CommissionCalculation) {
     this.initForm(calc.calculation_data);
+    const d = calc.calculation_data;
+    if (d.hospedagem !== undefined || d.nome !== undefined || d.dataIda !== undefined || d.dataVolta !== undefined || d.adultos !== undefined) {
+      this.metaForm.patchValue({
+        hospedagem: d.hospedagem ?? '',
+        dataIda: d.dataIda ?? '',
+        dataVolta: d.dataVolta ?? '',
+        nome: d.nome ?? '',
+        adultos: d.adultos ?? 2,
+        criancas: d.criancas ?? 0
+      }, { emitEvent: false });
+    }
     this.simulationName.set(calc.title);
     this.recalculate(calc.calculation_data);
+  }
+
+  formatCardDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return '';
+  }
+
+  formatCardDates(data: CommissionCalculationData): string {
+    const ida = this.formatCardDate(data.dataIda || '');
+    const volta = this.formatCardDate(data.dataVolta || '');
+    if (ida && volta) return `${ida} → ${volta}`;
+    return ida || volta;
   }
 
   confirmDelete(id: string) {
@@ -219,8 +229,27 @@ export class CommissionCalculatorComponent implements OnInit {
     }
   }
 
+  clearFilters() {
+    this.filterSearch.set('');
+  }
+
+  private animateCards() {
+    const grid = this.gridEl?.nativeElement;
+    if (!grid) return;
+    const cards = grid.querySelectorAll('.sim-card');
+    if (!cards.length) return;
+    cards.forEach((card, i) => {
+      animateMini(
+        card,
+        { opacity: [0, 1], transform: ['translateY(16px)', 'translateY(0)'] },
+        { duration: 0.35, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] as const }
+      );
+    });
+  }
+
   getPacoteComRav(data: any): string {
     const res = CommissionCalculatorEngine.calculate(data);
     return this.formatBRL(res.totalComDesconto + res.ravCheia);
   }
+
 }

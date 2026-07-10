@@ -40,25 +40,51 @@
             </h2>
           </div>
 
-          <div class="flex items-center gap-2 px-2 py-1 rounded-lg ml-3 flex-shrink-0" style="background: var(--n-0); border: 1px solid var(--n-150); box-shadow: var(--sh-1);">
-            <label for="exchangeRate" class="eyebrow whitespace-nowrap">Dólar Hoje (R$)</label>
-            <input
-              type="number"
-              id="exchangeRate"
-              [value]="exchangeRate.toFixed(2)"
-              (input)="exchangeRateChange.emit($any($event.target).value)"
-              step="0.01"
-              class="w-16 px-1.5 py-0.5 rounded text-[13px] font-bold text-right focus:outline-none focus:ring-1"
-              style="background: var(--n-50); border: 1px solid var(--n-200); color: var(--n-900);">
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="flex items-center gap-2 px-2 py-1 rounded-lg" style="background: var(--n-0); border: 1px solid var(--n-150); box-shadow: var(--sh-1);">
+              <label for="exchangeRate" class="eyebrow whitespace-nowrap">Dólar Hoje (R$)</label>
+              <input
+                type="number"
+                id="exchangeRate"
+                [value]="exchangeRate.toFixed(2)"
+                (input)="exchangeRateChange.emit($any($event.target).value)"
+                step="0.01"
+                class="w-16 px-1.5 py-0.5 rounded text-[13px] font-bold text-right focus:outline-none focus:ring-1"
+                style="background: var(--n-50); border: 1px solid var(--n-200); color: var(--n-900);">
+            </div>
+
+            <!-- View mode toggle -->
+            <div class="ct-seg">
+              <button class="ct-seg-btn" [class.active]="viewMode() === 'grid'" (click)="setViewMode('grid')" title="Visualização em grid">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                <span class="hidden sm:inline">Grid</span>
+              </button>
+              <button class="ct-seg-btn" [class.active]="viewMode() === 'list'" (click)="setViewMode('list')" title="Visualização em lista">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                <span class="hidden sm:inline">Lista</span>
+              </button>
+            </div>
           </div>
         </div>
 
         @if (quotes.length > 0) {
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            @for (quote of quotes; track quote.id) {
-              <app-quote-card [quote]="quote" [exchangeRate]="exchangeRate" (edit)="editQuote.emit($event)" (duplicate)="duplicateQuote.emit($event)" (remove)="removeQuote.emit($event)"></app-quote-card>
-            }
-          </div>
+          @if (viewMode() === 'grid') {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              @for (quote of quotes; track quote.id) {
+                <app-quote-card [quote]="quote" [exchangeRate]="exchangeRate" (edit)="editQuote.emit($event)" (duplicate)="duplicateQuote.emit($event)" (remove)="removeQuote.emit($event)"></app-quote-card>
+              }
+            </div>
+          } @else {
+            <div class="flex flex-col gap-3">
+              @for (quote of quotes; track quote.id) {
+                <app-quote-card [quote]="quote" [exchangeRate]="exchangeRate" [displayMode]="'list'" (edit)="editQuote.emit($event)" (duplicate)="duplicateQuote.emit($event)" (remove)="removeQuote.emit($event)"></app-quote-card>
+              }
+            </div>
+          }
         } @else {
           <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed text-center" style="background: var(--n-0); border-color: var(--n-200);">
             <div class="w-14 h-14 rounded-full flex items-center justify-center mb-4" style="background: var(--n-50);">

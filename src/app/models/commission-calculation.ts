@@ -10,6 +10,13 @@ export interface CommissionCalculationData {
   encargos: string;
   taxas: string;
   creator_name?: string;
+  // Campos visuais do card (metaForm)
+  hospedagem?: string;
+  dataIda?: string;
+  dataVolta?: string;
+  nome?: string;
+  adultos?: number;
+  criancas?: number;
 }
 
 export interface CommissionCalculation {

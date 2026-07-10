@@ -583,6 +583,25 @@
     .q-card { background: var(--n-0); border: var(--border); border-radius: var(--r-16); box-shadow: var(--sh-1); overflow: hidden; transition: box-shadow .2s; display: flex; flex-direction: column; }
     .q-card:hover { box-shadow: var(--sh-2); transform: translateY(-2px); }
 
+    /* ── Quote list row ─────────────────────────────────────── */
+    .q-list-row { background: var(--n-0); border: 1px solid var(--n-150); border-radius: var(--r-12); box-shadow: var(--sh-1); padding: 12px 16px; display: flex; align-items: center; gap: 12px; transition: box-shadow .15s; }
+    .q-list-row:hover { box-shadow: var(--sh-2); }
+    .q-list-row__info { flex: 1; min-width: 0; display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1.2fr; gap: 12px; align-items: start; }
+    .q-list-row__actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; min-width: 130px; }
+    .q-list-col { min-width: 0; }
+    .q-list-col--value { text-align: right; }
+    @media (max-width: 767px) {
+      .q-list-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .q-list-row__info { grid-template-columns: 1fr 1fr; }
+      .q-list-col--value { text-align: left; }
+      .q-list-row__actions { flex-wrap: wrap; justify-content: flex-start; min-width: unset; gap: 10px; }
+      .q-list-row__actions .ct-btn { padding: 9px 16px; font-size: 13px; }
+      .q-list-row__actions .ct-icon-btn { width: 38px !important; height: 38px !important; }
+    }
+    @media (max-width: 479px) {
+      .q-list-row__info { grid-template-columns: 1fr; }
+    }
+
     /* ── Admin — berry theme ───────────────────────────────── */
     .adm-theme { --brand-50: oklch(0.96 0.04 350); --brand-100: oklch(0.92 0.07 350); --brand-200: oklch(0.86 0.10 350); --brand-500: oklch(0.61 0.17 350); --brand-600: oklch(0.545 0.166 350); --brand-700: oklch(0.48 0.16 350); }
 
@@ -696,8 +715,9 @@
     /* ── Segmented control ─────────────────────────────────── */
     .ct-seg { display: inline-flex; background: var(--n-100); border-radius: 9px; padding: 3px; gap: 2px; }
     .ct-seg-btn {
+      display: inline-flex; align-items: center; gap: 5px;
       border: none; background: transparent;
-      padding: 6px 14px; border-radius: 7px;
+      padding: 6px 12px; border-radius: 7px;
       font-size: 12px; font-weight: 600; color: var(--n-600);
       cursor: pointer; transition: background .12s, color .12s, box-shadow .12s;
     }
