@@ -1,0 +1,174 @@
+<div class="ct-drawer-back" (click)="close.emit()">
+  <div class="ct-drawer" (click)="$event.stopPropagation()">
+
+    <div class="ct-drawer-head">
+      <div class="ct-avatar flex-shrink-0" style="width: 48px; height: 48px; font-size: 16px;">{{ initials }}</div>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-[17px] font-bold m-0 truncate flex items-center gap-2" style="color: var(--n-900);">
+          {{ mode === 'edit' ? 'Editar cliente' : (cliente.full_name || 'Cliente') }}
+          @if (mode === 'view' && cliente.tags.includes('VIP')) {
+            <span class="ct-pill ct-pill-warn">VIP</span>
+          }
+        </h3>
+        <p class="text-xs mt-0.5" style="color: var(--n-500);">
+          {{ mode === 'edit' ? 'Atualize os dados do cliente' : ('Cliente desde ' + customerSinceYear + ' · ' + (cliente.trips || []).length + ' viagens') }}
+        </p>
+      </div>
+      <button class="ct-icon-btn" (click)="close.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="ct-drawer-body">
+      @if (mode === 'edit') {
+        <app-cliente-form
+          [cliente]="cliente"
+          [existingClientes]="existingClientes"
+          [isSaving]="isSaving"
+          [showCancel]="true"
+          submitLabel="Salvar alterações"
+          (save)="save.emit($event)"
+          (cancel)="modeChange.emit('view')">
+        </app-cliente-form>
+      } @else {
+        <div class="flex flex-col gap-6">
+
+          <div class="flex flex-col gap-2.5">
+            <span class="eyebrow" style="color: var(--brand-600);">Dados Pessoais</span>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">CPF</div>
+                <div class="text-[13.5px] font-semibold" [style.color]="cliente.cpf ? 'var(--n-800)' : 'var(--n-400)'" [style.font-style]="cliente.cpf ? 'normal' : 'italic'" style="font-family: var(--font-mono);">{{ cliente.cpf || 'CPF não informado' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">RG</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800); font-family: var(--font-mono);">{{ cliente.rg || '—' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Nascimento</div>
+                <div class="text-[13.5px] font-semibold" [style.color]="cliente.birth_date ? 'var(--n-800)' : 'var(--n-400)'" [style.font-style]="cliente.birth_date ? 'normal' : 'italic'">{{ cliente.birth_date || 'Data não informada' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Sexo</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ cliente.gender || '—' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2.5">
+            <span class="eyebrow" style="color: var(--brand-600);">Contato</span>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <div class="col-span-2 flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">E-mail</div>
+                  <div class="text-[13.5px] font-semibold truncate" [style.color]="cliente.email ? 'var(--n-800)' : 'var(--n-400)'" [style.font-style]="cliente.email ? 'normal' : 'italic'">{{ cliente.email || 'E-mail não informado' }}</div>
+                </div>
+                @if (cliente.email) {
+                  <button class="ct-icon-btn flex-shrink-0" style="width: 26px; height: 26px;" title="Copiar e-mail" (click)="copyToClipboard(cliente.email)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                  </button>
+                }
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Telefone</div>
+                <div class="text-[13.5px] font-semibold" [style.color]="cliente.phone_number ? 'var(--n-800)' : 'var(--n-400)'" [style.font-style]="cliente.phone_number ? 'normal' : 'italic'" style="font-family: var(--font-mono);">{{ cliente.phone_number || 'Telefone não informado' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">WhatsApp</div>
+                <div class="text-[13.5px] font-semibold" [style.color]="cliente.whatsapp_number ? 'var(--brand-600)' : 'var(--n-400)'" [style.font-style]="cliente.whatsapp_number ? 'normal' : 'italic'" style="font-family: var(--font-mono);">{{ cliente.whatsapp_number || 'WhatsApp não informado' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2.5">
+            <span class="eyebrow" style="color: var(--brand-600);">Endereço</span>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <div class="col-span-2">
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Logradouro</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ addressLine }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Complemento</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ cliente.address_complement || '—' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Bairro</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ cliente.address_district || '—' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Cidade</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ cliente.address_city || '—' }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">UF / CEP</div>
+                <div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ ufZipLine }}</div>
+              </div>
+            </div>
+          </div>
+
+          @if (cliente.tags.length > 0) {
+            <div class="flex flex-col gap-2.5">
+              <span class="eyebrow" style="color: var(--brand-600);">Segmentação</span>
+              <div class="flex flex-wrap gap-1.5">
+                @for (tag of cliente.tags; track tag) {
+                  <span class="ct-pill" [ngClass]="pillClass(tag)">{{ tag }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="flex flex-col gap-2.5">
+            <span class="eyebrow" style="color: var(--brand-600);">Histórico de Viagens</span>
+            @if ((cliente.trips || []).length > 0) {
+              <div class="flex flex-col gap-2">
+                @for (trip of (cliente.trips || []); track $index) {
+                  <div class="flex items-center gap-3 p-2.5 rounded-xl" style="border: 1px solid var(--n-150);">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: var(--brand-50); color: var(--brand-600);">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.7.9c-.4.4-.2 1.1.3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 2.7 5.9c.2.5.9.7 1.3.3l.9-.7c.4-.3.6-.8.5-1.3z"/></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="text-[13.5px] font-bold" style="color: var(--n-900);">{{ trip.destination }}</div>
+                      <div class="text-[11.5px]" style="color: var(--n-500); font-family: var(--font-mono);">{{ trip.trip_date }} · {{ trip.trip_type }}</div>
+                    </div>
+                    <div class="text-[13px] font-bold flex-shrink-0" style="color: var(--n-800); font-family: var(--font-mono);">{{ formatCurrency(trip.amount) }}</div>
+                  </div>
+                }
+                <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+                  <span class="text-[11px] font-bold uppercase tracking-wide" style="color: var(--brand-700);">Total no histórico</span>
+                  <span class="text-[17px] font-bold" style="color: var(--brand-800); font-family: var(--font-mono);">{{ formatCurrency(totalSpent) }}</span>
+                </div>
+              </div>
+            } @else {
+              <p class="text-[13px]" style="color: var(--n-500);">Nenhuma viagem registrada.</p>
+            }
+          </div>
+
+          @if (cliente.notes) {
+            <div class="flex flex-col gap-2.5">
+              <span class="eyebrow" style="color: var(--brand-600);">Observações</span>
+              <div class="text-[13px] leading-relaxed p-3 rounded-xl" style="color: var(--n-700); background: var(--n-25); border: 1px solid var(--n-150);">{{ cliente.notes }}</div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="ct-drawer-foot">
+      @if (mode === 'edit') {
+        <div class="flex-1"></div>
+        <button class="ct-btn ct-btn-ghost" (click)="cliente.id ? modeChange.emit('view') : close.emit()">Cancelar</button>
+      } @else {
+        <button class="ct-btn ct-btn-ghost" style="color: var(--danger-500);" (click)="remove.emit(cliente.id)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          Excluir
+        </button>
+        <div class="flex-1"></div>
+        <button class="ct-btn ct-btn-primary" (click)="modeChange.emit('edit')">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Editar
+        </button>
+      }
+    </div>
+
+  </div>
+</div>

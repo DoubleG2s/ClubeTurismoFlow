@@ -1,0 +1,169 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+
+  <!-- Dados Pessoais -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Dados Pessoais</span>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="ct-field md:col-span-2">
+        <label class="ct-label">Nome completo *</label>
+        <input type="text" formControlName="full_name" placeholder="Ex: Maria Aparecida da Silva" class="ct-input">
+        @if (form.get('full_name')?.touched && form.get('full_name')?.invalid) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">Informe o nome completo.</span>
+        }
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">CPF / CNPJ</label>
+        <input type="text" formControlName="cpf" appMask="cpfCnpj" inputmode="numeric" maxlength="18" placeholder="000.000.000-00" class="ct-input">
+        @if (form.get('cpf')?.touched && form.get('cpf')?.hasError('cpfCnpj')) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">CPF ou CNPJ inválido.</span>
+        } @else if (duplicateCpfName()) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">Este CPF já está cadastrado para {{ duplicateCpfName() }}.</span>
+        }
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">RG</label>
+        <input type="text" formControlName="rg" placeholder="00.000.000-0" class="ct-input">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Data de nascimento</label>
+        <input type="text" formControlName="birth_date" appMask="birthDate" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" class="ct-input">
+        @if (form.get('birth_date')?.touched && form.get('birth_date')?.hasError('birthDate')) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">Data de nascimento inválida.</span>
+        }
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Sexo</label>
+        <select formControlName="gender" class="ct-select">
+          <option value="">Selecione...</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contato -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Contato</span>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="ct-field md:col-span-2">
+        <label class="ct-label">E-mail</label>
+        <input type="email" formControlName="email" placeholder="cliente@email.com" class="ct-input">
+        @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">Informe um e-mail válido.</span>
+        }
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Telefone</label>
+        <input type="text" formControlName="phone_number" appMask="phone" inputmode="numeric" maxlength="15" placeholder="(00) 0000-0000" class="ct-input">
+        @if (form.get('phone_number')?.touched && form.get('phone_number')?.hasError('phone')) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">Telefone inválido.</span>
+        }
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">WhatsApp</label>
+        <input type="text" formControlName="whatsapp_number" appMask="phone" inputmode="numeric" maxlength="15" placeholder="(00) 00000-0000" class="ct-input">
+        @if (form.get('whatsapp_number')?.touched && form.get('whatsapp_number')?.hasError('phone')) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">WhatsApp inválido.</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Endereço -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Endereço</span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="ct-field">
+        <label class="ct-label">CEP</label>
+        <div class="relative">
+          <input type="text" formControlName="zip_code" appMask="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" class="ct-input pr-8">
+          @if (isCepLoading()) {
+            <div class="absolute inset-y-0 right-0 flex items-center justify-center pr-2.5">
+              <svg class="animate-spin h-4 w-4" style="color: var(--brand-500);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          }
+        </div>
+        @if (form.get('zip_code')?.touched && form.get('zip_code')?.hasError('cep')) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">CEP inválido.</span>
+        } @else if (cepNotFound()) {
+          <span class="text-[11px] font-semibold" style="color: var(--danger-500);">CEP não encontrado.</span>
+        }
+      </div>
+      <div class="ct-field md:col-span-2">
+        <label class="ct-label">Logradouro</label>
+        <input type="text" formControlName="address_street" placeholder="Rua, avenida..." class="ct-input">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Número</label>
+        <input type="text" formControlName="address_number" placeholder="Nº" class="ct-input">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Complemento</label>
+        <input type="text" formControlName="address_complement" placeholder="Ap., bloco, casa..." class="ct-input">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Bairro</label>
+        <input type="text" formControlName="address_district" placeholder="Bairro" class="ct-input">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Cidade</label>
+        <input type="text" formControlName="address_city" placeholder="Cidade" class="ct-input">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">UF</label>
+        <select formControlName="address_state" class="ct-select">
+          <option value="">—</option>
+          @for (uf of ufOptions; track uf) {
+            <option [value]="uf">{{ uf }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Segmentação -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Segmentação</span>
+    <div class="flex flex-wrap gap-2">
+      @for (tag of tagOptions; track tag) {
+        <button type="button" (click)="toggleTag(tag)" class="ct-pill" [class.ct-pill-brand]="selectedTags().includes(tag)"
+          style="cursor: pointer; border: 1px solid var(--n-200);" [style.border-color]="selectedTags().includes(tag) ? 'var(--brand-200)' : 'var(--n-200)'">
+          {{ tag }}
+        </button>
+      }
+    </div>
+    <div class="ct-field md:w-40">
+      <label class="ct-label">Cliente desde</label>
+      <input type="text" formControlName="customer_since" placeholder="Ex: 2024" class="ct-input">
+    </div>
+  </div>
+
+  <!-- Observações -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Observações</span>
+    <textarea formControlName="notes" rows="3" placeholder="Preferências, restrições, anotações internas..." class="ct-textarea" style="resize: none;"></textarea>
+  </div>
+
+  <!-- Ações -->
+  <div class="flex justify-end gap-2 pt-4" style="border-top: var(--border);">
+    @if (showCancel) {
+      <button type="button" (click)="cancel.emit()" class="ct-btn ct-btn-ghost">Cancelar</button>
+    }
+    <button type="submit" [disabled]="isSaving" class="ct-btn ct-btn-primary disabled:opacity-50">
+      @if (isSaving) {
+        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      }
+      {{ submitLabel }}
+    </button>
+  </div>
+</form>

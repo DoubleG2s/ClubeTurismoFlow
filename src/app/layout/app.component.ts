@@ -38,6 +38,7 @@ import { Reservation } from '@models/reservation';
 import { FlightsPageComponent } from '@features/flights/flights-page.component';
 import { HotelsPageComponent } from '@features/hotels/hotels-page.component';
 import { QuotesPageComponent } from '@features/quotes/quotes-page.component';
+import { ClientesPageComponent } from '@features/clientes/clientes-page.component';
 import { ReservationsPageComponent } from '@features/reservations/reservations-page.component';
 import { SubscriptionComponent } from '@features/subscription/subscription';
 import { SettingsPageComponent } from '@features/settings/settings-page.component';
@@ -72,6 +73,7 @@ import { animate } from 'motion';
     FlightsPageComponent,
     HotelsPageComponent,
     QuotesPageComponent,
+    ClientesPageComponent,
     ReservationsPageComponent,
     SubscriptionComponent,
     QuoteProposalComponent,
@@ -146,6 +148,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       reservas: 'Gestão de Reservas',
       cotacoes: 'Cotações',
       hotel: 'Hotel',
+      clientes: 'Clientes',
       admin: 'Administração',
       assinatura: 'Assinatura',
       configuracoes: 'Configurações',

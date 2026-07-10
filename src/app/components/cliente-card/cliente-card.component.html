@@ -1,0 +1,167 @@
+@if (displayMode === 'list') {
+<!-- ========================== LIST ROW ========================== -->
+<div class="cli-list-row cursor-pointer" (click)="view.emit(cliente.id)">
+
+  <div class="cli-list-row__info">
+
+    <!-- Col 1: Avatar + Nome + CPF -->
+    <div class="cli-list-col flex items-center gap-3">
+      <div class="ct-avatar flex-shrink-0" style="width: 38px; height: 38px; font-size: 13px;" [style.background]="avatarGradient">
+        {{ initials }}
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <h3 class="text-sm font-bold leading-tight truncate" style="color: var(--n-900);">{{ cliente.full_name }}</h3>
+          @if (isVip) {
+            <span class="ct-pill ct-pill-warn" style="flex-shrink: 0;">VIP</span>
+          }
+        </div>
+        <p class="text-xs mt-0.5" style="color: var(--n-500); font-family: var(--font-mono);">{{ cliente.cpf || 'CPF não informado' }}</p>
+      </div>
+    </div>
+
+    <!-- Col 2: Contato -->
+    <div class="cli-list-col">
+      <p class="eyebrow">Contato</p>
+      <p class="text-xs truncate mt-0.5" [style.color]="cliente.email ? 'var(--n-700)' : 'var(--n-400)'" [style.font-style]="cliente.email ? 'normal' : 'italic'">{{ emailDisplay }}</p>
+      <p class="text-xs mt-0.5" [style.color]="cliente.whatsapp_number ? 'var(--brand-600)' : 'var(--n-400)'" [style.font-style]="cliente.whatsapp_number ? 'normal' : 'italic'" style="font-family: var(--font-mono);">{{ whatsappDisplay }}</p>
+    </div>
+
+    <!-- Col 3: Cidade + Tags -->
+    <div class="cli-list-col">
+      <p class="eyebrow">Localização</p>
+      <p class="text-sm mt-0.5" style="color: var(--n-700);">
+        {{ cliente.address_city ? cliente.address_city + (cliente.address_state ? ' · ' + cliente.address_state : '') : '—' }}
+      </p>
+      @if (cliente.tags.length > 0) {
+        <div class="flex flex-wrap gap-1 mt-1">
+          @for (tag of cliente.tags; track tag) {
+            <span class="ct-pill" [ngClass]="pillClass(tag)">{{ tag }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Col 4: Viagens / Total gasto / Desde -->
+    <div class="cli-list-col cli-list-col--value">
+      <p class="eyebrow">Histórico</p>
+      <p class="text-sm font-bold mt-0.5" style="color: var(--n-900); font-family: var(--font-mono);">{{ formatCurrency(totalSpent) }}</p>
+      <p class="text-xs mt-0.5" style="color: var(--n-500);">
+        {{ (cliente.trips || []).length }} {{ (cliente.trips || []).length === 1 ? 'viagem' : 'viagens' }} · Desde {{ customerSinceYear }}
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Actions -->
+  <div class="cli-list-row__actions" (click)="$event.stopPropagation()">
+    <div class="flex gap-1.5">
+      <button (click)="view.emit(cliente.id)" class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver
+      </button>
+      <button (click)="edit.emit(cliente.id)" class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Editar
+      </button>
+    </div>
+    <div class="flex items-center justify-center">
+      <button (click)="remove.emit(cliente.id)" class="ct-icon-btn" style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px; color: var(--danger-500);" title="Excluir">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+} @else {
+<!-- ========================== GRID CARD ========================== -->
+<div class="ct-card cursor-pointer flex flex-col h-full transition-all duration-200 hover:-translate-y-0.5" (click)="view.emit(cliente.id)">
+
+  <!-- Header -->
+  <div class="flex items-start gap-3 p-4 pb-3">
+    <div class="ct-avatar flex-shrink-0" style="width: 46px; height: 46px; font-size: 15px;" [style.background]="avatarGradient">
+      {{ initials }}
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <h3 class="text-[15px] font-bold leading-tight truncate" style="color: var(--n-900);">{{ cliente.full_name }}</h3>
+        @if (isVip) {
+          <span class="ct-pill ct-pill-warn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .8-5.3 5L18 22l-6-3.5L6 22l1.3-7.2L2 9.8 9 9z"/></svg>
+            VIP
+          </span>
+        }
+      </div>
+      <p class="text-[11.5px] mt-0.5" style="color: var(--n-500); font-family: var(--font-mono);">{{ cliente.cpf || 'CPF não informado' }}</p>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="px-4 pb-1 flex flex-col gap-3 flex-1">
+    <div class="flex flex-col gap-1.5">
+      <div class="flex items-center gap-2 text-xs" [style.color]="cliente.email ? 'var(--n-700)' : 'var(--n-400)'" [style.font-style]="cliente.email ? 'normal' : 'italic'">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="truncate">{{ emailDisplay }}</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs" [style.color]="cliente.whatsapp_number ? 'var(--brand-600)' : 'var(--n-400)'" [style.font-style]="cliente.whatsapp_number ? 'normal' : 'italic'" style="font-family: var(--font-mono);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        {{ whatsappDisplay }}
+      </div>
+      @if (cliente.address_city) {
+        <div class="flex items-center gap-2 text-xs" style="color: var(--n-700);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ cliente.address_city }}{{ cliente.address_state ? ' · ' + cliente.address_state : '' }}
+        </div>
+      }
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 rounded-xl overflow-hidden" style="border: 1px solid var(--n-100); background: var(--n-25);">
+      <div class="text-center px-2 py-2" style="border-right: 1px solid var(--n-100);">
+        <div class="text-[15px] font-bold" style="color: var(--n-900); font-variant-numeric: tabular-nums;">{{ (cliente.trips || []).length }}</div>
+        <div class="text-[9.5px] font-bold uppercase tracking-wide mt-0.5" style="color: var(--n-400);">Viagens</div>
+      </div>
+      <div class="text-center px-2 py-2" style="border-right: 1px solid var(--n-100);">
+        <div class="text-[13px] font-bold" style="color: var(--n-900); font-family: var(--font-mono);">{{ formatCurrency(totalSpent) }}</div>
+        <div class="text-[9.5px] font-bold uppercase tracking-wide mt-0.5" style="color: var(--n-400);">Total gasto</div>
+      </div>
+      <div class="text-center px-2 py-2">
+        <div class="text-[15px] font-bold" style="color: var(--n-900);">{{ customerSinceYear }}</div>
+        <div class="text-[9.5px] font-bold uppercase tracking-wide mt-0.5" style="color: var(--n-400);">Desde</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 text-xs" style="color: var(--n-600);">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.7.9c-.4.4-.2 1.1.3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 2.7 5.9c.2.5.9.7 1.3.3l.9-.7c.4-.3.6-.8.5-1.3z"/></svg>
+      @if (lastTrip) {
+        <span>Última: <b style="color: var(--n-800);">{{ lastTrip.destination }}</b> · <span style="font-family: var(--font-mono);">{{ lastTrip.trip_date }}</span></span>
+      } @else {
+        <span>Última: <b style="color: var(--n-500);">Nenhuma</b></span>
+      }
+    </div>
+
+    @if (cliente.tags.length > 0) {
+      <div class="flex flex-wrap gap-1.5">
+        @for (tag of cliente.tags; track tag) {
+          <span class="ct-pill" [ngClass]="pillClass(tag)">{{ tag }}</span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="flex gap-1.5 p-3 mt-1" style="border-top: var(--border);" (click)="$event.stopPropagation()">
+    <button (click)="view.emit(cliente.id)" class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      Ver perfil
+    </button>
+    <button (click)="edit.emit(cliente.id)" class="ct-btn ct-btn-ghost ct-btn-sm flex-1 justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Editar
+    </button>
+    <button (click)="remove.emit(cliente.id)" class="ct-icon-btn" style="width: 30px; height: 30px; border: 1px solid var(--n-200); border-radius: 6px; color: var(--danger-500);" title="Excluir">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+    </button>
+  </div>
+</div>
+} <!-- end @else grid -->
