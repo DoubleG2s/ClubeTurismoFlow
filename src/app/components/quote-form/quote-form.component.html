@@ -55,6 +55,32 @@
         }
       </div>
 
+      <!-- FORMAS DE PAGAMENTO -->
+      <div class="flex flex-col group">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Parcelas no cartão</label>
+        <input type="number" formControlName="parcelas_cartao" min="1" max="24" step="1" placeholder="10"
+          class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+        @if (quoteForm.get('parcelas_cartao')?.touched && quoteForm.get('parcelas_cartao')?.invalid) {
+        <span class="text-[10px] text-red-500 mt-1 font-bold">
+          @if (quoteForm.get('parcelas_cartao')?.hasError('required')) { Campo obrigatório }
+          @else if (quoteForm.get('parcelas_cartao')?.hasError('pattern')) { Use apenas números inteiros, sem vírgula ou sinal negativo }
+          @else { Informe um valor entre 1 e 24 }
+        </span>
+        }
+      </div>
+      <div class="flex flex-col group">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Parcelas no boleto</label>
+        <input type="number" formControlName="parcelas_boleto" min="1" max="24" step="1" placeholder="12"
+          class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400">
+        @if (quoteForm.get('parcelas_boleto')?.touched && quoteForm.get('parcelas_boleto')?.invalid) {
+        <span class="text-[10px] text-red-500 mt-1 font-bold">
+          @if (quoteForm.get('parcelas_boleto')?.hasError('required')) { Campo obrigatório }
+          @else if (quoteForm.get('parcelas_boleto')?.hasError('pattern')) { Use apenas números inteiros, sem vírgula ou sinal negativo }
+          @else { Informe um valor entre 1 e 24 }
+        </span>
+        }
+      </div>
+
     </div>
   </div>
 
@@ -67,8 +93,27 @@
       [class.text-slate-600]="activeOptionIndex() !== optIndex"
       [class.hover:bg-slate-200]="activeOptionIndex() !== optIndex"
       class="px-4 py-2 rounded-t-lg font-bold text-sm transition-all flex items-center gap-2">
-      Opção {{ optIndex + 1 }}
-      @if (quoteOptions.length > 1) {
+
+      @if (editingOptionIndex() === optIndex) {
+      <input type="text" appAutoFocusSelect maxlength="30" [attr.size]="Math.max(10, optionDisplayTitle(optIndex).length + 1)"
+        [value]="opt.get('title')?.value || ''"
+        (input)="onOptionTitleInput(optIndex, $event)"
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.preventDefault(); confirmOptionTitleEdit(optIndex)"
+        (keydown.escape)="$event.preventDefault(); cancelOptionTitleEdit(optIndex)"
+        (blur)="confirmOptionTitleEdit(optIndex)"
+        class="min-w-[120px] bg-white text-slate-900 rounded px-2 py-0.5 text-sm font-bold outline-none ring-2 ring-purple-400">
+      } @else {
+      <span>{{ optionDisplayTitle(optIndex) }}</span>
+      @if (activeOptionIndex() === optIndex) {
+      <span (click)="startEditOptionTitle(optIndex, $event)"
+        class="p-1 hover:bg-black/10 rounded-full transition-colors" title="Renomear opção">
+        <lucide-icon [img]="Pencil" class="w-3 h-3"></lucide-icon>
+      </span>
+      }
+      }
+
+      @if (quoteOptions.length > 1 && editingOptionIndex() !== optIndex) {
       <span (click)="removeQuoteOption(optIndex); $event.stopPropagation()"
         class="p-1 hover:bg-black/10 rounded-full transition-colors" title="Remover opção">
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -912,7 +912,7 @@
                 <div>
                   <p class="font-bold text-slate-800 mb-1 text-sm sm:text-base">Cartão de Crédito</p>
                   <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Em até <span
-                      class="font-bold text-blue-600">10x sem
+                      class="font-bold text-blue-600">{{ quote()?.parcelas_cartao || 10 }}x sem
                       juros</span> no cartão de crédito. É possível utilizar mais de um cartão ou cartão de terceiros
                     (mediante foto de documento).</p>
                 </div>
@@ -928,7 +928,7 @@
                 <div>
                   <p class="font-bold text-slate-800 mb-1 text-sm sm:text-base">Boleto Bancário</p>
                   <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">Parcelado em até <span
-                      class="font-bold text-blue-600">12x no boleto sem juros</span>
+                      class="font-bold text-blue-600">{{ quote()?.parcelas_boleto || 12 }}x no boleto sem juros</span>
                     (Sujeito à aprovação bancária e análise de score do CPF do titular da compra e viagem).</p>
                 </div>
               </div>

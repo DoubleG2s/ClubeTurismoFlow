@@ -1,19 +1,33 @@
-import { Component, EventEmitter, Input, Output, OnInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Directive, ElementRef, EventEmitter, Input, Output, OnInit, AfterViewInit, SimpleChanges, OnChanges, signal, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Quote, QuoteOption } from '../../models/quote';
 import { HotelService } from '../../services/hotel.service';
 import { Hotel } from '../../models/hotel';
 import { IataAirportInputComponent } from '../shared/iata-airport-input/iata-airport-input.component';
-import { LucideAngularModule, PlaneTakeoff, ClipboardPaste } from 'lucide-angular';
+import { LucideAngularModule, PlaneTakeoff, ClipboardPaste, Pencil } from 'lucide-angular';
 import { QuoteAiFillComponent, AiFillApplyEvent } from '../quote-ai-fill/quote-ai-fill.component';
 import { HotelFormComponent } from '../hotel-form/hotel-form.component';
 import { HotelFormSubmission } from '../hotel-form/hotel-form.types';
 
+const OPTION_TITLE_MAX_LENGTH = 30;
+
+@Directive({
+  selector: '[appAutoFocusSelect]',
+  standalone: true
+})
+export class AutoFocusSelectDirective implements AfterViewInit {
+  constructor(private el: ElementRef<HTMLInputElement>) {}
+  ngAfterViewInit() {
+    const input = this.el.nativeElement;
+    setTimeout(() => { input.focus(); input.select(); });
+  }
+}
+
 @Component({
   selector: 'app-quote-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IataAirportInputComponent, LucideAngularModule, QuoteAiFillComponent, HotelFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, IataAirportInputComponent, LucideAngularModule, QuoteAiFillComponent, HotelFormComponent, AutoFocusSelectDirective],
   templateUrl: './quote-form.component.html',
 })
 export class QuoteFormComponent implements OnInit, OnChanges {
@@ -31,11 +45,15 @@ export class QuoteFormComponent implements OnInit, OnChanges {
   isEditMode = signal(false);
   readonly PlaneTakeoff = PlaneTakeoff;
   readonly ClipboardPaste = ClipboardPaste;
+  readonly Pencil = Pencil;
+  readonly Math = Math;
 
   // States
   hotelService = inject(HotelService);
   activeHotelDropdownIndex = signal<{ optionIndex: number, hotelIndex: number } | null>(null);
   activeOptionIndex = signal<number>(0);
+  editingOptionIndex = signal<number | null>(null);
+  private optionTitleBackup = '';
   
   // Image Upload Feedbacks
   uploadingStates = signal<Record<string, boolean>>({});
@@ -66,6 +84,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       subtitle: [''],
       supplier: ['', Validators.required],
       discount_valid_until: [this.getDefaultDiscountDate(), [Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/), this.pastDateValidator()]],
+      parcelas_cartao: [10, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(24)]],
+      parcelas_boleto: [12, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(24)]],
       options: this.fb.array([])
     });
   }
@@ -121,6 +141,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         subtitle: this.quoteToEdit.subtitle,
         supplier: this.quoteToEdit.supplier,
         discount_valid_until: this.quoteToEdit.discount_valid_until || '',
+        parcelas_cartao: this.quoteToEdit.parcelas_cartao ?? 10,
+        parcelas_boleto: this.quoteToEdit.parcelas_boleto ?? 12,
       });
 
       this.quoteOptions.clear();
@@ -221,6 +243,35 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         this.activeOptionIndex.set(this.quoteOptions.length - 1);
       }
     }
+  }
+
+  optionDisplayTitle(optIndex: number): string {
+    const value = (this.quoteOptions.at(optIndex).get('title')?.value || '').trim();
+    return value || ('Opção ' + (optIndex + 1));
+  }
+
+  startEditOptionTitle(optIndex: number, event: Event) {
+    event.stopPropagation();
+    this.optionTitleBackup = this.quoteOptions.at(optIndex).get('title')?.value || '';
+    this.editingOptionIndex.set(optIndex);
+  }
+
+  onOptionTitleInput(optIndex: number, event: Event) {
+    const value = (event.target as HTMLInputElement).value.slice(0, OPTION_TITLE_MAX_LENGTH);
+    this.quoteOptions.at(optIndex).get('title')?.setValue(value);
+  }
+
+  confirmOptionTitleEdit(optIndex: number) {
+    if (this.editingOptionIndex() !== optIndex) return;
+    const control = this.quoteOptions.at(optIndex).get('title');
+    const trimmed = ((control?.value || '') as string).trim().slice(0, OPTION_TITLE_MAX_LENGTH);
+    control?.setValue(trimmed || this.optionTitleBackup);
+    this.editingOptionIndex.set(null);
+  }
+
+  cancelOptionTitleEdit(optIndex: number) {
+    this.quoteOptions.at(optIndex).get('title')?.setValue(this.optionTitleBackup);
+    this.editingOptionIndex.set(null);
   }
 
   getHotelOptions(optionIndex: number): FormArray {
@@ -440,6 +491,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
       subtitle: source.subtitle || '',
       supplier: source.supplier || '',
       discount_valid_until: this.getDefaultDiscountDate(),
+      parcelas_cartao: source.parcelas_cartao ?? 10,
+      parcelas_boleto: source.parcelas_boleto ?? 12,
     });
     this.quoteOptions.clear();
     if (source.options && source.options.length > 0) {
@@ -547,6 +600,8 @@ export class QuoteFormComponent implements OnInit, OnChanges {
         subtitle: formValue.subtitle,
         supplier: formValue.supplier,
         discount_valid_until: formValue.discount_valid_until || null,
+        parcelas_cartao: Number(formValue.parcelas_cartao) || 10,
+        parcelas_boleto: Number(formValue.parcelas_boleto) || 12,
         options: processedOptions
       };
 

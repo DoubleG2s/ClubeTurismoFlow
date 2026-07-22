@@ -89,6 +89,10 @@ export interface Quote {
   // Validade do desconto (dd/mm/yyyy)
   discount_valid_until?: string;
 
+  // Formas de pagamento
+  parcelas_cartao?: number;
+  parcelas_boleto?: number;
+
   // Compartilhamento
   public_token?: string;
   is_public?: boolean;
