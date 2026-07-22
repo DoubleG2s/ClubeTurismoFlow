@@ -1,0 +1,41 @@
+<div>
+  <div class="flex flex-wrap gap-1.5" [class.mb-3]="list.length > 0" [class.mb-2]="list.length === 0">
+    @for (s of comuns; track s) {
+      <button type="button" class="ct-qf" [class.on-em]="isOn(s)" [class.cursor-default]="isObrigatorio(s)" [style.opacity]="isObrigatorio(s) ? 0.85 : 1" (click)="toggleComum(s)" [title]="isObrigatorio(s) ? 'Obrigatório para este tipo de produto' : ''">
+        @if (isObrigatorio(s)) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        } @else if (isOn(s)) {
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        }
+        {{ s }}
+      </button>
+    }
+  </div>
+
+  @if (list.length === 0) {
+    <p class="text-xs m-0" style="color: var(--n-500);">Selecione os serviços acima ou adicione um personalizado — cada um terá seu detalhamento.</p>
+  } @else {
+    <div class="flex flex-col gap-2">
+      @for (s of list; track $index) {
+        <div class="flex gap-2 items-start">
+          <input type="text" class="ct-input" style="flex: 0 0 34%;" placeholder="Serviço" [value]="s.nome" [disabled]="isObrigatorio(s.nome)" [title]="isObrigatorio(s.nome) ? 'Obrigatório para este tipo de produto' : ''" (input)="setNome($index, $any($event.target).value)">
+          <input type="text" class="ct-input flex-1" placeholder="Detalhe (ex: 7 diárias · meia pensão · voo direto…)" [value]="s.detalhe" (input)="setDetalhe($index, $any($event.target).value)">
+          @if (!isObrigatorio(s.nome)) {
+            <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 38px; height: 38px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="remove($index)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          } @else {
+            <div class="flex-shrink-0 flex items-center justify-center" style="width: 38px; height: 38px; color: var(--n-400);" title="Obrigatório para este tipo de produto">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <button type="button" class="inline-flex items-center gap-1.5 mt-2 text-xs font-bold" style="color: var(--brand-600);" (click)="addPersonalizado()">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    Adicionar serviço personalizado
+  </button>
+</div>

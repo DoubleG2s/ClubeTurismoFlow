@@ -118,6 +118,12 @@
               <span class="ct-sb-label">Gestão de Reservas</span>
             </button>
 
+            <button class="ct-sb-item" [class.active]="activeTab() === 'vendas'" title="Vendas"
+                    (click)="switchTab('vendas'); closeSidebar()">
+              <lucide-icon name="circle-dollar-sign" class="w-4 h-4 flex-shrink-0"></lucide-icon>
+              <span class="ct-sb-label">Vendas</span>
+            </button>
+
             <button class="ct-sb-item" [class.active]="activeTab() === 'cotacoes'" title="Cotações"
                     (click)="switchTab('cotacoes'); closeSidebar()">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none"
@@ -362,6 +368,10 @@
 
         @if (activeTab() === 'clientes') {
           <app-clientes-page></app-clientes-page>
+        }
+
+        @if (activeTab() === 'vendas') {
+          <app-vendas-page></app-vendas-page>
         }
 
         @if (activeTab() === 'admin' && authService.isAdmin()) {

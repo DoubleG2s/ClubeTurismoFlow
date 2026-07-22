@@ -39,6 +39,7 @@ import { FlightsPageComponent } from '@features/flights/flights-page.component';
 import { HotelsPageComponent } from '@features/hotels/hotels-page.component';
 import { QuotesPageComponent } from '@features/quotes/quotes-page.component';
 import { ClientesPageComponent } from '@features/clientes/clientes-page.component';
+import { VendasPageComponent } from '@features/vendas/vendas-page.component';
 import { ReservationsPageComponent } from '@features/reservations/reservations-page.component';
 import { SubscriptionComponent } from '@features/subscription/subscription';
 import { SettingsPageComponent } from '@features/settings/settings-page.component';
@@ -74,6 +75,7 @@ import { animate } from 'motion';
     HotelsPageComponent,
     QuotesPageComponent,
     ClientesPageComponent,
+    VendasPageComponent,
     ReservationsPageComponent,
     SubscriptionComponent,
     QuoteProposalComponent,
@@ -146,6 +148,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     const map: Record<AppTab, string> = {
       voos: 'Voos',
       reservas: 'Gestão de Reservas',
+      vendas: 'Vendas',
       cotacoes: 'Cotações',
       hotel: 'Hotel',
       clientes: 'Clientes',

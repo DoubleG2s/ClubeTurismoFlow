@@ -1,0 +1,46 @@
+@if (value) {
+  <div class="flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+    <div class="min-w-0">
+      <div class="text-[13px] font-bold truncate" style="color: var(--brand-800);">{{ value.nome }}</div>
+      <div class="text-[11px] font-mono" style="color: var(--brand-700);">{{ value.cpf || 'CPF não informado' }}{{ value.nascimento ? ' · ' + value.nascimento : '' }}</div>
+    </div>
+    <button type="button" class="flex-shrink-0" style="color: var(--brand-600);" (click)="clear()" title="Trocar cliente">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
+  </div>
+} @else {
+  <div class="relative">
+    <input type="text" class="ct-input" [placeholder]="placeholder" [value]="query()"
+      (focus)="open.set(true)" (input)="onQueryInput($event)">
+    @if (open()) {
+      <div class="absolute z-20 top-[calc(100%+4px)] left-0 right-0 rounded-lg p-1.5 max-h-60 overflow-auto" style="background: var(--n-0); border: 1px solid var(--n-200); box-shadow: var(--sh-pop);">
+        @if (matches().length > 0) {
+          @for (c of matches(); track c.id) {
+            <div class="flex flex-col gap-0.5 px-2.5 py-2 rounded-md cursor-pointer hover:bg-[var(--n-50)]" (click)="pick(c)">
+              <span class="text-[12.5px] font-bold" style="color: var(--n-900);">{{ c.nome }}</span>
+              <span class="text-[11px] font-mono" style="color: var(--n-500);">{{ c.cpf }}</span>
+            </div>
+          }
+        } @else {
+          <div class="px-2.5 py-2 text-xs" style="color: var(--n-500);">Nenhum cliente encontrado.</div>
+        }
+        @if (!creating()) {
+          <div class="flex items-center gap-1.5 px-2.5 py-2 rounded-md cursor-pointer text-xs font-bold mt-1" style="color: var(--brand-700); border-top: 1px solid var(--n-100);" (click)="startCreating()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Cadastrar novo cliente
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 gap-2 mt-2 p-2.5 rounded-lg" style="background: var(--n-0); border: 1px dashed var(--n-200);" (click)="$event.stopPropagation()">
+            <input type="text" class="ct-input" placeholder="Nome completo" [value]="novoNome()" (input)="novoNome.set($any($event.target).value)">
+            <input type="text" class="ct-input font-mono" placeholder="CPF" inputmode="numeric" [value]="novoCpf()" (input)="onNovoCpfInput($event)">
+            <input type="text" class="ct-input font-mono" placeholder="dd/mm/aaaa" inputmode="numeric" [value]="novoNascimento()" (input)="onNovoNascimentoInput($event)">
+            <button type="button" class="ct-btn ct-btn-primary ct-btn-sm justify-center" (click)="salvarNovo()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Adicionar e vincular
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

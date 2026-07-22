@@ -1,0 +1,11 @@
+<input
+  type="text"
+  class="ct-input font-mono"
+  inputmode="decimal"
+  [value]="shown"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  (focus)="onFocus()"
+  (blur)="onBlur()"
+  (input)="onInput($event)"
+  (paste)="onPaste($event)">

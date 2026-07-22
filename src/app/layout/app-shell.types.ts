@@ -1,4 +1,4 @@
-export type AppTab = 'voos' | 'reservas' | 'cotacoes' | 'hotel' | 'clientes' | 'admin' | 'assinatura' | 'configuracoes';
+export type AppTab = 'voos' | 'reservas' | 'vendas' | 'cotacoes' | 'hotel' | 'clientes' | 'admin' | 'assinatura' | 'configuracoes';
 export type ReservationSubTab = 'reservas' | 'creditos' | 'calendario';
 export type HotelSubTab = 'hoteis' | 'email';
 export type QuoteSubTab = 'cadastro' | 'calculadora';

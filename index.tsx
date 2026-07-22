@@ -8,6 +8,7 @@ import {
   Plane,
   Building2,
   Check,
+  CircleDollarSign,
   Eye,
   EyeOff,
   ImageUp,
@@ -27,7 +28,7 @@ bootstrapApplication(AppComponent, {
     provideZonelessChangeDetection(),
     { provide: LOCALE_ID, useValue: 'pt-BR' },
     provideAnimations(),
-    { provide: LUCIDE_ICONS, multi: true, useValue: new LucideIconProvider({ Plane, Building2, Check, Eye, EyeOff, ImageUp, Lock, Shield, Upload, User }) }
+    { provide: LUCIDE_ICONS, multi: true, useValue: new LucideIconProvider({ Plane, Building2, Check, CircleDollarSign, Eye, EyeOff, ImageUp, Lock, Shield, Upload, User }) }
   ]
 }).catch(err => console.error(err));
 

@@ -1,0 +1,768 @@
+<div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5 items-start">
+
+  <!-- Rail vertical -->
+  <nav class="flex flex-col gap-1">
+    @for (s of steps; track s.key; let i = $index) {
+      <button type="button" class="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-left transition-colors"
+        [style.background]="i === step() ? 'var(--n-0)' : 'transparent'"
+        [style.box-shadow]="i === step() ? 'var(--sh-1)' : 'none'"
+        (click)="goTo(i)">
+        <span class="w-8 h-8 rounded-[9px] flex items-center justify-center flex-shrink-0 transition-colors"
+          [style.background]="i === step() ? 'var(--brand-600)' : (stepDone(s.key) ? 'var(--brand-100)' : 'var(--n-100)')"
+          [style.color]="i === step() ? '#fff' : (stepDone(s.key) ? 'var(--brand-700)' : 'var(--n-500)')">
+          @if (stepDone(s.key) && i !== step()) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          } @else {
+            @switch (s.key) {
+              @case ('geral') { <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.4"/></svg> }
+              @case ('produto') { <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a2 2 0 0 0 0-4z"/><path d="M9 4v16"/></svg> }
+              @case ('pax') { <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg> }
+              @case ('valores') { <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9a3 3 0 0 0-3-2c-1.5 0-3 1-3 2.5S10.5 12 12 12s3 .5 3 2.5-1.5 2.5-3 2.5a3 3 0 0 1-3-2"/></svg> }
+              @case ('revisao') { <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> }
+            }
+          }
+        </span>
+        <span class="flex flex-col gap-0.5 min-w-0">
+          <span class="text-[12.5px] font-bold" [style.color]="i === step() ? 'var(--brand-800)' : 'var(--n-800)'">{{ s.label }}</span>
+          <span class="text-[10.5px] font-semibold" style="color: var(--n-400);">
+            {{ s.key === 'revisao' ? 'Conferir e salvar' : (stepDone(s.key) ? 'Completa' : (stepMissingCount(s.key) > 0 ? stepMissingCount(s.key) + ' obrigatório' + (stepMissingCount(s.key) > 1 ? 's' : '') : 'Opcional')) }}
+          </span>
+        </span>
+      </button>
+    }
+  </nav>
+
+  <!-- Conteúdo -->
+  <div class="flex flex-col gap-3.5 min-w-0">
+
+    <!-- Resumo vivo -->
+    <div class="ct-card overflow-hidden">
+      <div class="flex items-stretch cursor-pointer flex-wrap sm:flex-nowrap" (click)="summaryOpen.set(!summaryOpen())">
+        <div class="flex flex-col gap-1 px-6 py-3.5 min-w-[150px]" style="border-right: 1px solid var(--n-150);">
+          <span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-500);">Valor total</span>
+          <span class="text-[15px] font-extrabold font-mono" style="color: var(--n-900);">{{ brl(valorTotal()) }}</span>
+        </div>
+        <div class="flex flex-col gap-1 px-6 py-3.5 min-w-[170px]" style="border-right: 1px solid var(--n-150); background: var(--brand-50);">
+          <span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--brand-600);">Receita prevista</span>
+          <span class="text-[15px] font-extrabold font-mono" style="color: var(--brand-800);">{{ brl(receita()) }}</span>
+        </div>
+        <div class="hidden sm:flex flex-col gap-1 px-6 py-3.5 justify-center min-w-[170px]" style="border-right: 1px solid var(--n-150);">
+          <span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-500);">Pagamentos</span>
+          <span class="text-[12.5px] font-semibold" [style.color]="saldo().state === 'ok' ? 'var(--brand-700)' : saldo().state === 'pending' ? 'var(--warn-700)' : 'var(--danger-700)'">{{ saldo().label }}</span>
+        </div>
+        <div class="flex-1"></div>
+        <button type="button" class="px-4 flex items-center" style="color: var(--n-400);">
+          <span class="inline-flex transition-transform" [style.transform]="summaryOpen() ? 'rotate(180deg)' : 'none'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+          </span>
+        </button>
+      </div>
+      @if (summaryOpen()) {
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-1 px-4.5 py-3" style="border-top: 1px solid var(--n-100); background: var(--n-25);">
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Pagante</span><span class="text-xs font-semibold truncate" style="color: var(--n-800);">{{ draft().pagante ? draft().pagante!.nome : '—' }}</span></div>
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Produto</span><span class="text-xs font-semibold truncate" style="color: var(--n-800);">{{ draft().produto.tipo }}{{ draft().produto.fornecedor ? ' · ' + draft().produto.fornecedor : '' }}</span></div>
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Destino</span><span class="text-xs font-semibold truncate" style="color: var(--n-800);">{{ destinoResumo() || '—' }}</span></div>
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Período</span><span class="text-xs font-semibold font-mono truncate" style="color: var(--n-800);">{{ draft().produto.dataInicio && draft().produto.dataFim ? draft().produto.dataInicio + ' — ' + draft().produto.dataFim : '—' }}</span></div>
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Passageiros</span><span class="text-xs font-semibold font-mono truncate" style="color: var(--n-800);">{{ paxCount() || '—' }}</span></div>
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Vendedor</span><span class="text-xs font-semibold truncate" style="color: var(--n-800);">{{ draft().vendedor || '—' }}</span></div>
+          <div class="flex flex-col gap-0.5 py-1 min-w-0"><span class="text-[9.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Reserva</span><span class="text-xs font-semibold font-mono truncate" style="color: var(--n-800);">{{ draft().produto.numeroFornecedor || 'criada ao salvar' }}</span></div>
+        </div>
+      }
+    </div>
+
+    <!-- Card da etapa -->
+    <div class="ct-card p-6">
+      <div class="flex items-start justify-between gap-3 pb-4 mb-4.5" style="border-bottom: 1px solid var(--n-100);">
+        <div>
+          <h3 class="flex items-center gap-2 text-[17px] font-extrabold m-0" style="color: var(--n-900);">{{ steps[step()].label }}</h3>
+          <p class="text-xs m-0 mt-1" style="color: var(--n-500);">Campos com <span style="color: var(--brand-600); font-weight: 800;">*</span> são obrigatórios.</p>
+        </div>
+        @if (missing().length > 0) {
+          <span class="text-[11px] font-extrabold px-2.5 py-1 rounded-full whitespace-nowrap"
+            [style.background]="tried()[stepKey()] ? 'var(--danger-50)' : 'var(--n-100)'"
+            [style.color]="tried()[stepKey()] ? 'var(--danger-700)' : 'var(--n-600)'">
+            {{ missing().length }} obrigatório{{ missing().length > 1 ? 's' : '' }} pendente{{ missing().length > 1 ? 's' : '' }}
+          </span>
+        } @else {
+          <span class="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full whitespace-nowrap" style="background: var(--brand-100); color: var(--brand-700);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Etapa completa
+          </span>
+        }
+      </div>
+
+      @switch (stepKey()) {
+
+        <!-- ═══ Etapa 1 — Dados gerais ═══ -->
+        @case ('geral') {
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between gap-3.5 flex-wrap p-3.5 rounded-xl" style="background: var(--ai-50); border: 1px solid #e6dcfb;">
+              <div>
+                <h4 class="flex items-center gap-1.5 text-[13px] font-extrabold m-0" style="color: var(--n-800);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color: var(--ai-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+                  Preenchimento Inteligente
+                </h4>
+                <p class="text-xs m-0 mt-1" style="color: var(--n-500);">Importe o voucher da venda (PDF) para preencher reserva, produto e passageiros automaticamente.</p>
+              </div>
+              <button type="button" class="ct-btn" style="background: var(--n-0); color: var(--ai-700); border: 1px solid #e6dcfb; font-weight: 700;" (click)="importVoucherMock()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                Importar Voucher da Venda
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="ct-field" [class.miss]="tried()['geral'] && !draft().data">
+                <label class="ct-label">Data da venda *</label>
+                <input type="date" class="ct-input" [value]="dataISO" (change)="onDataChange($any($event.target).value)">
+              </div>
+              <div class="ct-field" [class.miss]="tried()['geral'] && !draft().vendedor">
+                <label class="ct-label">Vendedor *</label>
+                <select class="ct-select" [value]="draft().vendedor" (change)="set('vendedor', $any($event.target).value)">
+                  <option value="" [selected]="!draft().vendedor">Selecione...</option>
+                  @for (x of vendedores; track x) { <option [value]="x" [selected]="x === draft().vendedor">{{ x }}</option> }
+                </select>
+              </div>
+              <div class="ct-field">
+                <label class="ct-label">Status da venda</label>
+                <select class="ct-select" [value]="draft().status" (change)="set('status', $any($event.target).value)">
+                  @for (x of statusVenda; track x) { <option [value]="x" [selected]="x === draft().status">{{ x }}</option> }
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="ct-field" [class.miss]="tried()['geral'] && !draft().produto.fornecedor.trim()">
+                <label class="ct-label">Fornecedor *</label>
+                <input type="text" class="ct-input" list="wz-fornecedores-list" placeholder="Ex: Azul Viagens, CVC…" [value]="draft().produto.fornecedor" (input)="setProduto('fornecedor', $any($event.target).value)">
+              </div>
+              <div class="ct-field">
+                <label class="ct-label">Nº da reserva no fornecedor</label>
+                <div class="relative">
+                  <input type="text" class="ct-input font-mono" placeholder="Digite ou pesquise uma reserva…"
+                    [value]="draft().produto.numeroFornecedor"
+                    (focus)="resOpen.set(true)"
+                    (input)="onNumRes($any($event.target).value.toUpperCase())">
+                  @if (resOpen() && resMatches().length > 0) {
+                    <div class="absolute z-20 top-[calc(100%+4px)] left-0 right-0 rounded-lg p-1.5 max-h-60 overflow-auto" style="background: var(--n-0); border: 1px solid var(--n-200); box-shadow: var(--sh-pop);">
+                      <div class="px-2.5 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Reservas já cadastradas</div>
+                      @for (r of resMatches(); track r.id) {
+                        <div class="flex flex-col gap-0.5 px-2.5 py-2 rounded-md cursor-pointer hover:bg-[var(--n-50)]" (mousedown)="$event.preventDefault(); importReserva(r)">
+                          <div class="flex items-center gap-2">
+                            <span class="font-mono font-extrabold text-[13px]" style="color: var(--n-900);">{{ r.voucher || r.id }}</span>
+                            <span class="text-xs font-semibold" style="color: var(--n-700);">{{ r.destino }}</span>
+                            @if (r.temVenda) { <span class="ct-pill ct-pill-warn" style="font-size: 9px; padding: 1px 5px;">Já tem venda</span> }
+                          </div>
+                          <span class="text-[11px]" style="color: var(--n-500);">{{ r.passageiros.join(', ') }} · {{ r.ida }} — {{ r.volta }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="text-[11px] mt-1 block" style="color: var(--n-500);">Será o número da reserva da venda. Selecione uma reserva existente para importar os dados.</span>
+              </div>
+            </div>
+
+            <div class="ct-field" [class.miss]="tried()['geral'] && !draft().pagante">
+              <label class="ct-label">Pagante *</label>
+              <app-venda-cliente-autocomplete [value]="draft().pagante" (valueChange)="set('pagante', $event)" placeholder="Buscar pagante por nome ou CPF…"></app-venda-cliente-autocomplete>
+            </div>
+            <datalist id="wz-fornecedores-list">@for (f of fornecedores; track f) { <option [value]="f"></option> }</datalist>
+          </div>
+        }
+
+        <!-- ═══ Etapa 2 — Produto ═══ -->
+        @case ('produto') {
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-wrap gap-1.5">
+              @for (t of produtoTipos; track t) {
+                <button type="button" class="ct-qf" [class.on-em]="tipoProd === t" (click)="setProdutoTipo(t)">{{ t }}</button>
+              }
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              @if (tipoProd !== 'Transfer') {
+                <div class="ct-field" [class.miss]="tried()['produto'] && !draft().produto.destino.trim()">
+                  <label class="ct-label">Destino *</label>
+                  <input type="text" class="ct-input" placeholder="Digite o destino..." [value]="draft().produto.destino" (input)="setProduto('destino', $any($event.target).value)">
+                </div>
+              } @else {
+                <div class="ct-field" [class.miss]="tried()['produto'] && !draft().produto.origemTransfer.trim()">
+                  <label class="ct-label">Origem do transfer *</label>
+                  <input type="text" class="ct-input" placeholder="Ex: Aeroporto GRU" [value]="draft().produto.origemTransfer" (input)="setProduto('origemTransfer', $any($event.target).value)">
+                </div>
+                <div class="ct-field" [class.miss]="tried()['produto'] && !draft().produto.destinoTransfer.trim()">
+                  <label class="ct-label">Destino do transfer *</label>
+                  <input type="text" class="ct-input" placeholder="Ex: Hotel Ibis Copacabana" [value]="draft().produto.destinoTransfer" (input)="setProduto('destinoTransfer', $any($event.target).value)">
+                </div>
+              }
+              <div class="ct-field">
+                <label class="ct-label">Tipo da viagem</label>
+                <div class="ct-seg w-full">
+                  <button type="button" class="ct-seg-btn flex-1 justify-center" [class.active]="draft().produto.tipoViagem === 'Nacional'" (click)="setProduto('tipoViagem', 'Nacional')">Nacional</button>
+                  <button type="button" class="ct-seg-btn flex-1 justify-center" [class.active]="draft().produto.tipoViagem === 'Internacional'" (click)="setProduto('tipoViagem', 'Internacional')">Internacional</button>
+                </div>
+              </div>
+              <div class="ct-field" [class.miss]="tried()['produto'] && !draft().produto.dataInicio">
+                <label class="ct-label">Data de início *</label>
+                <input type="date" class="ct-input" [value]="produtoDataISO('dataInicio')" (change)="onProdutoDataChange('dataInicio', $any($event.target).value)">
+              </div>
+              <div class="ct-field" [class.miss]="tried()['produto'] && !draft().produto.dataFim">
+                <label class="ct-label">Data de fim *</label>
+                <input type="date" class="ct-input" [value]="produtoDataISO('dataFim')" (change)="onProdutoDataChange('dataFim', $any($event.target).value)">
+              </div>
+            </div>
+
+            @if (tipoProd !== 'Seguro' && tipoProd !== 'Transfer' && tipoProd !== 'Ingresso') {
+              <div class="ct-field">
+                <label class="ct-label">Serviços inclusos</label>
+                <app-venda-servicos-editor [servicos]="draft().produto.servicos" [servicosInclusos]="draft().produto.servicosInclusos" [ocultar]="servicosOcultos" [obrigatorios]="servicosObrigatorios" (commit)="onServicosCommit($event)"></app-venda-servicos-editor>
+              </div>
+            }
+
+            <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold self-start" style="color: var(--brand-600);" (click)="showOptProduto.set(!showOptProduto())">
+              <span class="inline-flex transition-transform" [style.transform]="showOptProduto() ? 'rotate(180deg)' : 'none'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+              {{ showOptProduto() ? 'Ocultar' : 'Mostrar' }} detalhes opcionais do {{ tipoProd }}
+            </button>
+
+            @if (showOptProduto()) {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="ct-field">
+                  <label class="ct-label">Representante</label>
+                  <input type="text" class="ct-input" placeholder="Opcional" [value]="draft().produto.representante" (input)="setProduto('representante', $any($event.target).value)">
+                </div>
+                @if (transporteOpts) {
+                  <div class="ct-field">
+                    <label class="ct-label">Transporte</label>
+                    <select class="ct-select" [value]="draft().produto.transporte" (change)="setProduto('transporte', $any($event.target).value)">
+                      <option value="" [selected]="!draft().produto.transporte">Selecione...</option>
+                      @for (t of transporteOpts; track t) { <option [value]="t" [selected]="t === draft().produto.transporte">{{ t }}</option> }
+                    </select>
+                  </div>
+                }
+                @if ((isVoo || tipoProd === 'Pacote') && servicoAtivo('Aéreo')) {
+                  <div class="ct-field">
+                    <label class="ct-label">Companhia aérea</label>
+                    <input type="text" class="ct-input" placeholder="Ex: Azul, Latam, Gol…" [value]="draft().produto.companhiaAerea" (input)="setProduto('companhiaAerea', $any($event.target).value)">
+                  </div>
+                  <div class="ct-field">
+                    <label class="ct-label">Código do voo</label>
+                    <input type="text" class="ct-input font-mono" placeholder="Ex: AD4471" [value]="draft().produto.numeroVoo" (input)="setProduto('numeroVoo', $any($event.target).value.toUpperCase())">
+                  </div>
+                }
+                @if (isVoo) {
+                  <div class="ct-field">
+                    <label class="ct-label">Origem</label>
+                    <input type="text" class="ct-input" placeholder="Ex: GRU - São Paulo" [value]="draft().produto.origem" (input)="setProduto('origem', $any($event.target).value)">
+                  </div>
+                  <div class="ct-field">
+                    <label class="ct-label">Bagagem inclusa</label>
+                    <select class="ct-select" [value]="draft().produto.bagagem" (change)="setProduto('bagagem', $any($event.target).value)">
+                      <option value="" [selected]="!draft().produto.bagagem">Selecione...</option>
+                      <option value="Sim — 23kg" [selected]="draft().produto.bagagem === 'Sim — 23kg'">Sim — 23kg</option>
+                      <option value="Sim — 32kg" [selected]="draft().produto.bagagem === 'Sim — 32kg'">Sim — 32kg</option>
+                      <option value="Apenas mão" [selected]="draft().produto.bagagem === 'Apenas mão'">Apenas bagagem de mão</option>
+                      <option value="Não" [selected]="draft().produto.bagagem === 'Não'">Não</option>
+                    </select>
+                  </div>
+                }
+                @if ((tipoProd === 'Hospedagem' || tipoProd === 'Pacote') && servicoAtivo('Hotel')) {
+                  <div class="ct-field">
+                    <label class="ct-label">Hotel / Pousada</label>
+                    <input type="text" class="ct-input" placeholder="Ex: Ibis Copacabana" [value]="draft().produto.hotel" (input)="setProduto('hotel', $any($event.target).value)">
+                  </div>
+                  <div class="ct-field">
+                    <label class="ct-label">Localizador do hotel</label>
+                    <input type="text" class="ct-input font-mono" placeholder="Opcional" [value]="draft().produto.localizadorHotel" (input)="setProduto('localizadorHotel', $any($event.target).value)">
+                  </div>
+                  <div class="ct-field">
+                    <label class="ct-label">Categoria do quarto</label>
+                    <input type="text" class="ct-input" placeholder="Ex: Standard, Suíte Master…" list="wz-cat-quarto-list" [value]="draft().produto.categoriaQuarto" (input)="setProduto('categoriaQuarto', $any($event.target).value)">
+                  </div>
+                  <div class="ct-field">
+                    <label class="ct-label">Regime de alimentação</label>
+                    <select class="ct-select" [value]="draft().produto.regimeAlimentacao" (change)="setProduto('regimeAlimentacao', $any($event.target).value)">
+                      <option value="" [selected]="!draft().produto.regimeAlimentacao">Selecione...</option>
+                      <option value="Sem pensão" [selected]="draft().produto.regimeAlimentacao === 'Sem pensão'">Sem pensão</option>
+                      <option value="Café da manhã" [selected]="draft().produto.regimeAlimentacao === 'Café da manhã'">Café da manhã</option>
+                      <option value="Meia pensão" [selected]="draft().produto.regimeAlimentacao === 'Meia pensão'">Meia pensão</option>
+                      <option value="Pensão completa" [selected]="draft().produto.regimeAlimentacao === 'Pensão completa'">Pensão completa</option>
+                      <option value="All inclusive" [selected]="draft().produto.regimeAlimentacao === 'All inclusive'">All inclusive</option>
+                    </select>
+                  </div>
+                }
+                @if (tipoProd === 'Cruzeiro') {
+                  <div class="ct-field"><label class="ct-label">Cia. marítima</label><input type="text" class="ct-input" placeholder="Ex: MSC, Costa…" [value]="draft().produto.ciaMaritima" (input)="setProduto('ciaMaritima', $any($event.target).value)"></div>
+                  <div class="ct-field"><label class="ct-label">Nome do navio</label><input type="text" class="ct-input" placeholder="Ex: MSC Seaview" [value]="draft().produto.nomeNavio" (input)="setProduto('nomeNavio', $any($event.target).value)"></div>
+                  <div class="ct-field"><label class="ct-label">Nº da cabine</label><input type="text" class="ct-input font-mono" placeholder="Ex: 11042" [value]="draft().produto.numeroCabine" (input)="setProduto('numeroCabine', $any($event.target).value)"></div>
+                  <div class="ct-field">
+                    <label class="ct-label">Categoria da cabine</label>
+                    <select class="ct-select" [value]="draft().produto.categoriaCabine" (change)="setProduto('categoriaCabine', $any($event.target).value)">
+                      <option value="" [selected]="!draft().produto.categoriaCabine">Selecione...</option>
+                      <option value="Interna" [selected]="draft().produto.categoriaCabine === 'Interna'">Interna</option><option value="Externa" [selected]="draft().produto.categoriaCabine === 'Externa'">Externa</option>
+                      <option value="Varanda" [selected]="draft().produto.categoriaCabine === 'Varanda'">Varanda</option><option value="Suíte" [selected]="draft().produto.categoriaCabine === 'Suíte'">Suíte</option>
+                    </select>
+                  </div>
+                  <div class="ct-field"><label class="ct-label">Porto de embarque</label><input type="text" class="ct-input" placeholder="Ex: Santos (SP)" [value]="draft().produto.portoEmbarque" (input)="setProduto('portoEmbarque', $any($event.target).value)"></div>
+                  <div class="ct-field"><label class="ct-label">Porto de desembarque</label><input type="text" class="ct-input" placeholder="Ex: Buenos Aires" [value]="draft().produto.portoDesembarque" (input)="setProduto('portoDesembarque', $any($event.target).value)"></div>
+                }
+                @if (tipoProd === 'Seguro') {
+                  <div class="ct-field md:col-span-2"><label class="ct-label">Seguradora</label><input type="text" class="ct-input" placeholder="Ex: Assist Card, GTA, Travel Ace…" [value]="draft().produto.seguradora" (input)="setProduto('seguradora', $any($event.target).value)"></div>
+                }
+              </div>
+            }
+            <datalist id="wz-cat-quarto-list"><option value="Standard"></option><option value="Superior"></option><option value="Luxo"></option><option value="Suíte"></option><option value="Suíte Master"></option><option value="Família"></option></datalist>
+          </div>
+        }
+
+        <!-- ═══ Etapa 3 — Passageiros ═══ -->
+        @case ('pax') {
+          <div class="flex flex-col gap-3.5">
+            @if (pagavaTambemViaja) {
+              <button type="button" class="flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-[12.5px] font-semibold text-left" style="background: var(--info-50); border: 1px solid #cfe0f7; color: var(--info-700);" (click)="copiaPagante()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+                O pagante <b>{{ draft().pagante?.nome }}</b> também viaja? Adicionar como passageiro
+              </button>
+            }
+
+            @if (nenhumPassageiro) {
+              <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-[12.5px] font-semibold" style="background: var(--danger-50); border: 1px solid #f0caca; color: var(--danger-700);">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>
+                Adicione ao menos um passageiro.
+              </div>
+            }
+
+            <div class="flex flex-col gap-2.5">
+              @for (p of draft().passageiros; track $index) {
+                <div class="flex gap-2 items-start">
+                  <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                    <div class="grid grid-cols-1 md:grid-cols-[2.2fr_1fr] gap-2">
+                      <app-venda-cliente-autocomplete [value]="paxAsCliente(p)" [initialName]="p.clienteId == null ? p.nome : ''" (valueChange)="setPax($index, $event)" placeholder="Buscar passageiro por nome ou CPF…"></app-venda-cliente-autocomplete>
+                      <app-venda-currency-input [value]="p.valorIndividual" placeholder="Valor individual" (valueChange)="setPaxValor($index, $event)"></app-venda-currency-input>
+                    </div>
+                    @if (p.clienteId != null) {
+                      <div class="text-[11px] flex items-center gap-1.5 px-2.5 py-1.5 rounded-md" style="color: var(--n-500); background: var(--n-100);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+                        CPF {{ p.cpf || '—' }} · Nasc. {{ p.nascimento || '—' }}
+                      </div>
+                    }
+                  </div>
+                  @if (draft().passageiros.length > 1) {
+                    <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 38px; height: 38px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="removePax($index)">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold self-start" style="color: var(--brand-600);" (click)="addPax()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Adicionar passageiro
+            </button>
+          </div>
+        }
+
+        <!-- ═══ Etapa 4 — Valores ═══ -->
+        @case ('valores') {
+          <div class="flex flex-col gap-4">
+            <!-- Alternador de modo de preenchimento -->
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div class="ct-seg">
+                <button type="button" class="ct-seg-btn" [class.active]="modo === 'unico'" (click)="setModo('unico')">Valor único</button>
+                <button type="button" class="ct-seg-btn" [class.active]="modo === 'servico'" (click)="setModo('servico')">Por serviço</button>
+              </div>
+              @if (modo === 'servico') {
+                <div class="ct-seg">
+                  <button type="button" class="ct-seg-btn" [class.active]="svcLayout() === 'cartoes'" (click)="svcLayout.set('cartoes')">Cartões</button>
+                  <button type="button" class="ct-seg-btn" [class.active]="svcLayout() === 'tabela'" (click)="svcLayout.set('tabela')">Tabela</button>
+                </div>
+              }
+              <span class="text-[11.5px]" style="color: var(--n-500);">{{ modo === 'unico' ? 'Um valor total e uma comissão para toda a venda.' : 'Cada serviço com seu valor e comissão — promocode só no pacote.' }}</span>
+            </div>
+
+            @if (modo === 'unico') {
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="ct-field" [class.miss]="tried()['valores'] && !(num(draft().valores.valorProduto) > 0)">
+                  <label class="ct-label">Valor do produto *</label>
+                  <app-venda-currency-input [value]="draft().valores.valorProduto" (valueChange)="setValores('valorProduto', $event)"></app-venda-currency-input>
+                </div>
+                <div class="ct-field"><label class="ct-label">Taxas</label><app-venda-currency-input [value]="draft().valores.taxas" (valueChange)="setValores('taxas', $event)"></app-venda-currency-input></div>
+                <div class="ct-field"><label class="ct-label">Desconto</label><app-venda-currency-input [value]="draft().valores.desconto" (valueChange)="setValores('desconto', $event)"></app-venda-currency-input></div>
+              </div>
+            } @else {
+              <!-- ═══ Modo "Por serviço" ═══ -->
+              <div class="flex flex-col gap-3.5">
+
+                <!-- Promocode Azul -->
+                @if (aceitaPromo) {
+                  <div class="flex flex-col gap-2.5 p-3.5 rounded-xl" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+                      <span class="text-xs font-extrabold" style="color: var(--brand-800);">Promocode Azul</span>
+                      <span class="text-[11px]" style="color: var(--brand-700); opacity: .85;">— incide apenas nos serviços marcados (Pacote aéreo + hotel). Seguro nunca é descontado.</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold" [style.background]="!draft().valores.promocode ? 'var(--brand-600)' : 'var(--n-0)'" [style.color]="!draft().valores.promocode ? '#fff' : 'var(--n-600)'" style="border: 1px solid var(--brand-200);" (click)="setPromocode('')">Sem promo</button>
+                      @for (p of promoAzulOpcoes; track p.codigo) {
+                        <button type="button" class="flex flex-col items-start gap-0.5 px-3 py-1.5 rounded-lg" style="border: 1px solid var(--brand-200); min-width: 78px;"
+                          [style.background]="draft().valores.promocode === p.codigo ? 'var(--brand-600)' : 'var(--n-0)'" (click)="setPromocode(p.codigo)">
+                          <span class="text-[12.5px] font-extrabold font-mono" [style.color]="draft().valores.promocode === p.codigo ? '#fff' : 'var(--brand-700)'">{{ p.codigo }}</span>
+                          <span class="text-[9.5px] font-semibold whitespace-nowrap" [style.color]="draft().valores.promocode === p.codigo ? 'rgba(255,255,255,.9)' : 'var(--n-500)'">−{{ p.desconto }}% cliente{{ p.reduzComissao ? ' · −' + p.reduzComissao + 'pp com.' : ' · comissão cheia' }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl" style="background: var(--n-50); border: 1px dashed var(--n-200);">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+                    <span class="text-xs" style="color: var(--n-500);">Promocodes disponíveis apenas para fornecedor <b>Azul Viagens</b>. Selecione-o em Dados gerais para habilitar.</span>
+                  </div>
+                }
+
+                <!-- Quick-add de serviços -->
+                <div>
+                  <label class="eyebrow flex items-center gap-1.5 mb-2" style="color: var(--n-500);">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Adicionar serviço
+                  </label>
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (s of sugestoesServico; track s) {
+                      <button type="button" class="ct-qf" (click)="addLinhaServico(s)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        {{ s }}
+                      </button>
+                    }
+                    <button type="button" class="ct-qf" [class.on-em]="true" (click)="addLinhaServico('')">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                      Personalizado
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Linhas de serviço -->
+                @if (itensServico.length === 0) {
+                  <div class="text-xs text-center p-3.5 rounded-xl" style="color: var(--n-500); border: 1px dashed var(--n-200); background: var(--n-25);">Nenhum serviço adicionado. Use os botões acima para começar.</div>
+                } @else if (svcLayout() === 'tabela') {
+                  <div class="rounded-2xl overflow-hidden" style="border: 1px solid var(--n-150);">
+                    @for (l of itensServico; track l.id; let i = $index) {
+                      <div class="p-3 grid grid-cols-1 md:grid-cols-[1.6fr_1fr_0.7fr_1fr_auto_auto] gap-2.5 items-center" [style.background]="calcLinha(l).on ? 'var(--brand-50)' : 'transparent'" [style.border-bottom]="i < itensServico.length - 1 ? '1px solid var(--n-100)' : 'none'">
+                        <div class="flex flex-col gap-1 min-w-0">
+                          <input type="text" class="ct-input" placeholder="Nome do serviço" [value]="l.nome" (input)="setLinhaNome(i, $any($event.target).value)">
+                          @if (calcLinha(l).on) { <span class="text-[10px] font-semibold" style="color: var(--brand-700);">cliente {{ brl(calcLinha(l).valorCliente) }} · com. {{ pct(calcLinha(l).pctEfetivo) }}</span> }
+                        </div>
+                        <app-venda-currency-input [value]="l.valor" placeholder="R$ 0,00" (valueChange)="setLinhaValor(i, $event)"></app-venda-currency-input>
+                        <input type="number" step="0.1" class="ct-input font-mono" placeholder="0" [value]="l.percentComissao || ''" (input)="setLinhaPct(i, $any($event.target).value)">
+                        <app-venda-currency-input [value]="l.valorComissao" placeholder="R$ 0,00" (valueChange)="setLinhaValorCom(i, $event)"></app-venda-currency-input>
+                        <button type="button" class="px-2.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap" style="border: 1px solid var(--n-200);"
+                          [style.background]="l.aplicaPromo ? 'var(--brand-100)' : 'var(--n-0)'" [style.color]="l.aplicaPromo ? 'var(--brand-700)' : 'var(--n-500)'"
+                          [disabled]="isSeguroNome(l.nome)" [style.opacity]="isSeguroNome(l.nome) ? 0.45 : 1" [title]="isSeguroNome(l.nome) ? 'Seguro nunca recebe promo' : 'Aplicar promocode a este serviço'" (click)="toggleLinhaPromo(i)">
+                          <span class="w-1.5 h-1.5 rounded-full" style="background: currentColor;"></span>{{ l.aplicaPromo ? 'Promo: Sim' : 'Promo: Não' }}
+                        </button>
+                        <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 34px; height: 34px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="removeLinhaServico(i)">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="flex flex-col gap-3">
+                    @for (l of itensServico; track l.id; let i = $index) {
+                      <div class="p-3.5 rounded-2xl flex flex-col gap-3" [style.border]="calcLinha(l).on ? '1px solid var(--brand-300)' : '1px solid var(--n-150)'" [style.background]="calcLinha(l).on ? 'var(--brand-50)' : 'var(--n-0)'">
+                        <div class="flex items-center gap-2.5">
+                          <input type="text" class="ct-input flex-1 font-bold" placeholder="Nome do serviço" [value]="l.nome" (input)="setLinhaNome(i, $any($event.target).value)">
+                          <button type="button" class="px-2.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap" style="border: 1px solid var(--n-200);"
+                            [style.background]="l.aplicaPromo ? 'var(--brand-100)' : 'var(--n-0)'" [style.color]="l.aplicaPromo ? 'var(--brand-700)' : 'var(--n-500)'"
+                            [disabled]="isSeguroNome(l.nome)" [style.opacity]="isSeguroNome(l.nome) ? 0.45 : 1" [title]="isSeguroNome(l.nome) ? 'Seguro nunca recebe promo' : 'Aplicar promocode Azul'" (click)="toggleLinhaPromo(i)">
+                            <span class="w-1.5 h-1.5 rounded-full" style="background: currentColor;"></span> Promo Azul
+                          </button>
+                          <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 34px; height: 34px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="removeLinhaServico(i)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                          </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                          <div class="ct-field"><label class="ct-label">Valor do serviço</label><app-venda-currency-input [value]="l.valor" placeholder="R$ 0,00" (valueChange)="setLinhaValor(i, $event)"></app-venda-currency-input></div>
+                          <div class="ct-field"><label class="ct-label">Comissão %</label><input type="number" step="0.1" class="ct-input font-mono" placeholder="0" [value]="l.percentComissao || ''" (input)="setLinhaPct(i, $any($event.target).value)"></div>
+                          <div class="ct-field"><label class="ct-label">Comissão R$</label><app-venda-currency-input [value]="l.valorComissao" placeholder="R$ 0,00" (valueChange)="setLinhaValorCom(i, $event)"></app-venda-currency-input></div>
+                        </div>
+                        @if (calcLinha(l).on) {
+                          <div class="flex items-center gap-2.5 flex-wrap px-3 py-2 rounded-lg text-[11.5px] font-semibold" style="background: var(--brand-100); color: var(--brand-800);">
+                            <span class="font-mono font-extrabold">{{ promoAtiva?.codigo }}</span>
+                            <span style="color: var(--brand-400);">·</span>
+                            <span>Cliente <span class="line-through" style="opacity: .7;">{{ brl(calcLinha(l).valor) }}</span> → <b>{{ brl(calcLinha(l).valorCliente) }}</b></span>
+                            <span style="color: var(--brand-400);">·</span>
+                            <span>Comissão @if (promoAtiva?.reduzComissao) { <span class="line-through" style="opacity: .7;">{{ pct(calcLinha(l).pctBase) }}</span> → } <b>{{ pct(calcLinha(l).pctEfetivo) }}</b> = <b>{{ brl(calcLinha(l).comissao) }}</b></span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+
+                <!-- Resumo dos serviços -->
+                @if (itensServico.length > 0) {
+                  <div class="flex flex-col gap-1.5 p-4 rounded-2xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+                    <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>Soma bruta dos serviços</span><b class="font-mono" style="color: var(--n-900);">{{ brl(somaServicosCalc.bruto) }}</b></div>
+                    @if (somaServicosCalc.descontoPromo > 0) {
+                      <div class="flex justify-between text-[12.5px]" style="color: var(--warn-700);"><span>− Desconto promocode {{ draft().valores.promocode }}</span><b class="font-mono">− {{ brl(somaServicosCalc.descontoPromo) }}</b></div>
+                    }
+                    <div class="flex justify-between text-[13px] font-extrabold pt-1.5" style="color: var(--brand-800); border-top: 1px solid var(--n-150);"><span>Valor dos serviços ao cliente</span><b class="font-mono">{{ brl(somaServicosCalc.cliente) }}</b></div>
+                    <div class="flex justify-between text-[12.5px]" style="color: var(--brand-700);"><span>Comissão total (soma dos serviços)</span><b class="font-mono">{{ brl(somaServicosCalc.comissao) }}</b></div>
+                  </div>
+                }
+              </div>
+            }
+
+            <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold self-start" style="color: var(--brand-600);" (click)="showOptValores.set(!showOptValores())">
+              <span class="inline-flex transition-transform" [style.transform]="showOptValores() ? 'rotate(180deg)' : 'none'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+              {{ showOptValores() ? 'Ocultar' : 'Mostrar' }} {{ modo === 'servico' ? 'taxas, RAV e desconto' : 'outras taxas e RAV' }}
+            </button>
+            @if (showOptValores()) {
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                @if (modo === 'servico') {
+                  <div class="ct-field"><label class="ct-label">Taxas</label><app-venda-currency-input [value]="draft().valores.taxas" (valueChange)="setValores('taxas', $event)"></app-venda-currency-input></div>
+                }
+                <div class="ct-field"><label class="ct-label">Outras taxas</label><app-venda-currency-input [value]="draft().valores.outrasTaxas" (valueChange)="setValores('outrasTaxas', $event)"></app-venda-currency-input></div>
+                <div class="ct-field"><label class="ct-label">RAV</label><app-venda-currency-input [value]="draft().valores.rav" (valueChange)="setValores('rav', $event)"></app-venda-currency-input></div>
+                <div class="ct-field"><label class="ct-label">Taxa RAV (%)</label><input type="number" step="0.1" class="ct-input font-mono" [value]="draft().valores.taxaRav || ''" (input)="setValores('taxaRav', num($any($event.target).value))"></div>
+                @if (modo === 'servico') {
+                  <div class="ct-field"><label class="ct-label">Desconto adicional</label><app-venda-currency-input [value]="draft().valores.desconto" (valueChange)="setValores('desconto', $event)"></app-venda-currency-input></div>
+                }
+              </div>
+            }
+
+            <div class="flex flex-col gap-2 p-4 rounded-2xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+              <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>{{ modo === 'servico' ? 'Serviços (bruto)' : 'Valor do produto' }}</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.valorProduto) }}</b></div>
+              @if (num(draft().valores.descontoPromo) > 0) { <div class="flex justify-between text-[12.5px]" style="color: var(--warn-700);"><span>− Promo {{ draft().valores.promocode }}</span><b class="font-mono">− {{ brl(draft().valores.descontoPromo) }}</b></div> }
+              <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>+ Taxas</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.taxas + draft().valores.outrasTaxas) }}</b></div>
+              @if (num(draft().valores.rav) > 0) { <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>+ RAV</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.rav) }}</b></div> }
+              @if (num(draft().valores.desconto) > 0) { <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>− Desconto</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.desconto) }}</b></div> }
+              <div class="flex justify-between text-base font-extrabold pt-2.5" style="color: var(--brand-800); border-top: 1px solid var(--n-150);"><span>Valor total da venda</span><b class="font-mono">{{ brl(valorTotal()) }}</b></div>
+            </div>
+
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="eyebrow" style="color: var(--n-500); margin: 0;">Pagamentos</span>
+              <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold" style="color: var(--brand-600);" (click)="addPag()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Adicionar
+              </button>
+            </div>
+            <div class="flex flex-col gap-2.5">
+              @for (p of draft().pagamentos; track $index) {
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-2 items-end p-3 rounded-[10px]" style="background: var(--n-25); border: 1px solid var(--n-150);">
+                  <div class="ct-field"><label class="ct-label">Forma</label>
+                    <select class="ct-select" [value]="p.forma" (change)="onFormaChange($index, $any($event.target).value)">
+                      @for (f of formasPagamento; track f) { <option [value]="f" [selected]="f === p.forma">{{ f }}</option> }
+                    </select>
+                  </div>
+                  <div class="ct-field"><label class="ct-label">Informações</label>
+                    <input type="text" class="ct-input" [placeholder]="p.forma === 'Pontos TudoAzul' ? 'Ex: 85.000 pontos' : 'Opcional'" [value]="p.info" (input)="setPag($index, 'info', $any($event.target).value)">
+                  </div>
+                  <div class="ct-field"><label class="ct-label">Parcelas</label>
+                    @if (semParcelas(p.forma)) {
+                      <input type="text" class="ct-input font-mono" value="À vista" disabled style="background: var(--n-100); color: var(--n-500);">
+                    } @else {
+                      <input type="number" min="1" class="ct-input font-mono" [value]="p.parcelas" (input)="setPag($index, 'parcelas', num($any($event.target).value) || 1)">
+                    }
+                  </div>
+                  <div class="ct-field"><label class="ct-label">Vencimento</label>
+                    @if (comVencimento(p.forma)) {
+                      <input type="date" class="ct-input" [value]="pagVencimentoISO(p)" (change)="onPagVencimentoChange($index, $any($event.target).value)">
+                    } @else {
+                      <input type="text" class="ct-input font-mono" value="Sem vencimento" disabled style="background: var(--n-100); color: var(--n-500);">
+                    }
+                  </div>
+                  <div class="ct-field"><label class="ct-label">Valor</label><app-venda-currency-input [value]="p.valor" (valueChange)="setPag($index, 'valor', $event)"></app-venda-currency-input></div>
+                  <div class="flex items-end gap-1.5">
+                    <div class="ct-field flex-1"><label class="ct-label">Status</label>
+                      <select class="ct-select" [value]="p.status" (change)="setPag($index, 'status', $any($event.target).value)">
+                        @for (s of statusPagamento; track s) { <option [value]="s" [selected]="s === p.status">{{ s }}</option> }
+                      </select>
+                    </div>
+                    @if (draft().pagamentos.length > 1) {
+                      <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 38px; height: 38px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="removePag($index)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="flex items-center justify-between gap-2.5 px-3.5 py-3 rounded-[10px] text-[13px] font-bold"
+              [style.background]="saldo().state === 'ok' ? 'var(--brand-50)' : saldo().state === 'pending' ? 'var(--warn-50)' : 'var(--danger-50)'"
+              [style.color]="saldo().state === 'ok' ? 'var(--brand-700)' : saldo().state === 'pending' ? 'var(--warn-700)' : 'var(--danger-700)'">
+              <span>{{ saldo().label }}</span>
+              <span class="font-mono">{{ brl(somaPag) }} de {{ brl(valorTotal()) }}</span>
+            </div>
+
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="eyebrow" style="color: var(--n-500); margin: 0;">Comissão e Receita</span>
+            </div>
+            @if (modo === 'unico') {
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="ct-field"><label class="ct-label">Base de cálculo</label><input type="text" class="ct-input font-mono" [value]="brl(baseCalculo)" disabled style="background: var(--n-100); color: var(--n-600);"></div>
+                <div class="ct-field"><label class="ct-label">% Comissão do fornecedor</label><input type="number" step="0.1" class="ct-input font-mono" [value]="draft().comissao.percentualFornecedor || ''" (input)="onPercent($any($event.target).value)"></div>
+                <div class="ct-field"><label class="ct-label">Valor da comissão</label><app-venda-currency-input [value]="draft().comissao.valorComissaoFornecedor" (valueChange)="onValorComissao($event)"></app-venda-currency-input></div>
+              </div>
+            } @else {
+              <div class="flex flex-col gap-1.5 p-4 rounded-2xl" style="background: var(--n-0); border: 1px solid var(--n-150);">
+                <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>Comissão somada dos serviços</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().comissao.valorComissaoFornecedor) }}</b></div>
+                <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>Comissão média efetiva</span><b class="font-mono" style="color: var(--n-900);">{{ pct(draft().comissao.percentualFornecedor) }}</b></div>
+              </div>
+            }
+            <div class="flex items-center justify-between gap-2.5 p-4 rounded-2xl" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wide" style="color: var(--brand-700);">Receita prevista da agência</div>
+                <div class="text-[11px] mt-0.5" style="color: var(--brand-700); opacity: .8;">Comissão + (RAV − Taxa RAV)</div>
+              </div>
+              <div class="text-xl font-extrabold font-mono" style="color: var(--brand-800);">{{ brl(receita()) }}</div>
+            </div>
+          </div>
+        }
+
+        <!-- ═══ Etapa 5 — Revisão ═══ -->
+        @case ('revisao') {
+          <div class="flex flex-col gap-4">
+            <div class="grid grid-cols-3 gap-2.5">
+              <div class="p-3.5 rounded-xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+                <div class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color: var(--n-500);">Valor total</div>
+                <div class="text-base font-extrabold font-mono" style="color: var(--n-900);">{{ brl(valorTotal()) }}</div>
+              </div>
+              <div class="p-3.5 rounded-xl" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+                <div class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color: var(--brand-600);">Receita prevista</div>
+                <div class="text-base font-extrabold font-mono" style="color: var(--brand-800);">{{ brl(receita()) }}</div>
+              </div>
+              <div class="p-3.5 rounded-xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+                <div class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color: var(--n-500);">Pagamentos</div>
+                <div class="text-base font-extrabold font-mono" [style.color]="saldo().state === 'ok' ? 'var(--brand-700)' : saldo().state === 'pending' ? 'var(--warn-700)' : 'var(--danger-700)'">{{ brl(somaPag) }}</div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl" style="border: 1px solid var(--n-150);">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide" style="color: var(--n-600);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.4"/></svg>
+                  Dados gerais
+                </span>
+                <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold" style="color: var(--brand-600);" (click)="goTo(0)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Editar
+                </button>
+              </div>
+              <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Data</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ draft().data }}</span></div>
+              <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Vendedor</span><span class="font-semibold" style="color: var(--n-900);">{{ draft().vendedor }}</span></div>
+              <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Status</span><span class="font-semibold" style="color: var(--n-900);">{{ draft().status }}</span></div>
+              <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Pagante</span><span class="font-semibold" style="color: var(--n-900);">{{ draft().pagante ? draft().pagante!.nome : '—' }}</span></div>
+              <div class="flex justify-between gap-3 py-1.5 text-[12.5px]"><span style="color: var(--n-500);">Reserva</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ draft().produto.numeroFornecedor || 'Será criada automaticamente' }}</span></div>
+            </div>
+
+            <div class="p-3.5 rounded-xl" style="border: 1px solid var(--n-150);">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide" style="color: var(--n-600);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a2 2 0 0 0 0-4z"/><path d="M9 4v16"/></svg>
+                  Produto — {{ draft().produto.tipo }}
+                </span>
+                <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold" style="color: var(--brand-600);" (click)="goTo(1)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Editar
+                </button>
+              </div>
+              @if (draft().produto.fornecedor) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Fornecedor</span><span class="font-semibold" style="color: var(--n-900);">{{ draft().produto.fornecedor }}</span></div> }
+              @if (draft().produto.numeroFornecedor) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Nº fornecedor</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ draft().produto.numeroFornecedor }}</span></div> }
+              @if (destinoResumo()) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Destino</span><span class="font-semibold" style="color: var(--n-900);">{{ destinoResumo() }}</span></div> }
+              @if (draft().produto.dataInicio && draft().produto.dataFim) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Período</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ draft().produto.dataInicio }} — {{ draft().produto.dataFim }}</span></div> }
+              @if (draft().produto.hotel) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Hotel</span><span class="font-semibold" style="color: var(--n-900);">{{ draft().produto.hotel }}</span></div> }
+              @if (servicosList.length > 0) {
+                @for (s of servicosList; track $index) {
+                  <div class="flex justify-between gap-3 py-1.5 text-[12.5px]"><span style="color: var(--n-500);">{{ $index === 0 ? 'Serviços' : '' }}</span><span class="font-semibold text-right" style="color: var(--n-900);">{{ s.nome }}{{ s.detalhe ? ' — ' + s.detalhe : '' }}</span></div>
+                }
+              }
+            </div>
+
+            <div class="p-3.5 rounded-xl" style="border: 1px solid var(--n-150);">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide" style="color: var(--n-600);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+                  Passageiros ({{ passageirosPreenchidos.length }})
+                </span>
+                <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold" style="color: var(--brand-600);" (click)="goTo(2)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Editar
+                </button>
+              </div>
+              @for (p of passageirosPreenchidos; track $index) {
+                <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" [style.border-bottom]="$index < passageirosPreenchidos.length - 1 ? '1px dashed var(--n-100)' : 'none'"><span style="color: var(--n-500);">{{ p.nome }}</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ brl(p.valorIndividual) }}</span></div>
+              }
+            </div>
+
+            <div class="p-3.5 rounded-xl" style="border: 1px solid var(--n-150);">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide" style="color: var(--n-600);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9a3 3 0 0 0-3-2c-1.5 0-3 1-3 2.5S10.5 12 12 12s3 .5 3 2.5-1.5 2.5-3 2.5a3 3 0 0 1-3-2"/></svg>
+                  Valores e pagamentos
+                </span>
+                <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold" style="color: var(--brand-600);" (click)="goTo(3)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Editar
+                </button>
+              </div>
+              @if (modo === 'servico') {
+                @for (l of itensServico; track l.id) {
+                  <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">{{ l.nome || 'Serviço' }}</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ brl(calcLinha(l).valorCliente) }}{{ calcLinha(l).pctEfetivo > 0 ? ' · com. ' + pct(calcLinha(l).pctEfetivo) : '' }}</span></div>
+                }
+                @if (num(draft().valores.descontoPromo) > 0) {
+                  <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Promo {{ draft().valores.promocode }}</span><span class="font-mono font-semibold" style="color: var(--n-900);">− {{ brl(draft().valores.descontoPromo) }}</span></div>
+                }
+              } @else {
+                <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Valor do produto</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ brl(draft().valores.valorProduto) }}</span></div>
+              }
+              @if (num(draft().valores.taxas) > 0) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Taxas</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ brl(draft().valores.taxas) }}</span></div> }
+              @if (num(draft().valores.desconto) > 0) { <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">Desconto</span><span class="font-mono font-semibold" style="color: var(--n-900);">− {{ brl(draft().valores.desconto) }}</span></div> }
+              @for (p of draft().pagamentos; track $index) {
+                <div class="flex justify-between gap-3 py-1.5 text-[12.5px]" style="border-bottom: 1px dashed var(--n-100);"><span style="color: var(--n-500);">{{ p.forma }}{{ p.parcelas > 1 ? ' · ' + p.parcelas + 'x' : '' }}</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ brl(p.valor) }} · {{ p.status }}</span></div>
+              }
+              <div class="flex justify-between gap-3 py-1.5 text-[12.5px]"><span style="color: var(--n-500);">Comissão</span><span class="font-mono font-semibold" style="color: var(--n-900);">{{ draft().comissao.percentualFornecedor }}% = {{ brl(draft().comissao.valorComissaoFornecedor) }}</span></div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2.5 px-3.5 py-3 rounded-[10px] text-[13px] font-bold"
+              [style.background]="saldo().state === 'ok' ? 'var(--brand-50)' : saldo().state === 'pending' ? 'var(--warn-50)' : 'var(--danger-50)'"
+              [style.color]="saldo().state === 'ok' ? 'var(--brand-700)' : saldo().state === 'pending' ? 'var(--warn-700)' : 'var(--danger-700)'">
+              <span>{{ saldo().label }}</span>
+              <span class="font-mono">{{ brl(somaPag) }} de {{ brl(valorTotal()) }}</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    @if (tried()[stepKey()] && missing().length > 0) {
+      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-[12.5px] font-semibold" style="background: var(--danger-50); border: 1px solid #f0caca; color: var(--danger-700);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>
+        Pendente: {{ missing().join(', ') }}
+      </div>
+    }
+
+    <!-- Navegação -->
+    <div class="flex items-center justify-between">
+      <button type="button" class="ct-btn ct-btn-ghost" [style.visibility]="step() === 0 ? 'hidden' : 'visible'" (click)="prev()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        Voltar
+      </button>
+      <span class="text-xs font-semibold" style="color: var(--n-400);">Etapa {{ step() + 1 }} de {{ steps.length }}</span>
+      @if (isLast()) {
+        <button type="button" class="ct-btn ct-btn-primary" (click)="salvar()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+          Salvar venda
+        </button>
+      } @else {
+        <button type="button" class="ct-btn ct-btn-primary" (click)="next()">
+          Continuar
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      }
+    </div>
+  </div>
+</div>

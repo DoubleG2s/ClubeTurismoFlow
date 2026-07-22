@@ -1,0 +1,395 @@
+<div class="flex flex-col gap-6">
+
+  <!-- 0 — Vincular Reserva -->
+  <div class="rounded-2xl p-4" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+    <h4 class="flex items-center gap-2 text-[13px] font-extrabold m-0 mb-3.5" style="color: var(--brand-800);">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>
+      Vincular Reserva
+    </h4>
+
+    <div class="flex items-center justify-between gap-3.5 flex-wrap px-3.5 py-3 mb-3.5 rounded-[10px]" style="background: var(--n-0); border: 1px solid var(--n-200);">
+      <div>
+        <div class="flex items-center gap-1.5 text-xs font-extrabold" style="color: var(--n-800);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--ai-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+          Preenchimento Inteligente
+        </div>
+        <div class="text-[11px] mt-0.5" style="color: var(--n-500);">Faça upload de um voucher (PDF) para extrair e preencher os dados automaticamente.</div>
+      </div>
+      <button type="button" class="ct-btn" style="background: var(--ai-50); color: var(--ai-700); border: 1px solid #e6dcfb; font-weight: 700;" title="Em breve">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        Importar Voucher PDF
+      </button>
+    </div>
+
+    @if (draft().numeroReserva) {
+      <div class="flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg" style="background: var(--n-0); border: 1px solid var(--brand-200);">
+        <div class="min-w-0">
+          <div class="text-[13px]" style="color: var(--n-900);">Reserva vinculada: <span class="font-mono font-extrabold">{{ draft().numeroReserva }}</span></div>
+          <div class="text-xs" style="color: var(--n-500);">{{ draft().produto.destino }} · {{ draft().produto.dataInicio }} — {{ draft().produto.dataFim }}</div>
+        </div>
+        <button type="button" style="color: var(--brand-600);" (click)="desvincularReserva()" title="Desvincular">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+      </div>
+    } @else {
+      <p class="text-xs m-0 mb-2.5" style="color: var(--brand-700); line-height: 1.4;">Selecione uma reserva existente ou preencha os dados abaixo — uma reserva será criada automaticamente ao salvar.</p>
+      <div class="relative">
+        <div class="relative">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--n-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="text" class="ct-input pl-9" placeholder="Buscar por número de reserva, destino ou passageiro…"
+            [value]="resQuery()" (focus)="resOpen.set(true)" (input)="resQuery.set($any($event.target).value); resOpen.set(true)">
+        </div>
+        @if (resOpen()) {
+          <div class="absolute z-20 top-[calc(100%+4px)] left-0 right-0 rounded-lg p-1.5 max-h-60 overflow-auto" style="background: var(--n-0); border: 1px solid var(--n-200); box-shadow: var(--sh-pop);">
+            @if (resMatches().length > 0) {
+              @for (r of resMatches(); track r.id) {
+                <div class="flex flex-col gap-0.5 px-2.5 py-2 rounded-md cursor-pointer hover:bg-[var(--n-50)]" (click)="importReserva(r)">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-extrabold text-[13px]" style="color: var(--n-900);">{{ r.id }}</span>
+                    <span class="text-xs font-semibold" style="color: var(--n-700);">{{ r.destino }}</span>
+                    @if (r.temVenda) { <span class="ct-pill ct-pill-warn" style="font-size: 9px; padding: 1px 5px;">Já tem venda</span> }
+                  </div>
+                  <span class="text-[11px]" style="color: var(--n-500);">{{ r.passageiros.join(', ') }} · {{ r.ida }} — {{ r.volta }}</span>
+                </div>
+              }
+            } @else {
+              <div class="px-2.5 py-2 text-xs" style="color: var(--n-500);">Nenhuma reserva encontrada.</div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- 1 — Dados Gerais da Venda -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Dados Gerais da Venda</span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="ct-field">
+        <label class="ct-label">Data da venda *</label>
+        <input type="date" class="ct-input" [value]="dataISO" (change)="onDataChange($any($event.target).value)">
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Vendedor *</label>
+        <select class="ct-select" [value]="draft().vendedor" (change)="set('vendedor', $any($event.target).value)">
+          <option value="" [selected]="!draft().vendedor">Selecione...</option>
+          @for (x of vendedores; track x) { <option [value]="x" [selected]="x === draft().vendedor">{{ x }}</option> }
+        </select>
+      </div>
+      <div class="ct-field">
+        <label class="ct-label">Status da venda *</label>
+        <select class="ct-select" [value]="draft().status" (change)="set('status', $any($event.target).value)">
+          @for (x of statusVenda; track x) { <option [value]="x" [selected]="x === draft().status">{{ x }}</option> }
+        </select>
+      </div>
+    </div>
+    <div class="ct-field">
+      <label class="ct-label">Pagante *</label>
+      <app-venda-cliente-autocomplete [value]="draft().pagante" (valueChange)="set('pagante', $event)" placeholder="Buscar pagante por nome ou CPF…"></app-venda-cliente-autocomplete>
+    </div>
+  </div>
+
+  <!-- 2 — Produto / Serviço -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Produto / Serviço</span>
+    <div class="flex flex-wrap gap-1.5">
+      @for (t of produtoTipos; track t) {
+        <button type="button" class="ct-qf" [class.on-em]="tipoProd === t" (click)="setProduto('tipo', t)">{{ t }}</button>
+      }
+    </div>
+
+    <div class="ct-card p-4">
+      <h4 class="flex items-center gap-1.5 text-[13px] font-extrabold m-0 mb-3.5" style="color: var(--n-800);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color: var(--brand-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>
+        Detalhes do {{ draft().produto.tipo }}
+      </h4>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="ct-field">
+          <label class="ct-label">{{ isVoo ? 'Localizador do voo' : (tipoProd === 'Cruzeiro' ? 'Nº da reserva' : 'Nº da reserva no fornecedor') }} *</label>
+          <input type="text" class="ct-input font-mono" placeholder="Ex: DCX73H" [value]="draft().produto.numeroFornecedor" (input)="onNumeroFornecedorChange($any($event.target).value)">
+        </div>
+        <div class="ct-field">
+          <label class="ct-label">{{ tipoProd === 'Seguro' ? 'Seguradora' : 'Fornecedor' }} *</label>
+          <input type="text" class="ct-input" list="vd-fornecedores-list" [placeholder]="tipoProd === 'Seguro' ? 'Ex: Assist Card, GTA…' : 'Ex: Azul Viagens, CVC…'" [value]="draft().produto.fornecedor" (input)="setProduto('fornecedor', $any($event.target).value)">
+        </div>
+        <div class="ct-field">
+          <label class="ct-label">Representante</label>
+          <input type="text" class="ct-input" placeholder="Opcional" [value]="draft().produto.representante" (input)="setProduto('representante', $any($event.target).value)">
+        </div>
+        @if (showTransporte) {
+          <div class="ct-field">
+            <label class="ct-label">Transporte</label>
+            <select class="ct-select" [value]="draft().produto.transporte" (change)="setProduto('transporte', $any($event.target).value)">
+              <option value="" [selected]="!draft().produto.transporte">Selecione...</option>
+              @for (t of transporteOpts; track t) { <option [value]="t" [selected]="t === draft().produto.transporte">{{ t }}</option> }
+            </select>
+          </div>
+        }
+        <div class="ct-field">
+          <label class="ct-label">Data de início *</label>
+          <input type="date" class="ct-input" [value]="produtoDataISO('dataInicio')" (change)="onProdutoDataChange('dataInicio', $any($event.target).value)">
+        </div>
+        <div class="ct-field">
+          <label class="ct-label">Data de fim *</label>
+          <input type="date" class="ct-input" [value]="produtoDataISO('dataFim')" (change)="onProdutoDataChange('dataFim', $any($event.target).value)">
+        </div>
+        <div class="ct-field">
+          <label class="ct-label">Tipo da viagem *</label>
+          <div class="ct-seg w-full">
+            <button type="button" class="ct-seg-btn flex-1 justify-center" [class.active]="draft().produto.tipoViagem === 'Nacional'" (click)="setProduto('tipoViagem', 'Nacional')">Nacional</button>
+            <button type="button" class="ct-seg-btn flex-1 justify-center" [class.active]="draft().produto.tipoViagem === 'Internacional'" (click)="setProduto('tipoViagem', 'Internacional')">Internacional</button>
+          </div>
+        </div>
+        @if (tipoProd !== 'Transfer') {
+          <div class="ct-field">
+            <label class="ct-label">Destino *</label>
+            <input type="text" class="ct-input" placeholder="Digite o destino..." [value]="draft().produto.destino" (input)="setProduto('destino', $any($event.target).value)">
+          </div>
+        }
+
+        <!-- VOO -->
+        @if (isVoo || tipoProd === 'Pacote') {
+          <div class="ct-field">
+            <label class="ct-label">Companhia aérea</label>
+            <input type="text" class="ct-input" placeholder="Ex: Azul, Latam, Gol…" [value]="draft().produto.companhiaAerea" (input)="setProduto('companhiaAerea', $any($event.target).value)">
+          </div>
+          <div class="ct-field">
+            <label class="ct-label">Código do voo</label>
+            <input type="text" class="ct-input font-mono" placeholder="Ex: AD4471" [value]="draft().produto.numeroVoo" (input)="setProduto('numeroVoo', $any($event.target).value.toUpperCase())">
+          </div>
+        }
+        @if (isVoo) {
+          <div class="ct-field">
+            <label class="ct-label">Origem</label>
+            <input type="text" class="ct-input" placeholder="Ex: GRU - São Paulo" [value]="draft().produto.origem" (input)="setProduto('origem', $any($event.target).value)">
+          </div>
+          <div class="ct-field">
+            <label class="ct-label">Bagagem inclusa</label>
+            <select class="ct-select" [value]="draft().produto.bagagem" (change)="setProduto('bagagem', $any($event.target).value)">
+              <option value="" [selected]="!draft().produto.bagagem">Selecione...</option>
+              <option value="Sim" [selected]="draft().produto.bagagem === 'Sim'">Sim</option>
+              <option value="Não" [selected]="draft().produto.bagagem === 'Não'">Não</option>
+              <option value="Sim — 23kg" [selected]="draft().produto.bagagem === 'Sim — 23kg'">Sim — 23kg</option>
+              <option value="Sim — 32kg" [selected]="draft().produto.bagagem === 'Sim — 32kg'">Sim — 32kg</option>
+              <option value="Apenas mão" [selected]="draft().produto.bagagem === 'Apenas mão'">Apenas bagagem de mão</option>
+            </select>
+          </div>
+        }
+
+        <!-- HOSPEDAGEM -->
+        @if (tipoProd === 'Hospedagem' || tipoProd === 'Pacote') {
+          <div class="ct-field">
+            <label class="ct-label">Hotel / Pousada</label>
+            <input type="text" class="ct-input" placeholder="Ex: Ibis Copacabana" [value]="draft().produto.hotel" (input)="setProduto('hotel', $any($event.target).value)">
+          </div>
+          <div class="ct-field">
+            <label class="ct-label">Localizador do hotel</label>
+            <input type="text" class="ct-input font-mono" placeholder="Opcional" [value]="draft().produto.localizadorHotel" (input)="setProduto('localizadorHotel', $any($event.target).value)">
+          </div>
+          <div class="ct-field">
+            <label class="ct-label">Categoria do quarto</label>
+            <input type="text" class="ct-input" placeholder="Ex: Standard, Superior, Suíte Master…" list="vd-cat-quarto-list" [value]="draft().produto.categoriaQuarto" (input)="setProduto('categoriaQuarto', $any($event.target).value)">
+          </div>
+          <div class="ct-field">
+            <label class="ct-label">Regime de alimentação</label>
+            <select class="ct-select" [value]="draft().produto.regimeAlimentacao" (change)="setProduto('regimeAlimentacao', $any($event.target).value)">
+              <option value="" [selected]="!draft().produto.regimeAlimentacao">Selecione...</option>
+              <option value="Sem pensão" [selected]="draft().produto.regimeAlimentacao === 'Sem pensão'">Sem pensão</option>
+              <option value="Café da manhã" [selected]="draft().produto.regimeAlimentacao === 'Café da manhã'">Café da manhã</option>
+              <option value="Meia pensão" [selected]="draft().produto.regimeAlimentacao === 'Meia pensão'">Meia pensão</option>
+              <option value="Pensão completa" [selected]="draft().produto.regimeAlimentacao === 'Pensão completa'">Pensão completa</option>
+              <option value="All inclusive" [selected]="draft().produto.regimeAlimentacao === 'All inclusive'">All inclusive</option>
+            </select>
+          </div>
+        }
+
+        <!-- CRUZEIRO -->
+        @if (tipoProd === 'Cruzeiro') {
+          <div class="ct-field"><label class="ct-label">Cia. marítima</label><input type="text" class="ct-input" placeholder="Ex: MSC, Costa, Royal Caribbean" [value]="draft().produto.ciaMaritima" (input)="setProduto('ciaMaritima', $any($event.target).value)"></div>
+          <div class="ct-field"><label class="ct-label">Nome do navio</label><input type="text" class="ct-input" placeholder="Ex: MSC Seaview" [value]="draft().produto.nomeNavio" (input)="setProduto('nomeNavio', $any($event.target).value)"></div>
+          <div class="ct-field"><label class="ct-label">Nº da cabine</label><input type="text" class="ct-input font-mono" placeholder="Ex: 11042" [value]="draft().produto.numeroCabine" (input)="setProduto('numeroCabine', $any($event.target).value)"></div>
+          <div class="ct-field">
+            <label class="ct-label">Categoria da cabine</label>
+            <select class="ct-select" [value]="draft().produto.categoriaCabine" (change)="setProduto('categoriaCabine', $any($event.target).value)">
+              <option value="" [selected]="!draft().produto.categoriaCabine">Selecione...</option>
+              <option value="Interna" [selected]="draft().produto.categoriaCabine === 'Interna'">Interna</option><option value="Externa" [selected]="draft().produto.categoriaCabine === 'Externa'">Externa</option>
+              <option value="Varanda" [selected]="draft().produto.categoriaCabine === 'Varanda'">Varanda</option><option value="Suíte" [selected]="draft().produto.categoriaCabine === 'Suíte'">Suíte</option>
+            </select>
+          </div>
+          <div class="ct-field"><label class="ct-label">Porto de embarque</label><input type="text" class="ct-input" placeholder="Ex: Santos (SP)" [value]="draft().produto.portoEmbarque" (input)="setProduto('portoEmbarque', $any($event.target).value)"></div>
+          <div class="ct-field"><label class="ct-label">Porto de desembarque</label><input type="text" class="ct-input" placeholder="Ex: Buenos Aires" [value]="draft().produto.portoDesembarque" (input)="setProduto('portoDesembarque', $any($event.target).value)"></div>
+        }
+
+        <!-- SEGURO -->
+        @if (tipoProd === 'Seguro') {
+          <div class="ct-field md:col-span-2"><label class="ct-label">Seguradora</label><input type="text" class="ct-input" placeholder="Ex: Assist Card, GTA, Travel Ace…" [value]="draft().produto.seguradora" (input)="setProduto('seguradora', $any($event.target).value)"></div>
+        }
+
+        <!-- TRANSFER -->
+        @if (tipoProd === 'Transfer') {
+          <div class="ct-field"><label class="ct-label">Origem do transfer *</label><input type="text" class="ct-input" placeholder="Ex: Aeroporto GRU" [value]="draft().produto.origemTransfer" (input)="setProduto('origemTransfer', $any($event.target).value)"></div>
+          <div class="ct-field"><label class="ct-label">Destino do transfer *</label><input type="text" class="ct-input" placeholder="Ex: Hotel Ibis Copacabana" [value]="draft().produto.destinoTransfer" (input)="setProduto('destinoTransfer', $any($event.target).value)"></div>
+        }
+
+        <!-- Serviços inclusos -->
+        @if (tipoProd !== 'Seguro' && tipoProd !== 'Transfer' && tipoProd !== 'Ingresso') {
+          <div class="ct-field md:col-span-2">
+            <label class="ct-label">Serviços inclusos</label>
+            <app-venda-servicos-editor [servicos]="draft().produto.servicos" [servicosInclusos]="draft().produto.servicosInclusos" (commit)="onServicosCommit($event)"></app-venda-servicos-editor>
+          </div>
+        }
+      </div>
+      <datalist id="vd-fornecedores-list">@for (f of fornecedores; track f) { <option [value]="f"></option> }</datalist>
+      <datalist id="vd-cat-quarto-list"><option value="Standard"></option><option value="Superior"></option><option value="Luxo"></option><option value="Suíte"></option><option value="Suíte Master"></option><option value="Família"></option></datalist>
+    </div>
+  </div>
+
+  <!-- 3 — Passageiros -->
+  <div class="flex flex-col gap-3">
+    <div class="flex items-center justify-between">
+      <span class="eyebrow" style="color: var(--brand-600); margin: 0;">Passageiros *</span>
+      <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold" style="color: var(--brand-600);" (click)="addPax()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Adicionar passageiro
+      </button>
+    </div>
+    <div class="flex flex-col gap-2.5">
+      @for (p of draft().passageiros; track $index) {
+        <div class="flex gap-2 items-start">
+          <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+            <div class="grid grid-cols-1 md:grid-cols-[2.2fr_1fr] gap-2">
+              <app-venda-cliente-autocomplete [value]="paxAsCliente(p)" [initialName]="p.clienteId == null ? p.nome : ''" (valueChange)="setPax($index, $event)" placeholder="Buscar passageiro por nome ou CPF…"></app-venda-cliente-autocomplete>
+              <app-venda-currency-input [value]="p.valorIndividual" placeholder="Valor individual" (valueChange)="setPaxValor($index, $event)"></app-venda-currency-input>
+            </div>
+            @if (p.clienteId != null) {
+              <div class="text-[11px] flex items-center gap-1.5 px-2.5 py-1.5 rounded-md" style="color: var(--n-500); background: var(--n-100);">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+                Documento vinculado ao cadastro: CPF {{ p.cpf || '—' }} · Nasc. {{ p.nascimento || '—' }}
+              </div>
+            }
+          </div>
+          @if (draft().passageiros.length > 1) {
+            <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 38px; height: 38px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="removePax($index)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 4 — Valores -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Valores da Venda</span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+      <div class="ct-field"><label class="ct-label">Valor do produto *</label><app-venda-currency-input [value]="draft().valores.valorProduto" (valueChange)="setValores('valorProduto', $event)"></app-venda-currency-input></div>
+      <div class="ct-field"><label class="ct-label">Taxas</label><app-venda-currency-input [value]="draft().valores.taxas" (valueChange)="setValores('taxas', $event)"></app-venda-currency-input></div>
+      <div class="ct-field"><label class="ct-label">Outras taxas</label><app-venda-currency-input [value]="draft().valores.outrasTaxas" (valueChange)="setValores('outrasTaxas', $event)"></app-venda-currency-input></div>
+      <div class="ct-field"><label class="ct-label">RAV</label><app-venda-currency-input [value]="draft().valores.rav" (valueChange)="setValores('rav', $event)"></app-venda-currency-input></div>
+      <div class="ct-field"><label class="ct-label">Taxa RAV (%)</label><input type="number" step="0.1" class="ct-input font-mono" [value]="draft().valores.taxaRav || ''" (input)="setValores('taxaRav', $any($event.target).value)"></div>
+      <div class="ct-field"><label class="ct-label">Desconto</label><app-venda-currency-input [value]="draft().valores.desconto" (valueChange)="setValores('desconto', $event)"></app-venda-currency-input></div>
+    </div>
+    <div class="flex flex-col gap-2 p-4 rounded-2xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+      <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>Valor do produto</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.valorProduto) }}</b></div>
+      <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>+ Taxas e outras taxas</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.taxas + draft().valores.outrasTaxas) }}</b></div>
+      <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>+ RAV</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.rav) }}</b></div>
+      <div class="flex justify-between text-[12.5px]" style="color: var(--n-600);"><span>− Desconto</span><b class="font-mono" style="color: var(--n-900);">{{ brl(draft().valores.desconto) }}</b></div>
+      <div class="flex justify-between text-base font-extrabold pt-2.5" style="color: var(--brand-800); border-top: 1px solid var(--n-150);"><span>Valor total da venda</span><b class="font-mono">{{ brl(valorTotal()) }}</b></div>
+    </div>
+  </div>
+
+  <!-- 5 — Pagamentos -->
+  <div class="flex flex-col gap-3">
+    <div class="flex items-center justify-between">
+      <span class="eyebrow" style="color: var(--brand-600); margin: 0;">Pagamentos *</span>
+      <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold" style="color: var(--brand-600);" (click)="addPag()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Adicionar forma de pagamento
+      </button>
+    </div>
+    <div class="flex flex-col gap-2.5">
+      @for (p of draft().pagamentos; track $index) {
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 items-end p-3 rounded-[10px]" style="background: var(--n-25); border: 1px solid var(--n-150);">
+          <div class="ct-field"><label class="ct-label">Forma</label>
+            <select class="ct-select" [value]="p.forma" (change)="onFormaChange($index, $any($event.target).value)">
+              @for (f of formasPagamento; track f) { <option [value]="f" [selected]="f === p.forma">{{ f }}</option> }
+            </select>
+          </div>
+          <div class="ct-field"><label class="ct-label">Informações</label>
+            <input type="text" class="ct-input" [placeholder]="p.forma === 'Pontos TudoAzul' ? 'Ex: 85.000 pontos' : 'Opcional'" [value]="p.info" (input)="setPag($index, 'info', $any($event.target).value)">
+          </div>
+          <div class="ct-field"><label class="ct-label">Parcelas</label>
+            @if (semParcelas(p.forma)) {
+              <input type="text" class="ct-input font-mono" value="À vista" disabled style="background: var(--n-100); color: var(--n-500);">
+            } @else {
+              <input type="number" min="1" class="ct-input font-mono" [value]="p.parcelas" (input)="setPag($index, 'parcelas', num($any($event.target).value) || 1)">
+            }
+          </div>
+          <div class="ct-field"><label class="ct-label">Vencimento</label>
+            @if (comVencimento(p.forma)) {
+              <input type="date" class="ct-input" [value]="pagVencimentoISO(p)" (change)="onPagVencimentoChange($index, $any($event.target).value)">
+            } @else {
+              <input type="text" class="ct-input font-mono" value="Sem vencimento" disabled style="background: var(--n-100); color: var(--n-500);">
+            }
+          </div>
+          <div class="ct-field"><label class="ct-label">Valor</label><app-venda-currency-input [value]="p.valor" (valueChange)="setPag($index, 'valor', $event)"></app-venda-currency-input></div>
+          <div class="flex items-end gap-1.5">
+            <div class="ct-field flex-1"><label class="ct-label">Status</label>
+              <select class="ct-select" [value]="p.status" (change)="setPag($index, 'status', $any($event.target).value)">
+                @for (s of statusPagamento; track s) { <option [value]="s" [selected]="s === p.status">{{ s }}</option> }
+              </select>
+            </div>
+            @if (draft().pagamentos.length > 1) {
+              <button type="button" class="ct-icon-btn flex-shrink-0" style="width: 38px; height: 38px; border: 1px solid var(--n-200); border-radius: 8px;" (click)="removePag($index)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <div class="flex items-center justify-between gap-2.5 px-3.5 py-3 rounded-[10px] text-[13px] font-bold"
+      [style.background]="saldo().state === 'ok' ? 'var(--brand-50)' : saldo().state === 'pending' ? 'var(--warn-50)' : 'var(--danger-50)'"
+      [style.color]="saldo().state === 'ok' ? 'var(--brand-700)' : saldo().state === 'pending' ? 'var(--warn-700)' : 'var(--danger-700)'"
+      [style.border]="saldo().state === 'ok' ? '1px solid var(--brand-200)' : saldo().state === 'pending' ? '1px solid #f0dcb4' : '1px solid #f0caca'">
+      <span>{{ saldo().label }}</span>
+      <span class="font-mono">{{ brl(somaPag()) }} de {{ brl(valorTotal()) }}</span>
+    </div>
+  </div>
+
+  <!-- 6 — Comissão e Receita -->
+  <div class="flex flex-col gap-3">
+    <span class="eyebrow" style="color: var(--brand-600);">Comissão e Receita</span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+      <div class="ct-field"><label class="ct-label">Base de cálculo da comissão</label><input type="text" class="ct-input font-mono" [value]="brl(baseCalculo())" disabled style="background: var(--n-100); color: var(--n-600);"></div>
+      <div></div>
+      <div class="ct-field"><label class="ct-label">% Comissão do fornecedor</label><input type="number" step="0.1" class="ct-input font-mono" [value]="draft().comissao.percentualFornecedor || ''" (input)="onPercent($any($event.target).value)"></div>
+      <div class="ct-field"><label class="ct-label">Valor da comissão do fornecedor</label><input type="number" step="0.01" class="ct-input font-mono" [value]="draft().comissao.valorComissaoFornecedor || ''" (input)="onValorComissao($any($event.target).value)"></div>
+    </div>
+    <div class="flex items-center justify-between gap-2.5 p-4 rounded-2xl" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+      <div>
+        <div class="text-[11px] font-bold uppercase tracking-wide" style="color: var(--brand-700);">Receita prevista da agência</div>
+      </div>
+      <div class="text-xl font-extrabold font-mono" style="color: var(--brand-800);">{{ brl(receitaPrevista()) }}</div>
+    </div>
+  </div>
+
+  <!-- Ações -->
+  <div class="flex justify-end gap-2 pt-4" style="border-top: var(--border);">
+    @if (showCancel) {
+      <button type="button" (click)="cancel.emit()" class="ct-btn ct-btn-ghost">Cancelar</button>
+    }
+    <button type="button" [disabled]="isSaving" (click)="onSubmit()" class="ct-btn ct-btn-primary disabled:opacity-50">
+      @if (isSaving) {
+        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      }
+      {{ submitLabel }}
+    </button>
+  </div>
+</div>

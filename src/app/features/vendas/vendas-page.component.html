@@ -1,0 +1,221 @@
+<div class="vd-theme animate-fade-in">
+
+  <!-- Context Tabs -->
+  <div class="ct-context">
+    <button class="ct-tab" [class.active]="tab() === 'vendas'" (click)="setTab('vendas')">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01"/></svg>
+      Controle de Vendas
+      <span class="ct-pill" style="margin-left: 4px; font-size: 10px; padding: 0 6px;">{{ stats().total }}</span>
+    </button>
+    <button class="ct-tab" [class.active]="tab() === 'nova'" (click)="setTab('nova')">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Nova Venda
+    </button>
+  </div>
+
+  @if (tab() === 'nova') {
+    <div class="ct-page-body">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div>
+          <h1 class="text-xl font-extrabold m-0" style="color: var(--n-900);">Registrar Nova Venda</h1>
+          <p class="text-sm mt-1 m-0" style="color: var(--n-500);">Cadastro em etapas com resumo vivo — dentro do módulo de Vendas</p>
+        </div>
+        <button class="ct-btn ct-btn-ghost" (click)="setTab('vendas')">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+          Ver vendas registradas
+        </button>
+      </div>
+      <app-venda-wizard (done)="onWizardDone($event)"></app-venda-wizard>
+    </div>
+  } @else {
+  <div class="ct-page-body space-y-6">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="ct-kpi">
+        <span class="ct-kpi-label">Vendas registradas</span>
+        <span class="ct-kpi-value">{{ stats().total }}</span>
+      </div>
+      <div class="ct-kpi">
+        <span class="ct-kpi-label">Em andamento</span>
+        <span class="ct-kpi-value" style="color: var(--info-600);">{{ stats().abertas }}</span>
+      </div>
+      <div class="ct-kpi">
+        <span class="ct-kpi-label">Ticket médio</span>
+        <span class="ct-kpi-value" style="color: var(--brand-600);">{{ formatCurrency(stats().ticket) }}</span>
+      </div>
+      <div class="ct-kpi">
+        <span class="ct-kpi-label">Receita prevista total</span>
+        <span class="ct-kpi-value" style="color: var(--brand-700);">{{ formatCurrency(stats().receitaTotal) }}</span>
+      </div>
+    </div>
+
+    <!-- Vendas registradas -->
+    <section>
+      <div class="flex flex-col gap-3 mb-4">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="ct-sec-head flex-shrink-0">
+            <span class="sec-bar sec-bar-muted"></span>
+            <h2 class="whitespace-nowrap">
+              Vendas Registradas
+              <span class="ct-sec-count">{{ filteredVendas().length }}</span>
+            </h2>
+          </div>
+
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="ct-seg">
+              <button class="ct-seg-btn" [class.active]="viewMode() === 'grid'" (click)="setViewMode('grid')" title="Visualização em grid">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span class="hidden sm:inline">Grid</span>
+              </button>
+              <button class="ct-seg-btn" [class.active]="viewMode() === 'list'" (click)="setViewMode('list')" title="Visualização em lista">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <span class="hidden sm:inline">Lista</span>
+              </button>
+            </div>
+
+            <button class="ct-btn ct-btn-primary whitespace-nowrap" (click)="setTab('nova')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Nova Venda
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            @for (s of statusOptions; track s) {
+              <button (click)="toggleStatusFilter(s)" class="ct-qf" [class.on-em]="statusFilter() === s">
+                @if (statusFilter() === s) { <span class="w-1.5 h-1.5 rounded-full bg-current"></span> }
+                {{ s }}
+              </button>
+            }
+          </div>
+
+          <div class="relative w-full sm:w-72 sm:ml-auto">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style="color: var(--n-400);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" [value]="search()" (input)="onSearchChange($any($event.target).value)"
+              placeholder="Buscar venda, pagante, destino ou reserva…" class="ct-input pl-9">
+          </div>
+        </div>
+      </div>
+
+      @if (hasActiveFilters()) {
+        <div class="flex items-center gap-2 flex-wrap mb-4">
+          @if (statusFilter()) {
+            <span class="ct-pill ct-pill-brand">{{ statusFilter() }}</span>
+          }
+          @if (search().trim()) {
+            <span class="ct-pill">Busca: "{{ search().trim() }}"</span>
+          }
+          <button (click)="clearFilters()" class="text-[11px] font-bold" style="color: var(--brand-700);">Limpar filtros</button>
+        </div>
+      }
+
+      @if (filteredVendas().length > 0) {
+        @if (viewMode() === 'grid') {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @for (venda of paginatedVendas(); track venda.id) {
+              <app-venda-card [venda]="venda" (view)="openView($event)" (edit)="openEdit($event)" (remove)="promptDelete($event)"></app-venda-card>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (venda of paginatedVendas(); track venda.id) {
+              <app-venda-card [venda]="venda" [displayMode]="'list'" (view)="openView($event)" (edit)="openEdit($event)" (remove)="promptDelete($event)"></app-venda-card>
+            }
+          </div>
+        }
+
+        <!-- Paginação -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-5 pt-4" style="border-top: var(--border);">
+          <div class="flex items-center gap-2 text-xs" style="color: var(--n-500);">
+            <span>Mostrando <b style="color: var(--n-800);">{{ pageRangeStart() }}–{{ pageRangeEnd() }}</b> de <b style="color: var(--n-800);">{{ filteredVendas().length }}</b> vendas</span>
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="flex items-center gap-1">
+              <button class="ct-btn ct-btn-ghost ct-btn-sm" [disabled]="currentPage() === 0" (click)="goToPage(0)" title="Primeira página">«</button>
+              <button class="ct-btn ct-btn-ghost ct-btn-sm" [disabled]="currentPage() === 0" (click)="prevPage()" title="Página anterior">‹</button>
+              @for (p of pageNumbers(); track $index) {
+                @if (p === 'ellipsis') {
+                  <span class="px-1 text-xs" style="color: var(--n-400);">…</span>
+                } @else {
+                  <button class="ct-btn ct-btn-sm" [class.ct-btn-primary]="p === currentPage()" [class.ct-btn-ghost]="p !== currentPage()" (click)="goToPage(p)">{{ p + 1 }}</button>
+                }
+              }
+              <button class="ct-btn ct-btn-ghost ct-btn-sm" [disabled]="currentPage() >= totalPages() - 1" (click)="nextPage()" title="Próxima página">›</button>
+              <button class="ct-btn ct-btn-ghost ct-btn-sm" [disabled]="currentPage() >= totalPages() - 1" (click)="goToPage(totalPages() - 1)" title="Última página">»</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed text-center" style="background: var(--n-0); border-color: var(--n-200);">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center mb-4" style="background: var(--n-50);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" style="color: var(--n-300);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold" style="color: var(--n-900);">
+            {{ hasActiveFilters() ? 'Nenhuma venda encontrada' : 'Nenhuma venda registrada' }}
+          </h3>
+          <p class="mt-1 text-sm max-w-xs" style="color: var(--n-500);">
+            {{ hasActiveFilters() ? 'Ajuste os filtros ou registre uma nova venda.' : 'Registre a primeira venda para começar o controle comercial.' }}
+          </p>
+          @if (hasActiveFilters()) {
+            <button (click)="clearFilters()" class="ct-btn ct-btn-subtle ct-btn-sm mt-4">Limpar Filtros</button>
+          } @else {
+            <button (click)="setTab('nova')" class="ct-btn ct-btn-primary ct-btn-sm mt-4">Nova Venda</button>
+          }
+        </div>
+      }
+    </section>
+
+  </div>
+  }
+
+  @if (drawer(); as d) {
+    <app-venda-drawer
+      [venda]="d.venda"
+      [mode]="d.mode"
+      [isSaving]="isSaving()"
+      (close)="closeDrawer()"
+      (modeChange)="setDrawerMode($event)"
+      (save)="onSaveDrawer($event)"
+      (remove)="promptDelete($event)">
+    </app-venda-drawer>
+  }
+
+  @if (vendaToDelete()) {
+    <div class="ct-modal-back" role="dialog" aria-modal="true" (click)="cancelDelete()">
+      <div class="ct-modal max-w-sm" (click)="$event.stopPropagation()">
+        <div class="ct-modal-body flex flex-col items-center text-center py-6">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background: var(--danger-50); color: var(--danger-500);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-bold mb-2" style="color: var(--n-900);">Excluir Venda?</h3>
+          <p class="text-sm mb-6 leading-relaxed" style="color: var(--n-500);">
+            Tem certeza que deseja excluir esta venda permanentemente?<br>
+            <span class="text-xs font-medium" style="color: var(--danger-500);">Esta ação não pode ser desfeita.</span>
+          </p>
+          <div class="flex gap-3 w-full">
+            <button type="button" (click)="cancelDelete()" class="ct-btn ct-btn-ghost flex-1 justify-center">Cancelar</button>
+            <button type="button" (click)="confirmDelete()"
+              class="ct-btn flex-1 justify-center font-bold text-white"
+              style="background: var(--danger-500);">Excluir</button>
+          </div>
+          <p class="eyebrow mt-4" style="color: var(--n-400);">Pressione <kbd class="px-1 py-0.5 rounded font-mono text-[10px]" style="background: var(--n-100); border: 1px solid var(--n-200);">Enter</kbd> para confirmar</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (toast()) {
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4.5 py-2.5 rounded-[10px] text-white text-[13px] font-semibold z-[100]" style="background: var(--n-900); box-shadow: var(--sh-pop);">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color: var(--brand-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+      {{ toast() }}
+    </div>
+  }
+
+</div>

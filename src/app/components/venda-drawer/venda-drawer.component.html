@@ -1,0 +1,233 @@
+<div class="ct-drawer-back" (click)="close.emit()">
+  <div class="ct-drawer" style="width: 600px; max-width: 94vw;" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="p-0" style="background: linear-gradient(135deg, var(--brand-700), var(--brand-900));">
+      <div class="flex items-center px-5 pt-3.5">
+        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+          <span class="ct-pill" [ngClass]="statusClass" style="font-size: 11px; padding: 3px 10px;">{{ venda.status }}</span>
+          <span class="eyebrow" style="font-size: 10px; color: rgba(255,255,255,.6);">Venda</span>
+        </div>
+        <button class="ct-icon-btn" style="background: rgba(255,255,255,.12); color: #fff;" (click)="close.emit()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="px-5 pt-4 pb-4.5">
+        <div class="text-[28px] font-extrabold font-mono text-white" style="letter-spacing: 0.5px;">#{{ venda.numero }}</div>
+        <div class="flex items-center gap-1.5 mt-1.5 text-sm font-semibold" style="color: rgba(255,255,255,.85);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: rgba(255,255,255,.7);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-3.5 0-6 2.7-6 6 0 4.5 6 13 6 13s6-8.5 6-13c0-3.3-2.5-6-6-6z"/><circle cx="12" cy="8" r="2"/></svg>
+          {{ venda.produto.destino || 'Destino não informado' }}
+        </div>
+        <div class="text-xs mt-1" style="color: rgba(255,255,255,.55);">{{ venda.data }} · {{ venda.vendedor }}</div>
+      </div>
+      @if (venda.numeroReserva) {
+        <div class="flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold" style="background: rgba(0,0,0,.12); color: rgba(255,255,255,.8);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-300);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>
+          <span>Reserva <b class="font-mono">{{ venda.numeroReserva }}</b></span>
+        </div>
+      }
+      @if (venda.origem?.cotacaoId) {
+        <div class="flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold" style="background: rgba(0,0,0,.2); color: rgba(255,255,255,.75);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v15l4-3h10a2 2 0 0 0 2-2V7"/><path d="M17 1l4 4-7 7-4 1 1-4 6-8z"/></svg>
+          <span>Origem: Cotação <b class="font-mono">{{ venda.origem?.cotacaoId }}</b>{{ venda.origem?.opcao ? ' · ' + venda.origem?.opcao : '' }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="ct-drawer-body flex flex-col gap-4">
+      @if (mode === 'edit') {
+        <app-venda-form
+          [venda]="venda"
+          [isSaving]="isSaving"
+          [showCancel]="true"
+          submitLabel="Salvar alterações"
+          (save)="save.emit($event)"
+          (cancel)="modeChange.emit('view')">
+        </app-venda-form>
+      } @else {
+        <div class="flex flex-col gap-5">
+
+          <!-- Resumo financeiro -->
+          <div class="grid grid-cols-3 gap-2.5">
+            <div class="p-3.5 rounded-xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+              <div class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color: var(--n-500);">Valor total</div>
+              <div class="text-base font-extrabold font-mono" style="color: var(--n-900);">{{ brl(valorTotal) }}</div>
+            </div>
+            <div class="p-3.5 rounded-xl" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+              <div class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color: var(--brand-600);">Receita prevista</div>
+              <div class="text-base font-extrabold font-mono" style="color: var(--brand-800);">{{ brl(receita) }}</div>
+            </div>
+            <div class="p-3.5 rounded-xl" style="background: var(--n-25); border: 1px solid var(--n-150);">
+              <div class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color: var(--n-500);">Comissão</div>
+              <div class="text-base font-extrabold font-mono" style="color: var(--n-900);">{{ pct(venda.comissao.percentualFornecedor) }}</div>
+            </div>
+          </div>
+
+          <!-- Pagante -->
+          <div class="pb-4" style="border-bottom: 1px solid var(--n-100);">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide mb-3" style="color: var(--n-600);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+              Pagante
+            </div>
+            @if (venda.pagante) {
+              <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px]" style="background: var(--n-25);">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-[13px] font-extrabold" style="background: linear-gradient(135deg, var(--brand-400), var(--brand-600));">{{ initials(venda.pagante.nome) }}</div>
+                <div>
+                  <div class="text-[13px] font-bold" style="color: var(--n-900);">{{ venda.pagante.nome }}</div>
+                  <div class="text-[11px] font-mono" style="color: var(--n-500);">{{ venda.pagante.cpf }}</div>
+                </div>
+              </div>
+            } @else {
+              <div class="text-xs" style="color: var(--n-500);">Não informado</div>
+            }
+          </div>
+
+          <!-- Produto -->
+          <div class="pb-4" style="border-bottom: 1px solid var(--n-100);">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide mb-3" style="color: var(--n-600);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a2 2 0 0 0 0-4z"/><path d="M9 4v16"/></svg>
+              {{ venda.produto.tipo }}
+            </div>
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background: var(--n-25);">
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md" style="background: var(--brand-100); color: var(--brand-700);">{{ venda.produto.tipo }}</span>
+              <span class="font-semibold" style="color: var(--n-900);">{{ venda.produto.fornecedor }}</span>
+              <span class="font-mono text-[11px]" style="color: var(--n-500);">{{ venda.produto.numeroFornecedor }}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5 mt-2.5">
+              @if (venda.produto.tipoViagem) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Tipo da viagem</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.tipoViagem }}</div></div> }
+              @if (venda.produto.destino) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Destino</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.destino }}</div></div> }
+              @if (venda.produto.dataInicio && venda.produto.dataFim) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Período</div><div class="text-[13.5px] font-semibold font-mono" style="color: var(--n-800);">{{ venda.produto.dataInicio }} — {{ venda.produto.dataFim }}</div></div> }
+              @if (venda.produto.transporte) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Transporte</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.transporte }}</div></div> }
+              @if (venda.produto.companhiaAerea) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Companhia aérea</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.companhiaAerea }}</div></div> }
+              @if (venda.produto.numeroVoo) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Código do voo</div><div class="text-[13.5px] font-semibold font-mono" style="color: var(--n-800);">{{ venda.produto.numeroVoo }}</div></div> }
+              @if (venda.produto.origem) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Origem</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.origem }}</div></div> }
+              @if (venda.produto.bagagem) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Bagagem</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.bagagem }}</div></div> }
+              @if (venda.produto.hotel) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Hotel</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.hotel }}</div></div> }
+              @if (venda.produto.localizadorHotel) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Localizador hotel</div><div class="text-[13.5px] font-semibold font-mono" style="color: var(--n-800);">{{ venda.produto.localizadorHotel }}</div></div> }
+              @if (venda.produto.categoriaQuarto) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Categoria do quarto</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.categoriaQuarto }}</div></div> }
+              @if (venda.produto.regimeAlimentacao) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Regime alimentação</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.regimeAlimentacao }}</div></div> }
+              @if (venda.produto.ciaMaritima) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Cia. marítima</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.ciaMaritima }}</div></div> }
+              @if (venda.produto.nomeNavio) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Navio</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.nomeNavio }}</div></div> }
+              @if (venda.produto.numeroCabine) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Nº cabine</div><div class="text-[13.5px] font-semibold font-mono" style="color: var(--n-800);">{{ venda.produto.numeroCabine }}</div></div> }
+              @if (venda.produto.categoriaCabine) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Categoria cabine</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.categoriaCabine }}</div></div> }
+              @if (venda.produto.portoEmbarque) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Porto embarque</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.portoEmbarque }}</div></div> }
+              @if (venda.produto.portoDesembarque) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Porto desembarque</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.portoDesembarque }}</div></div> }
+              @if (venda.produto.seguradora) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Seguradora</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.seguradora }}</div></div> }
+              @if (venda.produto.origemTransfer) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Origem transfer</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.origemTransfer }}</div></div> }
+              @if (venda.produto.destinoTransfer) { <div><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Destino transfer</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.destinoTransfer }}</div></div> }
+              @if (venda.produto.servicosInclusos) { <div class="col-span-2"><div class="text-[10.5px] font-bold uppercase tracking-wide" style="color: var(--n-400);">Serviços inclusos</div><div class="text-[13.5px] font-semibold" style="color: var(--n-800);">{{ venda.produto.servicosInclusos }}</div></div> }
+            </div>
+          </div>
+
+          <!-- Passageiros -->
+          <div class="pb-4" style="border-bottom: 1px solid var(--n-100);">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide mb-3" style="color: var(--n-600);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+              Passageiros <span class="ct-pill" style="font-size: 10px;">{{ venda.passageiros.length }}</span>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              @for (p of venda.passageiros; track $index) {
+                <div class="flex items-center gap-2.5 px-3 py-2 rounded-[9px]" style="background: var(--n-25);">
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-extrabold" style="background: var(--n-200); color: var(--n-700);">{{ initials(p.nome) }}</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-[13px] font-semibold" style="color: var(--n-900);">{{ p.nome }}</div>
+                    <div class="text-[10.5px] font-mono" style="color: var(--n-500);">CPF {{ p.cpf || '—' }} · Nasc. {{ p.nascimento || '—' }}</div>
+                  </div>
+                  <div class="text-[13px] font-bold font-mono flex-shrink-0" style="color: var(--n-700);">{{ brl(p.valorIndividual) }}</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Valores -->
+          <div class="pb-4" style="border-bottom: 1px solid var(--n-100);">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide mb-3" style="color: var(--n-600);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9a3 3 0 0 0-3-2c-1.5 0-3 1-3 2.5S10.5 12 12 12s3 .5 3 2.5-1.5 2.5-3 2.5a3 3 0 0 1-3-2"/></svg>
+              Valores
+            </div>
+            <div class="rounded-[10px] overflow-hidden" style="border: 1px solid var(--n-150);">
+              <div class="flex justify-between items-center px-3.5 py-2.5 text-[13px]" style="color: var(--n-700); border-bottom: 1px solid var(--n-100);"><span>{{ venda.valores.modo === 'servico' ? 'Serviços (bruto)' : 'Valor do produto' }}</span><span class="font-mono">{{ brl(venda.valores.valorProduto) }}</span></div>
+              @if (num(venda.valores.descontoPromo) > 0) { <div class="flex justify-between items-center px-3.5 py-2.5 text-[13px]" style="color: var(--warn-700); border-bottom: 1px solid var(--n-100);"><span>− Promo {{ venda.valores.promocode }}</span><span class="font-mono">−{{ brl(venda.valores.descontoPromo) }}</span></div> }
+              <div class="flex justify-between items-center px-3.5 py-2.5 text-[13px]" style="color: var(--n-700); border-bottom: 1px solid var(--n-100);"><span>Taxas</span><span class="font-mono">{{ brl(venda.valores.taxas) }}</span></div>
+              @if (num(venda.valores.outrasTaxas) > 0) { <div class="flex justify-between items-center px-3.5 py-2.5 text-[13px]" style="color: var(--n-700); border-bottom: 1px solid var(--n-100);"><span>Outras taxas</span><span class="font-mono">{{ brl(venda.valores.outrasTaxas) }}</span></div> }
+              @if (num(venda.valores.rav) > 0) { <div class="flex justify-between items-center px-3.5 py-2.5 text-[13px]" style="color: var(--n-700); border-bottom: 1px solid var(--n-100);"><span>RAV</span><span class="font-mono">{{ brl(venda.valores.rav) }}</span></div> }
+              @if (num(venda.valores.desconto) > 0) { <div class="flex justify-between items-center px-3.5 py-2.5 text-[13px]" style="color: var(--danger-600); border-bottom: 1px solid var(--n-100);"><span>− Desconto</span><span class="font-mono">−{{ brl(venda.valores.desconto) }}</span></div> }
+              <div class="flex justify-between items-center px-3.5 py-2.5 text-sm font-extrabold text-white" style="background: var(--n-800);"><span>Valor total</span><span class="font-mono">{{ brl(valorTotal) }}</span></div>
+            </div>
+          </div>
+
+          <!-- Pagamentos -->
+          <div class="pb-4" style="border-bottom: 1px solid var(--n-100);">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide mb-3" style="color: var(--n-600);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h3"/></svg>
+              Pagamentos
+            </div>
+            <div class="flex flex-col gap-1.5 mb-2.5">
+              @for (p of venda.pagamentos; track $index) {
+                <div class="flex items-center gap-2.5 px-3 py-2 rounded-[9px]" style="background: var(--n-25);">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: var(--n-100);">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--n-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h3"/></svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-[13px] font-semibold" style="color: var(--n-900);">{{ p.forma }}{{ p.parcelas > 1 ? ' · ' + p.parcelas + 'x' : '' }}</div>
+                    @if (p.info) { <div class="text-xs" style="color: var(--n-500);">{{ p.info }}</div> }
+                    @if (p.vencimento) { <div class="text-[10.5px]" style="color: var(--n-400);">Venc. {{ p.vencimento }}</div> }
+                  </div>
+                  <span class="ct-pill" [ngClass]="p.status === 'Pago' ? 'ct-pill-brand' : 'ct-pill-warn'" style="font-size: 10px;">{{ p.status }}</span>
+                  <div class="text-[13px] font-bold font-mono flex-shrink-0" style="color: var(--n-900);">{{ brl(p.valor) }}</div>
+                </div>
+              }
+            </div>
+            <div class="flex items-center justify-between gap-2.5 px-3.5 py-3 rounded-[10px] text-[13px] font-bold"
+              [style.background]="saldo.state === 'ok' ? 'var(--brand-50)' : saldo.state === 'pending' ? 'var(--warn-50)' : 'var(--danger-50)'"
+              [style.color]="saldo.state === 'ok' ? 'var(--brand-700)' : saldo.state === 'pending' ? 'var(--warn-700)' : 'var(--danger-700)'">
+              <span>{{ saldo.label }}</span>
+              <span class="font-mono">{{ brl(somaPag) }} de {{ brl(valorTotal) }}</span>
+            </div>
+          </div>
+
+          <!-- Comissão e Receita -->
+          <div>
+            <div class="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide mb-3" style="color: var(--n-600);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" style="color: var(--brand-600);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l8 4a9 9 0 1 1-8-13z"/></svg>
+              Comissão e Receita
+            </div>
+            <div class="grid grid-cols-3 gap-2.5">
+              <div class="p-2.5 rounded-lg" style="background: var(--n-25);"><div class="text-[10px] font-bold uppercase tracking-wide" style="color: var(--n-500);">Base de cálculo</div><div class="text-sm font-bold font-mono mt-0.5" style="color: var(--n-900);">{{ brl(num(venda.valores.valorProduto)) }}</div></div>
+              <div class="p-2.5 rounded-lg" style="background: var(--n-25);"><div class="text-[10px] font-bold uppercase tracking-wide" style="color: var(--n-500);">% Comissão</div><div class="text-sm font-bold font-mono mt-0.5" style="color: var(--n-900);">{{ pct(venda.comissao.percentualFornecedor) }}</div></div>
+              <div class="p-2.5 rounded-lg" style="background: var(--n-25);"><div class="text-[10px] font-bold uppercase tracking-wide" style="color: var(--n-500);">Valor comissão</div><div class="text-sm font-bold font-mono mt-0.5" style="color: var(--n-900);">{{ brl(venda.comissao.valorComissaoFornecedor) }}</div></div>
+            </div>
+            <div class="flex items-center justify-between gap-2.5 p-3.5 rounded-2xl mt-2.5" style="background: var(--brand-50); border: 1px solid var(--brand-200);">
+              <span class="text-[11px] font-bold uppercase tracking-wide" style="color: var(--brand-700);">Receita prevista da agência</span>
+              <span class="text-lg font-extrabold font-mono" style="color: var(--brand-800);">{{ brl(receita) }}</span>
+            </div>
+          </div>
+
+          <!-- Rodapé -->
+          <div class="flex items-center gap-1.5 text-[11px] pt-2" style="color: var(--n-400); border-top: 1px solid var(--n-100);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+            Cadastrado por {{ venda.cadastradoPor }} em {{ venda.cadastradoEm }}
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="ct-drawer-foot">
+      @if (mode === 'edit') {
+        <div class="flex-1"></div>
+        <button class="ct-btn ct-btn-ghost" (click)="modeChange.emit('view')">Cancelar</button>
+      } @else {
+        <button class="ct-btn ct-btn-ghost" style="color: var(--danger-500);" (click)="remove.emit(venda.id)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          Excluir
+        </button>
+        <div class="flex-1"></div>
+        <button class="ct-btn ct-btn-primary" (click)="modeChange.emit('edit')">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Editar venda
+        </button>
+      }
+    </div>
+
+  </div>
+</div>
