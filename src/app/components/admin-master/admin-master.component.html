@@ -154,10 +154,16 @@
         </button>
       </div>
       <div class="ct-modal-body">
+
+        <!-- Seção: Dados da Empresa -->
+        <p class="eyebrow mb-3" style="color: var(--brand-700);">Dados da Empresa</p>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div class="ct-field sm:col-span-2">
             <label class="ct-label">Nome da Empresa *</label>
             <input type="text" class="ct-input" [ngModel]="companyDraft().name" (ngModelChange)="updateSlugAutomatic($event)" placeholder="Ex: Clube Turismo Jardim">
+            @if (formTouched() && nameError()) {
+              <p class="text-xs font-semibold" style="color: var(--danger-500);">{{ nameError() }}</p>
+            }
           </div>
           <div class="ct-field sm:col-span-2">
             <label class="ct-label">Slug (Identificador) *</label>
@@ -166,21 +172,85 @@
           </div>
           <div class="ct-field">
             <label class="ct-label">CNPJ / CPF</label>
-            <input type="text" class="ct-input" [ngModel]="companyDraft().tax_id" (ngModelChange)="updateCompanyTaxId($event)" placeholder="Apenas números">
+            <input type="text" class="ct-input" [ngModel]="companyDraft().tax_id" (ngModelChange)="updateCompanyTaxId($event)"
+              appMask="cpfCnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00">
+            @if (taxIdError()) {
+              <p class="text-xs font-semibold" style="color: var(--danger-500);">{{ taxIdError() }}</p>
+            }
           </div>
           <div class="ct-field">
             <label class="ct-label">CEP de Cobrança</label>
-            <input type="text" class="ct-input" [ngModel]="companyDraft().billing_postal_code" (ngModelChange)="updateCompanyBillingPostalCode($event)" placeholder="00000-000">
+            <input type="text" class="ct-input" [ngModel]="companyDraft().billing_postal_code" (ngModelChange)="updateCompanyBillingPostalCode($event)"
+              appMask="cep" inputmode="numeric" maxlength="9" placeholder="00000-000">
           </div>
           <div class="ct-field sm:col-span-2">
             <label class="ct-label">E-mail Comercial</label>
-            <input type="email" class="ct-input" [ngModel]="companyDraft().billing_email" (ngModelChange)="updateCompanyBillingEmail($event)" placeholder="financeiro@empresa.com.br">
+            @if (editingCompanyId()) {
+              <p class="text-sm font-semibold px-3.5 py-2.5 rounded-lg" style="background: var(--n-50); color: var(--n-800);">
+                {{ editingCompanySnapshot()?.billing_email || '—' }}
+              </p>
+            } @else {
+              <input type="email" class="ct-input" [ngModel]="companyDraft().billing_email" (ngModelChange)="updateCompanyBillingEmail($event)" placeholder="financeiro@empresa.com.br">
+            }
           </div>
         </div>
+
+        @if (editingCompanyId() && editingCompanySnapshot(); as company) {
+
+          <!-- Seção: Assinatura -->
+          <p class="eyebrow mb-3 mt-6 pt-5" style="color: var(--info-700); border-top: 1px solid var(--n-100);">Assinatura</p>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Status da Assinatura</span>
+              <span class="ct-pill" [class]="statusBadgeClass(company.subscription_status)">{{ subscriptionStatusLabel(company.subscription_status) }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Plano</span>
+              <span class="text-sm font-semibold" style="color: var(--n-900);">{{ company.subscription_plan || '—' }}</span>
+            </div>
+            <div class="ct-field pt-1">
+              <label class="ct-label">Validade da Assinatura *</label>
+              <input type="date" class="ct-input" [ngModel]="companyDraft().subscription_expires_at" (ngModelChange)="updateSubscriptionExpiresAt($event)"
+                [min]="todayIsoDate" [max]="maxExpiresAtIsoDate">
+              @if (formTouched() && expiresAtError()) {
+                <p class="text-xs font-semibold" style="color: var(--danger-500);">{{ expiresAtError() }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Seção: Pagamento -->
+          <p class="eyebrow mb-3 mt-6 pt-5" style="color: var(--n-500); border-top: 1px solid var(--n-100);">Pagamento</p>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Provedor de Pagamento</span>
+              <span class="text-sm font-semibold" style="color: var(--n-900);">{{ paymentProviderLabel(company.payment_provider) }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Método de Pagamento</span>
+              <span class="text-sm font-semibold" style="color: var(--n-900);">{{ paymentMethodLabel(company.payment_method) }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Status do Pagamento</span>
+              <span class="ct-pill" [class]="statusBadgeClass(company.payment_status)">{{ paymentStatusLabel(company.payment_status) }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Pago em</span>
+              <span class="text-sm font-semibold" style="color: var(--n-900);">{{ company.paid_at ? (company.paid_at | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+            </div>
+            <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+              <span class="text-sm font-bold" style="color: var(--n-500);">Próximo Vencimento</span>
+              <span class="text-sm font-semibold" style="color: var(--n-900);">{{ company.next_due_date ? (company.next_due_date | date:'dd/MM/yyyy') : '—' }}</span>
+            </div>
+          </div>
+        }
+
+        @if (saveError()) {
+          <p class="text-xs font-bold mt-5 p-3 rounded-lg w-full text-center" style="background: var(--danger-50); color: var(--danger-700); border: 1px solid #f0caca;">{{ saveError() }}</p>
+        }
       </div>
       <div class="ct-modal-foot">
         <button (click)="closeCompanyModal()" class="ct-btn ct-btn-ghost">Cancelar</button>
-        <button (click)="saveCompany()" [disabled]="isSaving() || !companyDraft().name || !companyDraft().slug"
+        <button (click)="requestSaveCompany()" [disabled]="isSaving() || (formTouched() && !isCompanyFormValid())"
           class="ct-btn ct-btn-primary disabled:opacity-50">
           @if (isSaving()) {
             <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -193,6 +263,59 @@
           }
         </button>
       </div>
+    </div>
+  </div>
+}
+
+<!-- SAVE CONFIRM MODAL -->
+@if (showSaveConfirm()) {
+  <div class="ct-modal-back" style="z-index: 110;" role="dialog" aria-modal="true" (click)="showSaveConfirm.set(false)">
+    <div class="ct-modal max-w-md" (click)="$event.stopPropagation()">
+      <div class="ct-modal-body flex flex-col items-center text-center py-6">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background: var(--brand-50); color: var(--brand-700);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold mb-2" style="color: var(--n-900);">Confirmar Alterações</h3>
+        <p class="text-sm mb-4" style="color: var(--n-500);">Confirma a atualização dos dados abaixo?</p>
+        <div class="w-full space-y-2 text-left">
+          <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+            <span class="text-sm font-bold" style="color: var(--n-500);">Empresa</span>
+            <span class="text-sm font-semibold" style="color: var(--n-900);">{{ companyDraft().name }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-3 rounded-xl" style="background: var(--n-50);">
+            <span class="text-sm font-bold" style="color: var(--n-500);">Nova validade da assinatura</span>
+            <span class="text-sm font-semibold" style="color: var(--n-900);">{{ formatDateBr(companyDraft().subscription_expires_at) }}</span>
+          </div>
+        </div>
+        <div class="flex gap-3 w-full mt-5">
+          <button (click)="showSaveConfirm.set(false)" [disabled]="isSaving()" class="ct-btn ct-btn-ghost flex-1 justify-center">Cancelar</button>
+          <button (click)="saveCompany()" [disabled]="isSaving()" class="ct-btn ct-btn-primary flex-1 justify-center disabled:opacity-50">
+            @if (isSaving()) {
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Salvando...
+            } @else {
+              Confirmar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- SUCCESS TOAST -->
+@if (saveSuccessMessage()) {
+  <div class="fixed bottom-6 left-1/2 z-[120] qp-toast pointer-events-none">
+    <div class="px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 text-white" style="background: var(--brand-600); border: 1px solid var(--brand-500);">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      <span class="text-sm font-semibold">{{ saveSuccessMessage() }}</span>
     </div>
   </div>
 }

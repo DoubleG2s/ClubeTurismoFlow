@@ -1,7 +1,7 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { onlyDigits } from '../utils/br-masks';
 
-function isValidCpf(cpf: string): boolean {
+export function isValidCpf(cpf: string): boolean {
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
 
   let sum = 0;
@@ -17,7 +17,7 @@ function isValidCpf(cpf: string): boolean {
   return checkDigit2 === parseInt(cpf[10], 10);
 }
 
-function isValidCnpj(cnpj: string): boolean {
+export function isValidCnpj(cnpj: string): boolean {
   if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
 
   const calcCheckDigit = (base: string): number => {
